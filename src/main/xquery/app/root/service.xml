@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application 
+		xmlns="http://wadl.dev.java.net/2009/02" 
+		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:sr="http://www.w3.org/2005/sparql-results#"
+		xmlns:wadl="http://wadl.dev.java.net/2009/02"
+		xmlns:xhtml="http://www.w3.org/1999/xhtml"
+		xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://wadl.dev.java.net/2009/02 
+				resources/schemas/wadl/wadl20090202.xsd">
+	<doc>GRIP Graph Store Service Description.</doc>
+	
+	<grammars/>
+	
+	<resources base="http://www.grip.com">
+		
+		<resource path="/">
+			<doc>Service Description.</doc>
+			<method name="GET">
+				<doc></doc>
+				<request/>
+				<response status="200">
+					<representation href="#html"/>
+					<representation href="#wadl"/>
+					<representation href="#rdf-xml"/>
+				</response>
+			</method>
+		</resource>
+		
+		<resource path="/{PATH}">
+			<doc>This is a fallback resource. If no other URI pattern is matched then this one will.
+			It is intended that this resource will match any graph URI.</doc>
+			<param name="PATH" style="template" type="xs:string"/>
+			<method name="HEAD">
+				<doc>Meta Information</doc>
+				<request>
+					<param href="#default"/>
+					<param href="#graph"/>
+				</request>
+				<response status="204"/>
+			</method>
+			<method name="GET">
+				<doc>Retrieve Graph</doc>
+				<request>
+					<param href="#default"/>
+					<param href="#graph"/>
+				</request>
+				<response status="200">
+					<representation href="#rdf-xml"/>
+				</response>
+			</method>
+			<method name="PUT">
+				<doc>Insert/Replace Graph</doc>
+				<request>
+					<param href="#default"/>
+					<param href="#graph"/>
+				</request>
+				<response status="204">
+					<representation href="#rdf-xml"/>
+				</response>
+			</method>
+			<method name="DELETE">
+				<doc>Retrieve Graph</doc>
+				<request>
+					<param href="#default"/>
+					<param href="#graph"/>
+				</request>
+				<response status="204"/>
+			</method>
+		</resource>
+	</resources>
+	
+	<param id="query" name="query" required="false" style="query" type="xs:string">
+		<doc>URI encoded SPARQL query</doc>
+	</param>
+	<param id="default" name="default" required="false" style="query" type="xs:boolean">
+		<doc>URI encoded Default Graph URI</doc>
+	</param>
+	<param id="graph" name="graph" required="false" style="query" type="xs:string">
+		<doc>URI encoded Named Graph URI</doc>
+	</param>
+	
+	<representation id="html" element="xhtml:html" mediaType="text/html"/>
+	<representation id="ntriples" mediaType="text/plain"/>
+	<representation id="rdf-xml" element="rdf:RDF" mediaType="application/rdf+xml"/>
+	<representation id="sr" element="sr:sparql" mediaType="application/sparql-result+xml"/>
+	<representation id="turtle" mediaType="text/turtle"/>
+	<representation id="wadl" element="wadl:application" mediaType="application/vnd.sun.wadl+xml"/>
+</application>

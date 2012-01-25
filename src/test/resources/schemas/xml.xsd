@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.w3.org/XML/1998/namespace" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <xs:import schemaLocation="local.xsd"/>
+  <xs:import namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" schemaLocation="rdfxml.xsd"/>
+  <xs:attribute name="lang"/>
+  <xs:attribute name="base"/>
+  <xs:group name="local">
+    <xs:sequence>
+      <xs:any namespace="##other" processContents="skip"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:attributeGroup name="local">
+    <xs:anyAttribute namespace="##other" processContents="skip"/>
+  </xs:attributeGroup>
+</xs:schema>

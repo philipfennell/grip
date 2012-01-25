@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  
+  RELAX NG Compact Schema for RDF/XML Syntax
+  
+  This schema is for information only and NON-NORMATIVE
+  
+  It is based on one originally written by James Clark in
+  http://lists.w3.org/Archives/Public/www-rdf-comments/2001JulSep/0248.html
+  and updated with later changes.
+  
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <xs:import schemaLocation="local.xsd"/>
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
+  <!-- I cannot seem to do this in RNGC so they are expanded in-line -->
+  <!--
+    coreSyntaxTerms = rdf:RDF | rdf:ID | rdf:about | rdf:parseType | rdf:resource | rdf:nodeID | rdf:datatype
+    syntaxTerms = coreSyntaxTerms | rdf:Description | rdf:li
+    oldTerms    = rdf:aboutEach | rdf:aboutEachPrefix | rdf:bagID
+    nodeElementURIs       = * - ( coreSyntaxTerms | rdf:li | oldTerms )
+    propertyElementURIs   = * - ( coreSyntaxTerms | rdf:Description | oldTerms )
+    propertyAttributeURIs = * - ( coreSyntaxTerms | rdf:Description | rdf:li | oldTerms )
+  -->
+  <!--
+    Also needed to allow rdf:li on all property element productions
+    since we can't capture the rdf:li rewriting to rdf_<n> in relaxng
+  -->
+  <!-- Need to add these explicitly -->
+  <xs:attributeGroup name="xmllang">
+    <xs:attribute ref="xml:lang" use="required"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="xmlbase">
+    <xs:attribute ref="xml:base" use="required"/>
+  </xs:attributeGroup>
+  <!-- and to forbid every other xml:* attribute, element -->
+  <xs:element name="doc" abstract="true">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="rdf:nodeElementList">
+          <xs:attribute ref="xml:lang"/>
+          <xs:attribute ref="xml:base"/>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RDF" substitutionGroup="rdf:doc"/>
+  <xs:complexType name="nodeElementList">
+    <xs:group minOccurs="0" maxOccurs="unbounded" ref="rdf:nodeElement"/>
+  </xs:complexType>
+  <!--
+    Should be something like:
+     ws* , (  nodeElement , ws* )*
+    but RELAXNG does this by default, ignoring whitespace separating tags.
+  -->
+  <xs:group name="nodeElement">
+    <xs:sequence>
+      <xs:group ref="local"/>
+    </xs:sequence>
+  </xs:group>
+  <!--
+    It is not possible to say "and not things
+    beginning with _ in the rdf: namespace" in RELAX NG.
+  -->
+  <xs:simpleType name="ws">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value=" "/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!--
+    Not used in this RELAX NG schema; but should be any legal XML
+    whitespace defined by http://www.w3.org/TR/2000/REC-xml-20001006#NT-S
+  -->
+  <xs:group name="propertyEltList">
+    <xs:sequence>
+      <xs:group minOccurs="0" maxOccurs="unbounded" ref="rdf:propertyElt"/>
+    </xs:sequence>
+  </xs:group>
+  <!--
+    Should be something like:
+     ws* , ( propertyElt , ws* )*
+    but RELAXNG does this by default, ignoring whitespace separating tags.
+  -->
+  <xs:group name="propertyElt">
+    <xs:choice>
+      <xs:group ref="rdf:resourcePropertyElt"/>
+      <xs:group ref="rdf:literalPropertyElt"/>
+      <xs:group ref="rdf:parseTypeLiteralPropertyElt"/>
+      <xs:group ref="rdf:parseTypeResourcePropertyElt"/>
+      <xs:group ref="rdf:parseTypeCollectionPropertyElt"/>
+      <xs:group ref="rdf:parseTypeOtherPropertyElt"/>
+      <xs:group ref="rdf:emptyPropertyElt"/>
+    </xs:choice>
+  </xs:group>
+  <xs:group name="resourcePropertyElt">
+    <xs:sequence>
+      <xs:group ref="xml:local"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="literalPropertyElt">
+    <xs:sequence>
+      <xs:group ref="xml:local"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="parseTypeLiteralPropertyElt">
+    <xs:sequence>
+      <xs:group ref="xml:local"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="parseTypeResourcePropertyElt">
+    <xs:sequence>
+      <xs:group ref="xml:local"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="parseTypeCollectionPropertyElt">
+    <xs:sequence>
+      <xs:group ref="xml:local"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="parseTypeOtherPropertyElt">
+    <xs:sequence>
+      <xs:group ref="xml:local"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:group name="emptyPropertyElt">
+    <xs:sequence>
+      <xs:group ref="xml:local"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:attributeGroup name="idAttr">
+    <xs:attribute name="ID" use="required" form="qualified" type="rdf:IDsymbol"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="nodeIdAttr">
+    <xs:attribute name="nodeID" use="required" form="qualified" type="rdf:IDsymbol"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="aboutAttr">
+    <xs:attribute name="about" use="required" form="qualified" type="rdf:URI-reference"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="propertyAttr">
+    <xs:attributeGroup ref="xml:local"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="resourceAttr">
+    <xs:attribute name="resource" use="required" form="qualified" type="rdf:URI-reference"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="datatypeAttr">
+    <xs:attribute name="datatype" use="required" form="qualified" type="rdf:URI-reference"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="parseLiteral">
+    <xs:attribute name="parseType" use="required" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="Literal"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="parseResource">
+    <xs:attribute name="parseType" use="required" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="Resource"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="parseCollection">
+    <xs:attribute name="parseType" use="required" form="qualified">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="Collection"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="parseOther">
+    <xs:attribute name="parseType" use="required" form="qualified"/>
+  </xs:attributeGroup>
+  <xs:simpleType name="URI-reference">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  <xs:group name="literal">
+    <xs:sequence>
+      <xs:group ref="rdf:any"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:simpleType name="IDsymbol">
+    <xs:restriction base="xs:NMTOKEN"/>
+  </xs:simpleType>
+  <xs:group name="any">
+    <xs:sequence>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
+    </xs:sequence>
+  </xs:group>
+</xs:schema>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+	<rdf:Description rdf:about="http://example.org/book/book3">
+		<dc:title>Harry Potter and the Prisoner Of Azkaban</dc:title>
+		<dc:creator rdf:nodeID="A0"/>
+		<dc:publisher rdf:resource="http://live.dbpedia.org/page/Bloomsbury_Publishing"/>
+		<dc:date>1999-07-08</dc:date>
+	</rdf:Description>
+	<rdf:Description rdf:nodeID="A0">
+		<vcard:FN>J.K. Rowling</vcard:FN>
+		<vcard:N rdf:nodeID="A1"/>
+	</rdf:Description>
+	<rdf:Description rdf:about="http://example.org/book/book7">
+		<dc:title>Harry Potter and the Deathly Hallows</dc:title>
+		<dc:creator>J.K. Rowling</dc:creator>
+		<dc:publisher rdf:resource="http://live.dbpedia.org/page/Bloomsbury_Publishing"/>
+		<dc:date>2001-07-21</dc:date>
+	</rdf:Description>
+	<rdf:Description rdf:about="http://example.org/book/book2">
+		<dc:title>Harry Potter and the Chamber of Secrets</dc:title>
+		<dc:creator rdf:nodeID="A0"/>
+		<dc:publisher rdf:resource="http://live.dbpedia.org/page/Bloomsbury_Publishing"/>
+		<dc:date>1998-07-02</dc:date>
+	</rdf:Description>
+	<rdf:Description rdf:about="http://example.org/book/book5">
+		<dc:title>Harry Potter and the Order of the Phoenix</dc:title>
+		<dc:creator>J.K. Rowling</dc:creator>
+		<dc:publisher rdf:resource="http://live.dbpedia.org/page/Bloomsbury_Publishing"/>
+		<dc:date>2003-06-21</dc:date>
+	</rdf:Description>
+	<rdf:Description rdf:about="http://example.org/book/book4">
+		<dc:title>Harry Potter and the Goblet of Fire</dc:title>
+		<dc:publisher rdf:resource="http://live.dbpedia.org/page/Bloomsbury_Publishing"/>
+		<dc:date>2000-07-08</dc:date>
+	</rdf:Description>
+	<rdf:Description rdf:about="http://example.org/book/book6">
+		<dc:title>Harry Potter and the Half-Blood Prince</dc:title>
+		<dc:creator>J.K. Rowling</dc:creator>
+		<dc:publisher rdf:resource="http://live.dbpedia.org/page/Bloomsbury_Publishing"/>
+		<dc:date>2005-07-16</dc:date>
+	</rdf:Description>
+	<rdf:Description rdf:about="http://example.org/book/book1">
+		<dc:title xml:lang="en-GB">Harry Potter and the Philosopher's Stone</dc:title>
+		<dc:creator>J.K. Rowling</dc:creator>
+		<dc:publisher rdf:resource="http://live.dbpedia.org/page/Bloomsbury_Publishing"/>
+		<dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2001-11-04</dc:date>
+	</rdf:Description>
+	<rdf:Description rdf:nodeID="A1">
+		<vcard:Family>Rowling</vcard:Family>
+		<vcard:Given>Joanna</vcard:Given>
+	</rdf:Description>
+</rdf:RDF>

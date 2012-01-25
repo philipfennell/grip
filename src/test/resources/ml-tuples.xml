@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graph uri="http://www.books.com/harry_potter">
+   <t>
+      <s>http://example.org/book/book3</s>
+      <p>http://purl.org/dc/elements/1.1/title</p>
+      <o>Harry Potter and the Prisoner Of Azkaban</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book3</s>
+      <p>http://purl.org/dc/elements/1.1/creator</p>
+      <o>_:A0</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book3</s>
+      <p>http://purl.org/dc/elements/1.1/publisher</p>
+      <o type="http://www.w3.org/2001/XMLSchema#anyURI">http://live.dbpedia.org/page/Bloomsbury_Publishing</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book3</s>
+      <p>http://purl.org/dc/elements/1.1/date</p>
+      <o>1999-07-08</o>
+   </t>
+   <t>
+      <s>_:A0</s>
+      <p>http://www.w3.org/2001/vcard-rdf/3.0#FN</p>
+      <o>J.K. Rowling</o>
+   </t>
+   <t>
+      <s>_:A0</s>
+      <p>http://www.w3.org/2001/vcard-rdf/3.0#N</p>
+      <o>_:A1</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book7</s>
+      <p>http://purl.org/dc/elements/1.1/title</p>
+      <o>Harry Potter and the Deathly Hallows</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book7</s>
+      <p>http://purl.org/dc/elements/1.1/creator</p>
+      <o>J.K. Rowling</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book7</s>
+      <p>http://purl.org/dc/elements/1.1/publisher</p>
+      <o type="http://www.w3.org/2001/XMLSchema#anyURI">http://live.dbpedia.org/page/Bloomsbury_Publishing</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book7</s>
+      <p>http://purl.org/dc/elements/1.1/date</p>
+      <o>2001-07-21</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book2</s>
+      <p>http://purl.org/dc/elements/1.1/title</p>
+      <o>Harry Potter and the Chamber of Secrets</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book2</s>
+      <p>http://purl.org/dc/elements/1.1/creator</p>
+      <o>_:A0</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book2</s>
+      <p>http://purl.org/dc/elements/1.1/publisher</p>
+      <o type="http://www.w3.org/2001/XMLSchema#anyURI">http://live.dbpedia.org/page/Bloomsbury_Publishing</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book2</s>
+      <p>http://purl.org/dc/elements/1.1/date</p>
+      <o>1998-07-02</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book5</s>
+      <p>http://purl.org/dc/elements/1.1/title</p>
+      <o>Harry Potter and the Order of the Phoenix</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book5</s>
+      <p>http://purl.org/dc/elements/1.1/creator</p>
+      <o>J.K. Rowling</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book5</s>
+      <p>http://purl.org/dc/elements/1.1/publisher</p>
+      <o type="http://www.w3.org/2001/XMLSchema#anyURI">http://live.dbpedia.org/page/Bloomsbury_Publishing</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book5</s>
+      <p>http://purl.org/dc/elements/1.1/date</p>
+      <o>2003-06-21</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book4</s>
+      <p>http://purl.org/dc/elements/1.1/title</p>
+      <o>Harry Potter and the Goblet of Fire</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book4</s>
+      <p>http://purl.org/dc/elements/1.1/publisher</p>
+      <o type="http://www.w3.org/2001/XMLSchema#anyURI">http://live.dbpedia.org/page/Bloomsbury_Publishing</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book4</s>
+      <p>http://purl.org/dc/elements/1.1/date</p>
+      <o>2000-07-08</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book6</s>
+      <p>http://purl.org/dc/elements/1.1/title</p>
+      <o>Harry Potter and the Half-Blood Prince</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book6</s>
+      <p>http://purl.org/dc/elements/1.1/creator</p>
+      <o>J.K. Rowling</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book6</s>
+      <p>http://purl.org/dc/elements/1.1/publisher</p>
+      <o type="http://www.w3.org/2001/XMLSchema#anyURI">http://live.dbpedia.org/page/Bloomsbury_Publishing</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book6</s>
+      <p>http://purl.org/dc/elements/1.1/date</p>
+      <o>2005-07-16</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book1</s>
+      <p>http://purl.org/dc/elements/1.1/title</p>
+      <o xml:lang="en-GB">Harry Potter and the Philosopher's Stone</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book1</s>
+      <p>http://purl.org/dc/elements/1.1/creator</p>
+      <o>J.K. Rowling</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book1</s>
+      <p>http://purl.org/dc/elements/1.1/publisher</p>
+      <o type="http://www.w3.org/2001/XMLSchema#anyURI">http://live.dbpedia.org/page/Bloomsbury_Publishing</o>
+   </t>
+   <t>
+      <s>http://example.org/book/book1</s>
+      <p>http://purl.org/dc/elements/1.1/date</p>
+      <o type="http://www.w3.org/2001/XMLSchema#date">2001-11-04</o>
+   </t>
+   <t>
+      <s>_:A1</s>
+      <p>http://www.w3.org/2001/vcard-rdf/3.0#Family</p>
+      <o>Rowling</o>
+   </t>
+   <t>
+      <s>_:A1</s>
+      <p>http://www.w3.org/2001/vcard-rdf/3.0#Given</p>
+      <o>Joanna</o>
+   </t>
+</graph>
