@@ -294,6 +294,26 @@ limitations under the License.</p:documentation>
 	-->
 	
 	
+	<p:declare-step type="gsp:retieve-service-description">
+		<p:documentation>Retrieve the Graph Store's Service Description</p:documentation>
+		<p:output port="result"/>
+		<p:option name="uri" required="true"/>
+		<p:option name="media-type" required="false" select="'application/rdf+xml'"/>
+		<p:option name="debug" required="false" select="'false'"/>
+		
+		<gsp:submission method="options">
+			<p:with-option name="request-uri" select="$uri"/>
+			<p:with-option name="media-type" select="$media-type"/>
+		</gsp:submission>
+		
+		<gsp:debug-submission>
+			<p:with-option name="debug" select="$debug"/>
+		</gsp:debug-submission>
+		
+		<gsp:http-request/>
+	</p:declare-step>
+	
+	
 	<p:declare-step type="gsp:delete-graph">
 		<p:documentation>Delete Graph</p:documentation>
 		<p:output port="result"/>

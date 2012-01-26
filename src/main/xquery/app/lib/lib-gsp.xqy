@@ -337,6 +337,37 @@ declare function gsp:merge-graph($trix as element(trix:trix))
 
 
 (:~
+ :
+ :
+ :)
+declare function gsp:get-service-description($requestURI as xs:string) 
+		as element(trix:trix) 
+{
+<trix xmlns="http://www.w3.org/2004/03/trix/trix-1/"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:prof="http://www.w3.org/ns/owl-profile/"
+      xmlns:sd="http://www.w3.org/ns/sparql-service-description#"
+      xmlns:scovo="http://purl.org/NET/scovo#"
+      xmlns:void="http://rdfs.org/ns/void#"
+      xmlns:xs="http://www.w3.org/2001/XMLSchema#">
+   <graph>
+      <uri>#default</uri>
+      <triple>
+         <id>d1e2</id>
+         <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</uri>
+         <uri>http://www.w3.org/ns/sparql-service-description#Service</uri>
+      </triple>
+      <triple>
+         <id>d1e2</id>
+         <uri>http://www.w3.org/ns/sparql-service-description#endpoint</uri>
+         <uri>{$requestURI}</uri>
+      </triple>
+   </graph>
+</trix>
+}; 
+
+
+(:~
  : Return all tuples for the given context (all triples for the given graph uri)
  : @param $c the context (graph URI)
  : @return element(t*)

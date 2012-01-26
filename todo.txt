@@ -1,0 +1,8 @@
+Things To Do
+============
+
+*	Support creation of new graphs with POST + Slug header
+* 	Support transforming typed node elements into TriX.
+* 	Block the use of rdf:Seq, rdf:Bag, rdf:Alt, rdf:Statement, rdf:Property and 
+	rdf:List for now.
+*	Add full support for SPARQL 1.1 Service Description

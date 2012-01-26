@@ -126,6 +126,7 @@ declare function core:getActionName($method as xs:string) as xs:string
 			<put>update</put>
 			<!-- <patch>patch</patch> -->
 			<delete>delete</delete>
+			<trace>loop-back</trace>
 		</methods>
 	return 
 		data($methods/element()[local-name() = $method])
@@ -269,7 +270,7 @@ declare function core:choose-content-type($ext as xs:string?, $accept as xs:stri
  : Returns the 'preferred' content type from the passed Accept header string.
  : FireFoxtext/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
  :)
-declare function core:preferred-content-type($accept as xs:string) 
+declare function core:preferred-content-type($accept as xs:string?) 
 		as xs:string 
 {
 	let $preferredContentTypes as xs:string* := (
@@ -291,7 +292,7 @@ declare function core:preferred-content-type($accept as xs:string)
 		else if ('*/*' = $preferredContentTypes) then
 			$core:DEFAULT_CONTENT_TYPE
 		else
-			($preferredContentTypes, 'application/xml')[1]
+			($preferredContentTypes, $core:DEFAULT_CONTENT_TYPE)[1]
 }; 	
 
 

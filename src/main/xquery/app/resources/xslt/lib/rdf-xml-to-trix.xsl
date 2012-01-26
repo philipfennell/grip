@@ -5,7 +5,7 @@
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 		xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-		exclude-result-prefixes="rdf xs"
+		exclude-result-prefixes="#all"
 		version="2.0">
 	
 	<xsl:strip-space elements="*"/>
@@ -40,6 +40,12 @@
 	</xsl:template>
 	
 	
+	<!-- Throw an error if a property element has the rdf:parseType="Resource" attribute. -->
+	<xsl:template match="*[@rdf:parseType = 'Resource']" mode="#all" priority="10">
+		<xsl:copy-of select="error(xs:QName('err:TX001'), 'Graphs using rdf:parseType=&quot;Resource&quot; are not, currently, supported.')"/>
+	</xsl:template>
+	
+	
 	<!-- Root. -->
 	<xsl:template match="rdf:RDF">
 		<trix>
@@ -52,6 +58,14 @@
 				<xsl:apply-templates select="rdf:Description" mode="triples"/>
 			</graph>
 		</trix>
+	</xsl:template>
+	
+	
+	<!-- Subjects with an ID. -->
+	<xsl:template match="rdf:Description[not(@*)]" mode="triples">
+		<xsl:apply-templates select="*" mode="id">
+			<xsl:with-param name="generatedId" as="xs:string" select="generate-id()" tunnel="yes"/>
+		</xsl:apply-templates>
 	</xsl:template>
 	
 	
@@ -85,7 +99,9 @@
 	
 	<!-- Blank Nodes -->
 	<xsl:template match="*" mode="id" priority="1">
-		<id><xsl:value-of select="../@rdf:nodeID"/></id>
+		<xsl:param name="generatedId" as="xs:string" tunnel="yes"/>
+		
+		<id><xsl:value-of select="(../@rdf:nodeID, $generatedId)[1]"/></id>
 		<xsl:call-template name="predicate"/>
 		<xsl:next-match/>
 	</xsl:template>
