@@ -50,8 +50,8 @@
 	<xsl:template match="t" mode="trix" priority="3">
 		<triple>
 			<xsl:choose>
-				<xsl:when test="matches(s, '_BN\d+')">
-					<id><xsl:value-of select="s"/></id>
+				<xsl:when test="matches(s, '_:\w+')">
+					<id><xsl:value-of select="substring-after(s, '_:')"/></id>
 				</xsl:when>
 				<xsl:otherwise>
 					<uri><xsl:value-of select="s"/></uri>
@@ -77,8 +77,8 @@
 	</xsl:template>
 	
 	
-	<xsl:template match="t[matches(o, '_BN\d+')]" mode="trix" priority="2">
-		<id><xsl:value-of select="o"/></id>
+	<xsl:template match="t[matches(o, '_:\w+')]" mode="trix" priority="2">
+		<id><xsl:value-of select="substring-after(o, '_:')"/></id>
 	</xsl:template>
 	
 	

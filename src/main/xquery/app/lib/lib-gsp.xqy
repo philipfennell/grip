@@ -246,7 +246,7 @@ declare function gsp:tuple-insert($triple as element(trix:triple), $graphURI as 
 declare function gsp:generate-blank-node-id($id as xs:string, $graphURI as xs:string) 
 		as xs:string 
 {
-	concat('_BN', string(xdmp:hash64(concat($id, $graphURI))))
+	concat('_:', 'A', string(xdmp:hash64(concat($id, $graphURI))))
 }; 
 
 
