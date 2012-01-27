@@ -44,21 +44,6 @@
 	</xsl:template>
 	
 	
-	<!-- Transform Typed Node Element into a full rdf:Descriptions using the 
-		 rdf:type property then carry on transforming.
-	<xsl:template match="*[name() ne 'rdf:Description']" mode="descriptions">
-		<xsl:variable name="rdfDescription">
-			<rdf:Description>
-				<xsl:copy-of select="@*"/>
-				 <rdf:type rdf:resource="{concat(namespace-uri-from-QName(resolve-QName(name(), .)), local-name())}"/>
-				<xsl:copy-of select="*"/>
-			</rdf:Description>
-		</xsl:variable>
-		
-		<xsl:apply-templates select="$rdfDescription" mode="descriptions"/>
-	</xsl:template> -->
-	
-	
 	<!-- Subjects without an explicit node reference (blank nodes). -->
 	<xsl:template match="rdf:Description[not(@*)]" mode="descriptions">
 		<xsl:apply-templates select="*" mode="id">
@@ -77,8 +62,6 @@
 	<xsl:template match="rdf:Description[@rdf:nodeID]" mode="descriptions">
 		<xsl:apply-templates select="*" mode="id"/>
 	</xsl:template>
-	
-	
 	
 	
 	<!-- Triple. -->

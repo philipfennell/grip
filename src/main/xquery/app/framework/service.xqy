@@ -92,6 +92,11 @@ declare function service:set-response($response as item()?, $contentType as xs:s
 			(xdmp:set-response-content-type($contentType),
 			xdmp:set-response-code(200, 'Ok'),
 			$response)
+		case text() 
+		return
+			(xdmp:set-response-content-type($contentType),
+			xdmp:set-response-code(200, 'Ok'),
+			$response)
 		default 
 		return 
 			(xdmp:set-response-code(204, 'No Content'))
@@ -111,6 +116,8 @@ declare function service:handle-response($response as item()?)
 		typeswitch ($response)
 			case xs:anyURI return 
 					service:set-response($response, '')
+			case text() return 
+					service:set-response($response, 'text/plain')
 			case element(app:service) return
 					service:set-response($response, 'application/atomsvc+xml')
 			case element(app:categories) return

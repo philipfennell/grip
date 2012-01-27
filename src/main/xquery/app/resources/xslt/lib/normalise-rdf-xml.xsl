@@ -141,7 +141,7 @@
 	<xsl:function name="rdf:resolve-uri" as="xs:string">
 		<xsl:param name="uriAttr" as="attribute()"/>
 		
-		<xsl:value-of select="resolve-uri(string($uriAttr), ($uriAttr/ancestor::*[@xml:base][1]/@xml:base, base-uri($uriAttr))[1])"/>
+		<xsl:value-of select="resolve-uri(string($uriAttr), ($uriAttr/ancestor::*[@xml:base][1]/@xml:base, static-base-uri())[1])"/>
 	</xsl:function>
 	
 	

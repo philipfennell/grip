@@ -317,7 +317,8 @@ declare function core:representation($instance as item()?, $contentType as xs:st
 			case $item as element() 
 			return
 				try {
-					xdmp:xslt-invoke($transformURI, $instance)/*
+				(: Return either the child node() or text()... as it comes. :)
+					xdmp:xslt-invoke($transformURI, $instance)/(*, text())[1]
 				} catch ($error) {
 					(: If the transform cannot be found then throw an 'Unacceptable Error'... :)
 					if (data($error/error:code) = ('SVC-FILOPN', 'XSLT-MSGTERMINATE')) then 
