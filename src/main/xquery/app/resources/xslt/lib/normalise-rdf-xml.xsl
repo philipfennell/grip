@@ -156,9 +156,9 @@
 	</xsl:template>
 	
 	
-	<!-- Throw an error if rdf:Bag, rdf:Seq or rdf:Alt are present. -->
-	<xsl:template match="rdf:Bag | rdf:Seq | rdf:Alt" mode="#all" priority="10">
-		<xsl:copy-of select="error(xs:QName('err:TX001'), 'Graphs using rdf:Bag, rdf:Seq or rdf:Alt are not, currently, supported.')"/>
+	<!-- Throw an error if rdf:Bag, rdf:Seq, rdf:Alt, rdf:Statement, rdf:Property or rdf:List are present. -->
+	<xsl:template match="rdf:Bag | rdf:Seq | rdf:Alt | rdf:Statement | rdf:Property | rdf:List" mode="#all" priority="10">
+		<xsl:copy-of select="error(xs:QName('err:TX001'), 'Graphs using rdf:Bag, rdf:Seq, rdf:Alt, rdf:Statement, rdf:Property or rdf:List are not, currently, supported.')"/>
 	</xsl:template>
 	
 </xsl:transform>

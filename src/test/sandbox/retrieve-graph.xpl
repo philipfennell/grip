@@ -17,6 +17,6 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:retrieve-graph uri="http://localhost:8005/test/data" graph="http://sandbox.com/test/skos"/>
+	<gsp:retrieve-graph uri="http://localhost:8005/merge-to-service-test"/>
 	
 </p:declare-step>
