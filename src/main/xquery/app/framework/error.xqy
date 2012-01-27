@@ -33,6 +33,7 @@ declare variable $reasonPhraseLUT as element() :=
 		<err:phrase code="{404}">Not Found</err:phrase>
 		<err:phrase code="{405}">Method Not Allowed</err:phrase>
 		<err:phrase code="{406}">Not Acceptable</err:phrase>
+		<err:phrase code="{409}">Conflict</err:phrase>
 		<err:phrase code="{415}">Unsupported Media Type</err:phrase>
 		<err:phrase code="{500}">Internal Server Error</err:phrase>
 	</err:lut>;
@@ -45,6 +46,7 @@ declare variable $responseCodeLUT as element() :=
 		<err:REQ002>{400}</err:REQ002>
 		<err:TX001>{400}</err:TX001>
 		<err:REQ003>{415}</err:REQ003>
+		<err:REQ004>{409}</err:REQ004>
 		<err:ENT002>{400}</err:ENT002>
 		<err:ENT003>{400}</err:ENT003>
 		<err:REQ003>{401}</err:REQ003>

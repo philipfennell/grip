@@ -15,10 +15,10 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:merge-graph uri="http://localhost:8005/test/data" default="true"
-			content-type="application/rdf+xml" slug="">
+	<gsp:merge-graph uri="http://localhost:8005/" 
+			content-type="application-rdf+xml" slug="merge to service test">
 		<p:input port="source">
-			<p:document href="test/resources/books-published.rdf"/>
+			<p:document href="test/resources/books.rdf"/>
 		</p:input>
 	</gsp:merge-graph>
 	

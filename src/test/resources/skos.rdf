@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+	<skos:Concept rdf:about="http://www.my.com/#canals">
+		<skos:definition>A feature type category for places such as the Erie Canal</skos:definition>
+		<skos:prefLabel>canals</skos:prefLabel>
+		<skos:altLabel>canal bends</skos:altLabel>
+		<skos:altLabel>canalized streams</skos:altLabel>
+		<skos:altLabel>ditch mouths</skos:altLabel>
+		<skos:altLabel>ditches</skos:altLabel>
+		<skos:altLabel>drainage canals</skos:altLabel>
+		<skos:altLabel>drainage ditches</skos:altLabel>
+		<skos:broader rdf:resource="http://www.my.com/#hydrographic%20structures"/>
+		<skos:related rdf:resource="http://www.my.com/#channels"/>
+		<skos:related rdf:resource="http://www.my.com/#locks"/>
+		<skos:related rdf:resource="http://www.my.com/#transportation%20features"/>
+		<skos:related rdf:resource="http://www.my.com/#tunnels"/>
+		<skos:scopeNote>Manmade waterway used by watercraft or for drainage, irrigation, mining, or
+			water power</skos:scopeNote>
+	</skos:Concept>
+</rdf:RDF>

@@ -15,22 +15,12 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:add-graph name="test" uri="http://localhost:8005/test/data" 
-			default="true" content-type="application-rdf+xml">
+	<gsp:merge-graph uri="http://localhost:8005/" 
+			content-type="application-rdf+xml" slug="merge to service test">
 		<p:input port="source">
-			<p:inline exclude-inline-prefixes="#all">
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-		xmlns:dc="http://purl.org/dc/elements/1.1/">
-	<rdf:Description rdf:ID="foo">
-		<dc:title>Harry Potter and the Deathly Hallows</dc:title>
-		<dc:creator>J.K. Rowling</dc:creator>
-		<dc:publisher rdf:resource="http://live.dbpedia.org/page/Bloomsbury_Publishing"/>
-		<dc:date>2001-07-21</dc:date>
-	</rdf:Description>
-</rdf:RDF>
-			</p:inline>
+			<p:document href="test/resources/books.rdf"/>
 		</p:input>
-	</gsp:add-graph>
+	</gsp:merge-graph>
 	
 	<test:validate-with-schematron assert-valid="true">
 		<p:input port="schema">

@@ -37,8 +37,9 @@ declare namespace s = "http://www.w3.org/2009/xpath-functions/analyze-string";
  : @param $requestPath the request path.
  : @param $uriTemplates the 'template URI that maps steps to WADL template params.
  : @param $method the HTTP request method.
- : @param $paramNames 
- : @param $requestBody 
+ : @param $paramNames HTTP request parameter names.
+ : @param $headerNames HTTP request header names.
+ : @param $requestBody HTTP request body (entity).
  : @param $requestMediaType 
  : @returns an action element.
  :)
@@ -48,6 +49,7 @@ declare function local:build-action(
 		$uriTemplates as xs:string+, 
 		$method as xs:string,
 		$paramNames as xs:string*,
+		$headerNames as xs:string*,
 		$requestBody as xs:string?,
 		$requestMediaType as xs:string*
 	)
@@ -71,13 +73,21 @@ declare function local:build-action(
 				analyze-string($requestPath, $pattern)//s:group[@nr = $group/@nr]/text()
 			}
 			
-	(: HTTP Request variables. :)
+	(: HTTP Request parameters. :)
 	let $requestParams as element()* := for $name in $paramNames
 		where not($name = ('debug', '_requri', '_reqpath', '_reqext'))
 		return
 			element {QName($normalisedNS, concat('resource:', upper-case($name)))} {
 				xdmp:get-request-field($name)
 			}
+	
+	(: HTTP Request headers. :)
+	let $requestHeaders as element()* := for $name in $headerNames
+		return
+			element {QName($normalisedNS, concat('resource:', upper-case($name)))} {
+				xdmp:get-request-header($name)
+			}
+	
 	return
 		element {QName($normalisedNS, concat('resource:', $action))} {
 			(
@@ -85,6 +95,7 @@ declare function local:build-action(
 				element {QName($normalisedNS, 'resource:REQUEST_PATH')} {$requestPath},
 				$templateVars,
 				$requestParams,
+				$requestHeaders,
 				element {QName($normalisedNS, 'resource:MEDIA_TYPE')} {$requestMediaType},
 				element {QName($normalisedNS, 'resource:CONTENT')} {
 					$requestBody
@@ -180,6 +191,7 @@ let $action as element() :=
 		$service:URI_TEMPLATES, 
 		lower-case(xdmp:get-request-method()),
 		xdmp:get-request-field-names(),
+		('Slug'),
 		$requestBody,
 		if (contains($requestContentTypeHeader, ';')) then 
 			substring-before($requestContentTypeHeader, ';')

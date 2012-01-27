@@ -21,8 +21,8 @@
 			<p:inline exclude-inline-prefixes="#all">
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 		xmlns:dc="http://purl.org/dc/elements/1.1/"
-		xml:base="http://www.example.com/test">
-	<rdf:Description rdf:about="http://example.org/book/book7">
+		xml:base="http://example.org/book/">
+	<rdf:Description rdf:ID="book7">
 		<dc:title>Harry Potter and the Deathly Hallows</dc:title>
 		<dc:creator>J.K. Rowling</dc:creator>
 		<dc:publisher rdf:resource="http://live.dbpedia.org/page/Bloomsbury_Publishing"/>
@@ -33,13 +33,13 @@
 		</p:input>
 	</gsp:add-graph>
 	
-	<test:validate-with-schematron assert-valid="true">
+	<!--<test:validate-with-schematron assert-valid="true">
 		<p:input port="schema">
-			<p:document href="test/resources/schemas/error-response.sch"/>
+			<p:document href="test/resources/schemas/successful-response.sch"/>
 		</p:input>
 		<p:input port="parameters">
 			<p:empty/>
 		</p:input>
-	</test:validate-with-schematron>
+	</test:validate-with-schematron>-->
 	
 </p:declare-step>

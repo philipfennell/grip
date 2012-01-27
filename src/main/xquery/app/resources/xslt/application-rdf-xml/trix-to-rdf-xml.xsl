@@ -39,21 +39,48 @@
 			</xsl:for-each>
 			
 			<xsl:for-each-group select="triple" group-by="rdf:subject(.)">
-				<rdf:Description>
-					<xsl:choose>
-						<xsl:when test="local-name(rdf:subject(.)) eq 'id'">
-							<xsl:attribute name="rdf:nodeID" select="rdf:subject(.)"/>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:attribute name="rdf:about" select="rdf:subject(.)"/>
-						</xsl:otherwise>
-					</xsl:choose>
-					<xsl:apply-templates select="current-group()" mode="rdf-xml">
-						<xsl:with-param name="namespaces" select="$namespaces" as="element()" tunnel="yes"/>
-					</xsl:apply-templates>
-				</rdf:Description>
+				<xsl:variable name="rdfDescription" as="element()">
+					<rdf:Description>
+						<xsl:choose>
+							<xsl:when test="local-name(rdf:subject(.)) eq 'id'">
+								<xsl:attribute name="rdf:nodeID" select="rdf:subject(.)"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:attribute name="rdf:about" select="rdf:subject(.)"/>
+							</xsl:otherwise>
+						</xsl:choose>
+						<xsl:apply-templates select="current-group()" mode="rdf-xml">
+							<xsl:with-param name="namespaces" select="$namespaces" as="element()" tunnel="yes"/>
+						</xsl:apply-templates>
+					</rdf:Description>
+				</xsl:variable>
+				
+				<!-- Re-process the new Description to deal with typed nodes. -->
+				<xsl:apply-templates select="$rdfDescription" mode="nodes">
+					<xsl:with-param name="namespaces" select="$namespaces" as="element()" tunnel="yes"/>
+				</xsl:apply-templates>
 			</xsl:for-each-group>
 		</rdf:RDF>
+	</xsl:template>
+	
+	
+	<!--  -->
+	<xsl:template match="rdf:Description[rdf:type]" mode="nodes" priority="1">
+		<xsl:param name="namespaces" as="element()" tunnel="yes"/>
+		<xsl:variable name="localName" as="xs:string" select="gsp:get-name(rdf:type/@rdf:resource)"/>
+		<xsl:variable name="namespace" as="xs:string" select="gsp:get-namespace(rdf:type/@rdf:resource)"/>
+		<xsl:variable name="prefix" as="xs:string?" select="gsp:get-namespace-prefix($namespaces, $namespace)"/>
+		
+		<xsl:element name="{concat($prefix, ':', $localName)}" namespace="{$namespace}">
+			<xsl:copy-of select="@*"/>
+			<xsl:copy-of select="* except (rdf:type)"/>
+		</xsl:element>
+	</xsl:template>
+	
+	
+	<!--  -->
+	<xsl:template match="rdf:Description" mode="nodes">
+		<xsl:copy-of select="."/>
 	</xsl:template>
 	
 	

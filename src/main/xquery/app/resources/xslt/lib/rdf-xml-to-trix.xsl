@@ -8,6 +8,8 @@
 		exclude-result-prefixes="#all"
 		version="2.0">
 	
+	<xsl:import href="normalise-rdf-xml.xsl"/>
+	
 	<xsl:strip-space elements="*"/>
 	
 	<xsl:output encoding="UTF-8" indent="yes" media-type="application/xml" method="xml"/>
@@ -22,32 +24,13 @@
 	</xsl:template>
 	
 	
-	<!-- Throw an error if the RDF/XML graph uses an xml:base URI. -->
-	<xsl:template match="rdf:RDF[@xml:base]" priority="10">
-		<xsl:copy-of select="error(xs:QName('err:TX001'), 'Graphs using the xml:base attribute are not, currently, supported.')"/>
-	</xsl:template>
-	
-	
-	<!-- Throw an error if the RDF/XML graph uses an rdf:ID attributes. -->
-	<xsl:template match="rdf:Description[@rdf:ID]" mode="triples" priority="10">
-		<xsl:copy-of select="error(xs:QName('err:TX001'), 'Graphs using the rdf:ID attribute are not, currently, supported.')"/>
-	</xsl:template>
-	
-	
-	<!-- Throw an error if a property element has the rdf:parseType="Collection" attribute. -->
-	<xsl:template match="*[@rdf:parseType = 'Collection']" mode="#all" priority="10">
-		<xsl:copy-of select="error(xs:QName('err:TX001'), 'Graphs declaring Collections with rdf:parseType=&quot;Collection&quot; are not, currently, supported.')"/>
-	</xsl:template>
-	
-	
-	<!-- Throw an error if a property element has the rdf:parseType="Resource" attribute. -->
-	<xsl:template match="*[@rdf:parseType = 'Resource']" mode="#all" priority="10">
-		<xsl:copy-of select="error(xs:QName('err:TX001'), 'Graphs using rdf:parseType=&quot;Resource&quot; are not, currently, supported.')"/>
-	</xsl:template>
-	
-	
 	<!-- Root. -->
 	<xsl:template match="rdf:RDF">
+		<!-- Normalise the RDF/XML to make it easier to transform into TriX. -->
+		<xsl:variable name="normalisedRDF" as="element(rdf:RDF)">
+			<xsl:apply-imports/>
+		</xsl:variable>
+		
 		<trix>
 			<xsl:for-each select="namespace::*">
 				<xsl:copy-of select="."/>
@@ -55,30 +38,47 @@
 			<xsl:namespace name="xs">http://www.w3.org/2001/XMLSchema#</xsl:namespace>
 			<graph>
 				<uri><xsl:value-of select="$GRAPH_URI"/></uri>
-				<xsl:apply-templates select="rdf:Description" mode="triples"/>
+				<xsl:apply-templates select="$normalisedRDF/*" mode="descriptions"/>
 			</graph>
 		</trix>
 	</xsl:template>
 	
 	
-	<!-- Subjects with an ID. -->
-	<xsl:template match="rdf:Description[not(@*)]" mode="triples">
+	<!-- Transform Typed Node Element into a full rdf:Descriptions using the 
+		 rdf:type property then carry on transforming.
+	<xsl:template match="*[name() ne 'rdf:Description']" mode="descriptions">
+		<xsl:variable name="rdfDescription">
+			<rdf:Description>
+				<xsl:copy-of select="@*"/>
+				 <rdf:type rdf:resource="{concat(namespace-uri-from-QName(resolve-QName(name(), .)), local-name())}"/>
+				<xsl:copy-of select="*"/>
+			</rdf:Description>
+		</xsl:variable>
+		
+		<xsl:apply-templates select="$rdfDescription" mode="descriptions"/>
+	</xsl:template> -->
+	
+	
+	<!-- Subjects without an explicit node reference (blank nodes). -->
+	<xsl:template match="rdf:Description[not(@*)]" mode="descriptions">
 		<xsl:apply-templates select="*" mode="id">
 			<xsl:with-param name="generatedId" as="xs:string" select="generate-id()" tunnel="yes"/>
 		</xsl:apply-templates>
 	</xsl:template>
 	
 	
-	<!-- Subjects with a URI. -->
-	<xsl:template match="rdf:Description[@rdf:about]" mode="triples">
+	<!-- Subjects with a URI (absolute or relative). -->
+	<xsl:template match="rdf:Description[@rdf:about | @rdf:ID]" mode="descriptions">
 		<xsl:apply-templates select="*" mode="resource"/>
 	</xsl:template>
 	
 	
 	<!-- Subjects with an ID. -->
-	<xsl:template match="rdf:Description[@rdf:nodeID]" mode="triples">
+	<xsl:template match="rdf:Description[@rdf:nodeID]" mode="descriptions">
 		<xsl:apply-templates select="*" mode="id"/>
 	</xsl:template>
+	
+	
 	
 	
 	<!-- Triple. -->
@@ -99,7 +99,7 @@
 	
 	<!-- Blank Nodes -->
 	<xsl:template match="*" mode="id" priority="1">
-		<xsl:param name="generatedId" as="xs:string" tunnel="yes"/>
+		<xsl:param name="generatedId" as="xs:string?" tunnel="yes"/>
 		
 		<id><xsl:value-of select="(../@rdf:nodeID, $generatedId)[1]"/></id>
 		<xsl:call-template name="predicate"/>

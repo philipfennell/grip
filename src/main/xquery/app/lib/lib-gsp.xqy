@@ -268,6 +268,28 @@ declare function gsp:delete-graph($graphURI as xs:string)
 
 
 (:~
+ : When POSTed to the service URI, attempt to create a new graph, if the graph
+ : URI already exists then this is an error.
+ : @param $trix the TriX graph to be inserted.
+ : @return empty-sequence()
+ : @throws 
+ :)
+declare function gsp:create-graph($trix as element(trix:trix))
+	as xs:anyURI
+{
+	let $graphURI as xs:string := string($trix/trix:graph/trix:uri)
+	let $info := xdmp:log(concat('[XQuery][GRIP] Creating New Graph: ', $graphURI), 'info')
+	return
+		if (doc-available($graphURI)) then 
+			error(xs:QName('err:REQ004'), 'Graph already exists.', $graphURI)
+		else
+			( gsp:insert-graph($trix/trix:graph), 
+			gsp:add-graph-doc($trix/trix:graph),
+			xs:anyURI($graphURI) )
+};
+
+
+(:~
  : Inserts the passed graph into the database replacing one if it already exists.
  : To get around conflicting updates this function finds those tuples that 
  : already exist and eliminates those that won't be replaced by the incoming 
@@ -337,8 +359,12 @@ declare function gsp:merge-graph($trix as element(trix:trix))
 
 
 (:~
- :
- :
+ : Returns the graph store's Service Decription according to the SPARQL 1.1 
+ : Service Description.
+ : @see http://www.w3.org/TR/sparql11-service-description/
+ : Note: this is only a 'place holder' function - full support will follow.
+ : @param $requestURI the URI of the original request to the service.
+ : @return element(trix:trix)
  :)
 declare function gsp:get-service-description($requestURI as xs:string) 
 		as element(trix:trix) 
@@ -403,4 +429,30 @@ declare function gsp:rq($qn as xs:QName+, $v as xs:string+)
 {
 	cts:element-range-query($qn, '=', $v, 
   			('collation=http://marklogic.com/collation/codepoint'))
+};
+
+
+(:~
+ : Takes the baseURI and a normalised string (the slug) and joins them together 
+ : to for a new URI.
+ : @param $baseURI then URI's base
+ : @param $slug the text to be used in creating the new portion of the URI.
+ : @return xs:string
+ :)
+declare function gsp:create-new-uri($baseURI as xs:string, $slug as xs:string) 
+		as xs:string
+{
+	concat($baseURI, translate(normalize-space($slug), ' ', '-'))
+}; 
+
+
+(:~
+ : Transform TriX to RDF/XML.
+ : @param $trix the graph to be inserted.
+ : @return element(rdf:RDF)
+ :)
+declare function gsp:trix-to-rdf-xml($trix as element(trix:trix))
+	as element(rdf:RDF)
+{
+	xdmp:xslt-invoke('resources/xslt/application-rdf-xml/trix-to-rdf-xml.xsl', $trix, ())/*
 };

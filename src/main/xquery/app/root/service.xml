@@ -3,12 +3,13 @@
 		xmlns="http://wadl.dev.java.net/2009/02" 
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 		xmlns:sr="http://www.w3.org/2005/sparql-results#"
+		xmlns:trix="http://www.w3.org/2004/03/trix/trix-1/"
 		xmlns:wadl="http://wadl.dev.java.net/2009/02"
 		xmlns:xhtml="http://www.w3.org/1999/xhtml"
 		xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://wadl.dev.java.net/2009/02 
-				resources/schemas/wadl/wadl20090202.xsd">
+				../resources/schemas/wadl/wadl20090202.xsd">
 	<doc>GRIP Graph Store Service Description.</doc>
 	
 	<grammars/>
@@ -16,7 +17,16 @@
 	<resources base="http://www.grip.com">
 		
 		<resource path="/">
-			<doc>Service Description.</doc>
+			<doc>Service.</doc>
+			<method name="OPTIONS">
+				<doc></doc>
+				<request/>
+				<response status="200">
+					<representation href="#html"/>
+					<representation href="#wadl"/>
+					<representation href="#rdf-xml"/>
+				</response>
+			</method>
 			<method name="GET">
 				<doc></doc>
 				<request/>
@@ -25,6 +35,13 @@
 					<representation href="#wadl"/>
 					<representation href="#rdf-xml"/>
 				</response>
+			</method>
+			<method name="POST">
+				<doc></doc>
+				<request>
+					<param name="Slug" style="header" required="false" type="xs:string"/>
+				</request>
+				<response status="201"/>
 			</method>
 		</resource>
 		
@@ -48,7 +65,16 @@
 				</request>
 				<response status="200">
 					<representation href="#rdf-xml"/>
+					<representation href="#trix"/>
 				</response>
+			</method>
+			<method name="POST">
+				<doc>Merge Graph</doc>
+				<request>
+					<param href="#default"/>
+					<param href="#graph"/>
+				</request>
+				<response status="204"/>
 			</method>
 			<method name="PUT">
 				<doc>Insert/Replace Graph</doc>
@@ -56,9 +82,8 @@
 					<param href="#default"/>
 					<param href="#graph"/>
 				</request>
-				<response status="204">
-					<representation href="#rdf-xml"/>
-				</response>
+				<response status="201"/>
+				<response status="204"/>
 			</method>
 			<method name="DELETE">
 				<doc>Retrieve Graph</doc>
@@ -84,6 +109,7 @@
 	<representation id="html" element="xhtml:html" mediaType="text/html"/>
 	<representation id="ntriples" mediaType="text/plain"/>
 	<representation id="rdf-xml" element="rdf:RDF" mediaType="application/rdf+xml"/>
+	<representation id="trix" element="trix:trix" mediaType="application/trix+xml"/>
 	<representation id="sr" element="sr:sparql" mediaType="application/sparql-result+xml"/>
 	<representation id="turtle" mediaType="text/turtle"/>
 	<representation id="wadl" element="wadl:application" mediaType="application/vnd.sun.wadl+xml"/>

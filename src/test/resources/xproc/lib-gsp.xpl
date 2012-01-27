@@ -32,12 +32,14 @@ limitations under the License.</p:documentation>
 		<p:option name="method" required="true"/>
 		<p:option name="request-uri" required="true"/>
 		<p:option name="media-type" required="false" select="'application/rdf+xml'"/>
+		<p:option name="slug" required="false" select="''"/>
 		
 		<p:identity>
 			<p:input port="source">
 				<p:inline exclude-inline-prefixes="#all">
 <c:request detailed="true">
-	<c:header name="accept"/>
+	<c:header name="Accept"/>
+	<c:header name="Slug"/>
 	<c:header name="user-agent" value="xpl-graph-store-http-protocol-client/0.1"/>
 </c:request>
 				</p:inline>
@@ -52,8 +54,12 @@ limitations under the License.</p:documentation>
 			<p:with-option name="attribute-value" select="$request-uri"/>
 		</p:add-attribute>
 		
-		<p:add-attribute match="c:request/c:header[@name eq 'accept']" attribute-name="value">
+		<p:add-attribute match="c:request/c:header[@name eq 'Accept']" attribute-name="value">
 			<p:with-option name="attribute-value" select="$media-type"/>
+		</p:add-attribute>
+		
+		<p:add-attribute match="c:request/c:header[@name eq 'Slug']" attribute-name="value">
+			<p:with-option name="attribute-value" select="$slug"/>
 		</p:add-attribute>
 	</p:declare-step>
 	
@@ -65,10 +71,12 @@ limitations under the License.</p:documentation>
 		<p:option name="method" required="true"/>
 		<p:option name="request-uri" required="true"/>
 		<p:option name="content-type" required="true"/>
+		<p:option name="slug" required="false" select="''"/>
 		
 		<gsp:submission>
 			<p:with-option name="method" select="$method"/>
 			<p:with-option name="request-uri" select="$request-uri"/>
+			<p:with-option name="slug" select="$slug"/>
 		</gsp:submission>
 		
 		<p:insert match="/c:request" position="last-child">
@@ -227,6 +235,7 @@ limitations under the License.</p:documentation>
 		<p:option name="content-type" required="true"/>
 		<p:option name="default" required="false" select="'false'"/>
 		<p:option name="graph" required="false" select="''"/>
+		<p:option name="slug" required="false" select="''"/>
 		<p:option name="debug" required="false" select="'false'"/>
 		
 		<p:variable name="params" select="string-join((if ($default eq 'true') then 'default=' else (), if (string-length($graph) gt 0) then concat('graph=', encode-for-uri($graph)) else ()), '&amp;')"/>
@@ -234,6 +243,7 @@ limitations under the License.</p:documentation>
 		<gsp:graph-submission method="post">
 			<p:with-option name="request-uri" select="concat($uri, if (contains($uri, '?')) then '&amp;' else '?', $params)"/>
 			<p:with-option name="content-type" select="$content-type"/>
+			<p:with-option name="slug" select="$slug"/>
 		</gsp:graph-submission>
 		
 		<gsp:debug-submission>
