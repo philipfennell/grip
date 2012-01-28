@@ -101,7 +101,7 @@
 		<xsl:param name="language" as="xs:string?"/>
 		
 		<xsl:choose>
-			<xsl:when test="if (string-length($language) gt 0) then matches($language, '[a-z]+(-[A-Z0-9]+ )*') else true()">
+			<xsl:when test="if (string-length($language) gt 0) then matches($language, '[a-z]+(-[A-Z0-9]+)*') else true()">
 				<xsl:value-of select="concat('&quot;', $string, '&quot;', if (string-length($language) gt 0) then concat('@', $language) else '')"/>
 			</xsl:when>
 			<xsl:otherwise>
