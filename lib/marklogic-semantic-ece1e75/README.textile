@@ -1,1 +1,0 @@
-For more information see "http://marklogic.github.com/semantic/":http://marklogic.github.com/semantic/
