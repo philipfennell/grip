@@ -174,11 +174,11 @@ declare function local:dispatch($action as element())
 let $requestPath as xs:string := xdmp:get-request-field('_reqpath')
 let $requestURI as xs:anyURI := xs:anyURI(xdmp:get-request-field('_requri'))
 
-let $requestBody as xs:string :=
+let $requestBody as xs:string? :=
 	try {
-		xdmp:quote(xdmp:get-request-body('xml'))
+		xdmp:get-request-body('text')
 	} catch ($error) {
-		$error
+		core:rethrow-error($error)
 	}
 
 let $requestContentTypeHeader as xs:string? := string-join(xdmp:get-request-header('Content-Type'), ' ')

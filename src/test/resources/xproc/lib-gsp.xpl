@@ -91,11 +91,47 @@ limitations under the License.</p:documentation>
 			<p:with-option name="attribute-value" select="$content-type"/>
 		</p:add-attribute>
 		
-		<p:insert match="/c:request/c:body" position="last-child">
-			<p:input port="insertion">
+		<gsp:insert-entity>
+			<p:input port="entity">
 				<p:pipe port="source" step="graph-submission"/>
 			</p:input>
-		</p:insert>
+			<p:with-option name="content-type" select="$content-type"/>
+		</gsp:insert-entity>
+	</p:declare-step>
+	
+	
+	<p:declare-step name="insert-entity" type="gsp:insert-entity">
+		<p:documentation>Insert the payload entity into the request fragment.</p:documentation>
+		<p:input port="source" primary="true"/>
+		<p:input port="entity" primary="false"/>
+		<p:output port="result"/>
+		<p:option name="content-type" required="true"/>
+		
+		<p:choose>
+			<p:when test="starts-with($content-type, 'text/')">
+				<!--<p:string-replace match="/c:request/c:body/*">
+					<p:with-option name="replace" select="$content-type"/>
+				</p:string-replace>-->
+				<p:replace match="/c:request/c:body">
+					<p:input port="source">
+						<p:pipe port="source" step="insert-entity"/>
+					</p:input>
+					<p:input port="relacement">
+						<p:pipe port="entity" step="insert-entity"/>
+					</p:input>
+				</p:replace>
+			</p:when>
+			<p:otherwise>
+				<p:insert match="/c:request/c:body" position="last-child">
+					<p:input port="source">
+						<p:pipe port="source" step="insert-entity"/>
+					</p:input>
+					<p:input port="insertion">
+						<p:pipe port="entity" step="insert-entity"/>
+					</p:input>
+				</p:insert>
+			</p:otherwise>
+		</p:choose>
 	</p:declare-step>
 	
 	

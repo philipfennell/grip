@@ -25,7 +25,9 @@ module namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
+declare namespace nt 	= "http://www.w3.org/TR/rdf-testcases/#ntriples";
 declare namespace rdf 	= "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+declare namespace ttl 	= "http://www.w3.org/TeamSubmission/turtle/";
 
 
 (:~
@@ -100,6 +102,38 @@ declare function trix:rdf-xml-to-trix($rdf as element(rdf:RDF), $graphURI as xs:
 	let $_put := map:put($params, 'GRAPH_URI', $graphURI)
 	return
 		xdmp:xslt-invoke('/resources/xslt/lib/rdf-xml-to-trix.xsl', $rdf, $params)/*
+};
+
+
+(:~
+ : Transform the RDF/N-Triples to TriX.
+ : @param $rdf the graph to be inserted.
+ : @param $graphURI the graph URI.
+ : @return element(trix:trix)
+ :)
+declare function trix:ntriples-to-trix($rdf as element(nt:RDF), $graphURI as xs:string)
+	as element(trix:trix)
+{
+	let $params := map:map()
+	let $_put := map:put($params, 'GRAPH_URI', $graphURI)
+	return
+		xdmp:xslt-invoke('/resources/xslt/lib/ntriples-to-trix.xsl', $rdf, $params)/*
+};
+
+
+(:~
+ : Transform the RDF/Turtle to TriX.
+ : @param $rdf the graph to be inserted.
+ : @param $graphURI the graph URI.
+ : @return element(trix:trix)
+ :)
+declare function trix:turtle-to-trix($rdf as element(ttl:RDF), $graphURI as xs:string)
+	as element(trix:trix)
+{
+	let $params := map:map()
+	let $_put := map:put($params, 'GRAPH_URI', $graphURI)
+	return
+		xdmp:xslt-invoke('/resources/xslt/lib/turtle-to-trix.xsl', $rdf, $params)/*
 };
 
 

@@ -13,9 +13,14 @@
 	
 	<xsl:strip-space elements="*"/>
 	
-	<xsl:output encoding="UTF-8" indent="yes" media-type="application/xml" method="xml"/>
+	<xsl:output encoding="UTF-8" indent="yes" media-type="application/xml" 
+			use-character-maps="ntriples" method="xml"/>
+	
+	<xsl:include href="ntriples.xsl"/>
 	
 	<xsl:param name="GRAPH_URI" as="xs:string" select="'#default'"/>
+	
+	
 	
 	
 	<!--  -->
@@ -25,7 +30,7 @@
 	
 	
 	<!--  -->
-	<xsl:template match="nt:triples">
+	<xsl:template match="nt:RDF">
 		<trix>
 			<graph>
 				<uri><xsl:value-of select="$GRAPH_URI"/></uri>
@@ -172,8 +177,13 @@
 	<!-- Returns the datatype from the object. -->
 	<xsl:function name="nt:get-datatype" as="xs:string">
 		<xsl:param name="string" as="xs:string"/>
+		<xsl:variable name="dataType" as="xs:string" select="nt:get-uriref(substring-after($string, '^^'))"/>
 		
-		<xsl:value-of select="nt:get-uriref(substring-after($string, '^^'))"/>
+		<xsl:value-of select="
+			if (starts-with($dataType, 'xs:')) then 
+				concat('http://www.w3.org/2001/XMLSchema#', substring-after($dataType, 'xs:')) 
+			else 
+				$dataType"/>
 	</xsl:function>
 	
 	
@@ -193,7 +203,12 @@
 				<xsl:matching-substring><xsl:value-of select="."/></xsl:matching-substring>
 			</xsl:analyze-string>
 		</xsl:variable>
-		<xsl:value-of select="replace(if (string-length($langCode) gt 0) then substring-before($string, $langCode) else $string, '&quot;', '')"/>
+		<xsl:variable name="quotedString" as="xs:string" 
+					select="if (string-length($langCode) gt 0) then substring-before($string, $langCode) else $string"/>
+		<xsl:variable name="stringValue" as="xs:string" 
+				select="substring($quotedString, 2, string-length($quotedString) - 2)"/>
+		
+		<xsl:value-of select="nt:unescape-string($stringValue)"/>
 	</xsl:function>
 	
 	

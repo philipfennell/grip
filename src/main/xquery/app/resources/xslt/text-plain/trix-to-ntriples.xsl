@@ -14,6 +14,8 @@
 	
 	<xsl:output encoding="UTF-8" indent="yes" media-type="text/plain" method="text"/>
 	
+	<xsl:include href="../lib/ntriples.xsl"/>
+	
 	
 	
 	
@@ -66,8 +68,6 @@
 	</xsl:template>
 	
 	
-	
-	
 	<!-- Returns the first node in the triple, the subject. -->
 	<xsl:function name="rdf:subject" as="element()">
 		<xsl:param name="context" as="element(triple)"/>
@@ -102,7 +102,7 @@
 		
 		<xsl:choose>
 			<xsl:when test="if (string-length($language) gt 0) then matches($language, '[a-z]+(-[A-Z0-9]+)*') else true()">
-				<xsl:value-of select="concat('&quot;', $string, '&quot;', if (string-length($language) gt 0) then concat('@', $language) else '')"/>
+				<xsl:value-of select="concat('&quot;', nt:escape-string($string), '&quot;', if (string-length($language) gt 0) then concat('@', $language) else '')"/>
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid language code: ''', $language, ''''))"/>

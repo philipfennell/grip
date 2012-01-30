@@ -31,7 +31,9 @@ import module namespace sem = "http://marklogic.com/semantic"
 import module namespace trix = "http://www.w3.org/2004/03/trix/trix-1/"
 	at "/lib/lib-trix.xqy";
 
+declare namespace nt 	= "http://www.w3.org/TR/rdf-testcases/#ntriples";
 declare namespace rdf 	= "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+declare namespace ttl 	= "http://www.w3.org/TeamSubmission/turtle/";
 
 
 (:~
@@ -59,7 +61,6 @@ declare function gsp:select-graph-uri($default as xs:boolean, $graphURI as xs:st
 			$requestURI
 	else
 		$graphURI
-	
 }; 
 
 
@@ -70,24 +71,35 @@ declare function gsp:select-graph-uri($default as xs:boolean, $graphURI as xs:st
  : @param $graphContent the graph to be inserted.
  : @param $mediaType graph serialisation media-type.
  : @return element(graph)
- : @throws err:REQ003 - Unsupported Media Type.
+ : @throws err:REQ005 - Unsupported Media Type.
  :)
 declare function gsp:parse-graph($graphURI as xs:string, $graphContent as item()?, 
 		$mediaType as xs:string)
 				as element(trix:trix)
 {
 	(: 
-	 : One day there'll be some logic here that chooses from the input which 
-	 : transform to use. 
+	 : If it's a text based graph representation, take it as is, else if it's
+	 : XML then parse it as XML, otherwise it's not supported.
 	 :)
-	
-	typeswitch (xdmp:unquote($graphContent)/*) 
-		case element(rdf:RDF) 
-			return trix:rdf-xml-to-trix(xdmp:unquote($graphContent)/*, $graphURI)
-		case element(trix:trix) 
-			return trix:trix-set-graph-uri(xdmp:unquote($graphContent)/*, $graphURI)
-		default 
-			return error(xs:QName('err:REQ003'), concat('Unsupported Media Type: ', name($graphContent)))
+	let $source as element() := 
+		if (starts-with($mediaType, 'text/')) then 
+			<nt:RDF>{$graphContent}</nt:RDF>
+		else if (ends-with($mediaType, '+xml')) then 
+			xdmp:unquote($graphContent)/*
+		else
+			error(xs:QName('err:REQ005'), concat('Unsupported Media Type: ', $mediaType))
+	return
+		typeswitch ($source) 
+			case element(rdf:RDF) 
+				return trix:rdf-xml-to-trix($source, $graphURI)
+			case element(trix:trix) 
+				return trix:trix-set-graph-uri($source, $graphURI)
+			case element(nt:RDF) 
+				return trix:ntriples-to-trix($source, $graphURI)
+			(: case element(ttl:RDF) 
+				return trix:turtle-to-trix($source, $graphURI) :)
+			default 
+				return error(xs:QName('err:REQ005'), concat('Unsupported Media Type: ', name($source)))
 };
 
 

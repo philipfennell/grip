@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nt:RDF xmlns:nt="http://www.w3.org/TR/rdf-testcases/#ntriples"><![CDATA[<http://example.org/book/book7> <http://purl.org/dc/elements/1.1/date> "2001-07-21"^^<xs:date> .
+<http://example.org/book/book7> <http://purl.org/dc/elements/1.1/publisher> <http://live.dbpedia.org/page/Bloomsbury_Publishing> .
+<http://example.org/book/book7> <http://purl.org/dc/elements/1.1/creator> "J.K. Rowling"@en-GB .
+<http://example.org/book/book7> <http://purl.org/dc/elements/1.1/title> "Harry Potter and the Deathly Hallows" .
+<http://example.org/book/book7> <http://purl.org/dc/elements/1.1/abstract> "Some text that is \"quoted\" and should remain so." .
+<http://example.org/book/book7> <http://purl.org/dc/elements/1.1/abstract> "Some text that is\ttab\tdelimited." .
+<http://example.org/book/book7> <http://purl.org/dc/elements/1.1/abstract> "Some text that has an escaped \\ back-slash." .
+<http://example.org/book/book7> <http://purl.org/dc/elements/1.1/abstract> "Some text with a new-line\nand a carriage-return\r." .
+<http://example.org/book/book7> <http://purl.org/dc/elements/1.1/abstract> "Some sepecial character like \uFF77 or \u10FFFF." .
+<http://example.org/book/book7> <http://purl.org/dc/elements/1.1/abstract> "All \"together\" again \\ and \t again and \n again and \r again.." .]]></nt:RDF>

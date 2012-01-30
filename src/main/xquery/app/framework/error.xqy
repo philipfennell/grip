@@ -41,22 +41,22 @@ declare variable $reasonPhraseLUT as element() :=
 (:~ Internally generated exception mapping to HTTP resonse codes. :)
 declare variable $responseCodeLUT as element() := 
 	<err:lut>
-		<err:GSP001>{400}</err:GSP001>
-		<err:REQ001>{400}</err:REQ001>
-		<err:REQ002>{400}</err:REQ002>
-		<err:TX001>{400}</err:TX001>
-		<err:REQ003>{415}</err:REQ003>
-		<err:REQ004>{409}</err:REQ004>
+		<err:ENT001>{404}</err:ENT001>
 		<err:ENT002>{400}</err:ENT002>
 		<err:ENT003>{400}</err:ENT003>
-		<err:REQ003>{401}</err:REQ003>
-		<err:RES001>{404}</err:RES001>
-		<err:ENT001>{404}</err:ENT001>
+		<err:GSP001>{400}</err:GSP001>
 		<err:MOD001>{405}</err:MOD001>
+		<err:REQ001>{400}</err:REQ001>
+		<err:REQ002>{400}</err:REQ002>
+		<err:REQ003>{401}</err:REQ003>
+		<err:REQ004>{409}</err:REQ004>
+		<err:REQ005>{415}</err:REQ005>
 		<err:REP001>{406}</err:REP001>
+		<err:RES001>{404}</err:RES001>
 		<err:RES002>{500}</err:RES002>
-		<err:UPD002>{500}</err:UPD002>
 		<err:SYS001>{500}</err:SYS001>
+		<err:TX001>{400}</err:TX001>
+		<err:UPD002>{500}</err:UPD002>
 	</err:lut>;
 
 let $responseCode as xs:string? := $responseCodeLUT/*[fn:name() = ($error:errors//error:name)[1]]/text()

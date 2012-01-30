@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<trix xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+   <graph>
+      <uri>#default</uri>
+      <triple>
+         <uri>http://example.org/book/book7</uri>
+         <uri>http://purl.org/dc/elements/1.1/date</uri>
+         <typedLiteral datatype="http://www.w3.org/2001/XMLSchema#date">2001-07-21</typedLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/book/book7</uri>
+         <uri>http://purl.org/dc/elements/1.1/publisher</uri>
+         <uri>http://live.dbpedia.org/page/Bloomsbury_Publishing</uri>
+      </triple>
+      <triple>
+         <uri>http://example.org/book/book7</uri>
+         <uri>http://purl.org/dc/elements/1.1/creator</uri>
+         <plainLiteral xml:lang="en-GB">J.K. Rowling</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/book/book7</uri>
+         <uri>http://purl.org/dc/elements/1.1/title</uri>
+         <plainLiteral>Harry Potter and the Deathly Hallows</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/book/book7</uri>
+         <uri>http://purl.org/dc/elements/1.1/abstract</uri>
+         <plainLiteral>Some text that is "quoted" and should remain so.</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/book/book7</uri>
+         <uri>http://purl.org/dc/elements/1.1/abstract</uri>
+         <plainLiteral>Some text that is&#9;tab&#9;delimited.</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/book/book7</uri>
+         <uri>http://purl.org/dc/elements/1.1/abstract</uri>
+         <plainLiteral>Some text that has an escaped \ back-slash.</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/book/book7</uri>
+         <uri>http://purl.org/dc/elements/1.1/abstract</uri>
+         <plainLiteral>Some text with a new-line&#10;and a carriage-return&#13;.</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/book/book7</uri>
+         <uri>http://purl.org/dc/elements/1.1/abstract</uri>
+          <plainLiteral>Some sepecial character like &amp;#xFF77; or &amp;#x10FFFF;.</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/book/book7</uri>
+         <uri>http://purl.org/dc/elements/1.1/abstract</uri>
+         <plainLiteral>All "together" again \ and &#9; again and &#10; again and &#13; again..</plainLiteral>
+      </triple>
+   </graph>
+</trix>
