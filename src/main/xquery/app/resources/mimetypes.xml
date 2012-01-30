@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mimetypes xmlns="http://marklogic.com/xdmp/mimetypes">
+	<mimetype>
+		<name>text/html</name>
+		<extensions>html htm</extensions>
+		<format>text</format>
+	</mimetype>
+	<mimetype>
+		<name>text/plain</name>
+		<extensions>nt</extensions>
+		<format>text</format>
+	</mimetype>
+	<mimetype>
+		<name>text/turtle</name>
+		<extensions>ttl</extensions>
+		<format>text</format>
+	</mimetype>
+	<mimetype>
+		<name>application/rdf+xml</name>
+		<extensions>rdf</extensions>
+		<format>xml</format>
+	</mimetype>
+	<mimetype>
+		<name>application/sparql-result+xml</name>
+		<extensions>sr</extensions>
+		<format>xml</format>
+	</mimetype>
+	<mimetype>
+		<name>application/trix+xml</name>
+		<extensions>trix</extensions>
+		<format>xml</format>
+	</mimetype>
+	<mimetype>
+		<name>application/wadl+xml</name>
+		<extensions>wadl</extensions>
+		<format>xml</format>
+	</mimetype>
+	<mimetype>
+		<name>application/xml</name>
+		<extensions>xml</extensions>
+		<format>xml</format>
+	</mimetype>
+</mimetypes>
