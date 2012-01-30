@@ -32,14 +32,7 @@ declare namespace err = 		"http://www.marklogic.com/rig/error";
 declare namespace error = 		"http://marklogic.com/xdmp/error";
 declare namespace xhtml = 		"http://www.w3.org/1999/xhtml";
 
-declare variable $core:APP_PATH as xs:string := 'C:\Users\pfennell\Projects\SemanticWeb\grip\src\main\xquery\app\';
-declare variable $core:BASE_URI as xs:string := 'http://www.marklogic.com/rig';
-(:declare variable $core:COMPONENT_PATH as xs:string := '/system-files/presentation/components';:)
-declare variable $core:CONTENT_PATH as xs:string := '/content';
 declare variable $core:DEFAULT_CONTENT_TYPE as xs:string := 'application/rdf+xml';
-
-declare variable $core:UUID_VERSION as xs:unsignedLong := 3; 
-declare variable $core:UUID_RESERVED as xs:unsignedLong := 8;
 
 
 (:~
@@ -84,30 +77,6 @@ declare function core:handle-request($protocol as xs:string, $host as xs:string,
 								(if (string-length($requestParams) gt 0) then 
 										'&amp;' else ''), $requestParams)
 };
-
-
-(:~
- : Looks at the current appserver to see who the default user is. If it is 
- : 'application-level' then redirect to the log-on action 
- : otherwise assume that basic or digest authentication has handled the 
- : credentials and carry on with the request.
- : @param $requestURI the incoming request URI.
- : @return a request URI.
- :)
-(:declare function core:check-authentication-option($requestURI as xs:string) as xs:string 
-{
-	(
-		if (admin:appserver-get-default-user(admin:get-configuration(), xdmp:server()) = xdmp:user('eoi-admin')) then  
-			(
-				if (usermodule:check-login()) then 
-					xdmp:get-request-field('requri')
-				else
-					'/users/logon'
-			)
-		else
-			xdmp:get-request-field('requri')
-		)
-}; :)
 
 
 (:~
@@ -186,7 +155,7 @@ declare function core:error($name as xs:QName, $description as xs:string, $data 
 
 (:~
  : Rethrows an XQuery error.
- : @param $error	
+ : @param $error
  :)
 declare function core:rethrow-error($error as element(error:error))
 {
@@ -203,14 +172,16 @@ declare function core:rethrow-error($error as element(error:error))
 
 
 (:~
- :
+ : Generates an HTML representation of the HTTP request information.
+ : @param $action the XML action fragment created from request information.
+ : @return HTML document-node()
  :)
-declare function core:debug-page($moduleElement as element()) 
+declare function core:debug-page($action as element()) 
 		as document-node()
 { 
-	let $moduleNamespaceURI as xs:string := namespace-uri($moduleElement)
-	let $moduleURI as xs:string := concat(namespace-uri($moduleElement), '/', 
-			local-name($moduleElement), '.xqy')
+	let $moduleNamespaceURI as xs:string := namespace-uri($action)
+	let $moduleURI as xs:string := concat(namespace-uri($action), '/', 
+			local-name($action), '.xqy')
 	return
 document {<html xmlns="http://www.w3.org/1999/xhtml">
     <head>
@@ -222,7 +193,7 @@ document {<html xmlns="http://www.w3.org/1999/xhtml">
     	<p>Module URI: &lt;{$moduleURI}&gt;</p>
     	<p>Module External Variables: </p>
     	<ul>{
-    		for $ext in $moduleElement/* return
+    		for $ext in $action/* return
     			<li>{name($ext)} = {data($ext)}</li>
     	}</ul>
     	<p>Content-Type: '{core:choose-content-type(xdmp:get-request-field('ext'), xdmp:get-request-header('Accept'))}'</p>
@@ -268,7 +239,8 @@ declare function core:choose-content-type($ext as xs:string?, $accept as xs:stri
 
 (:~
  : Returns the 'preferred' content type from the passed Accept header string.
- : FireFoxtext/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+ : @param $accept the HTTP Accept header string sent by the client.
+ : @return xs:string
  :)
 declare function core:preferred-content-type($accept as xs:string?) 
 		as xs:string 
@@ -301,7 +273,7 @@ declare function core:preferred-content-type($accept as xs:string?)
  : ACCEPT header and the document's root element.
  : @param $instance 
  : @param $contentType
- : @return 
+ : @return item()
  :)
 declare function core:representation($instance as item()?, $contentType as xs:string) 
 		as item()?
@@ -338,32 +310,56 @@ declare function core:representation($instance as item()?, $contentType as xs:st
 
 
 (:~
- : Calculate the UUID and set the UUID property on the file.
- :
- : The layout of a UUID is as follows. 0 1 2 3 0 1 2 3 4 5 6 7 8 9 a b c d e f 0 1 2 3 4 5 6 7 8 9 a b c d e f +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ | time_low | +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ | time_mid | time_hi |version| +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ |clk_seq_hi |res| clk_seq_low | node (0-1) | +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ | node (2-5) | +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ 0 1 2 3 4 5 6 7 8 9 a b c d e f 0 1 2 3 4 5 6 7 8 9 a b c d e f
- : 
- : This implements version 3 of the UUID specification. 
- : The timestamp is a 60-bit value. 
- : The clock sequence is a 14 bit value. 
- : The node is a 48-bit name value. 
- :) 
-declare function core:generate-uuid($uri as xs:string) 
-		as xs:string 
-{ 
-	core:generate-uuid($uri, xdmp:host-name(xdmp:host())) 
-};
-
-declare function core:generate-uuid($uri as xs:string, $namespace as xs:string) 
-		as xs:string 
-{ 
-	(: calculate md5 with a dateTime for our random values :) 
-	let $hash := xdmp:md5(concat($uri, xs:string(current-dateTime()), $namespace)) 
-	return 
-		concat(
-			substring( $hash, 1, 15 ), 
-			(: set version bits :) xdmp:integer-to-hex($core:UUID_VERSION), 
-			(: set reserved bits :) substring( $hash, 17, 1 ), 
-			xdmp:integer-to-hex((xdmp:hex-to-integer(substring($hash, 18, 1)) idiv 4) + $core:UUID_RESERVED), 
-			substring( $hash, 19, 14 ) 
+ : Retrieve a document, realtive to the application root, whether it's on the 
+ : file-system or a Modules database.
+ : @param $uri the document's relative URI
+ : @return document-node()
+ :)
+declare function core:document-get($uri as xs:string)
+		as document-node()
+{
+	let $modulesDatabaseId as xs:unsignedLong := 
+		admin:appserver-get-modules-database(
+            admin:get-configuration(), 
+            xdmp:server()
+        )
+	
+	let $appRoot as xs:string := admin:appserver-get-root(admin:get-configuration(), xdmp:server())
+	
+	(: Remove any trailing / or \ before concatonating the appserver root URI to the document URI. :)
+	let $absoluteURI as xs:string := 
+		fn:concat(
+			(
+				if (fn:matches($appRoot, '(\\|/)$')) then 
+					fn:substring($appRoot, 1, (fn:string-length($appRoot) - 1))
+				else 
+					$appRoot
+			), 
+			$uri
 		)
-}; 
+	
+	(: If the URI contains '\', ensure all file separators ar '\'. :)
+	let $normalisedURI as xs:string := 
+		if (fn:contains($absoluteURI, '\')) then
+			fn:translate($absoluteURI, '/', '\')
+		else
+			$absoluteURI
+	let $doc as document-node()? := 
+		(: If the modules database id is 0 then it is the file system. :)
+		if ($modulesDatabaseId eq 0) then
+			xdmp:document-get($normalisedURI)
+		else
+			(: get documents from the modules database. :)
+			xdmp:eval(
+				fn:concat('fn:doc("', $normalisedURI, '")'),
+				(),
+				<options xmlns="xdmp:eval">
+					<database>{$modulesDatabaseId}</database>
+				</options>
+			)
+	return
+		if (fn:exists($doc)) then
+			$doc
+		else
+			fn:error(xs:QName('ERROR'), 'Failed to retrieve document.', $normalisedURI)
+};

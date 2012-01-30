@@ -26,19 +26,13 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 import module namespace core = "http://www.marklogic.com/rig/core" 
 		at "/framework/core.xqy";
 
-declare namespace mt 		= "http://marklogic.com/xdmp/mimetypes";
-declare namespace xf 		= "http://www.w3.org/2002/xforms";
-declare namespace xhtml 	= "http://www.w3.org/1999/xhtml";
-declare namespace atom 		= "http://www.w3.org/2005/Atom";
-declare namespace app 		= "http://www.w3.org/2007/app"; 
-declare namespace rdf 		= "http://www.w3.org/1999/02/22-rdf-syntax-ns#"; 
-declare namespace trix 		= "http://www.w3.org/2004/03/trix/trix-1/"; 
+declare namespace mt 		= "http://marklogic.com/xdmp/mimetypes"; 
 declare namespace wadl 		= "http://wadl.dev.java.net/2009/02"; 
 
 declare variable $service:MIME_TYPES as document-node() := 
-		xdmp:document-get('Data/mimetypes.xml');
+		core:document-get('/resources/config/mimetypes.xml');
 declare variable $service:DESCRIPTION as document-node() := 
-		xdmp:document-get(concat($core:APP_PATH, 'root/service.xml'));
+		core:document-get('/resources/config/service.xml');
 declare variable $service:BASE_URI as xs:string := 
 		$service:DESCRIPTION/wadl:application/wadl:resources/@base;
 declare variable $service:URI_TEMPLATES as xs:string* := 
@@ -78,8 +72,8 @@ declare function service:set-response($response as item()?, $contentType as xs:s
 	 : The logic in here is that if the result of an action is an xs:anyURI then 
 	 : it indicates the creation of a new resource which should be indicated by 
 	 : 201 (Created) and the URI put in the HTTP 'Location' response header.
-	 : Given that element() response that reaches this far has not, by 
-	 : definition, failed so the response should otherwise be 200 (Ok) unless 
+	 : Given that an element() response that reaches this far has not, by 
+	 : definition, failed so the response should be 200 (Ok) unless 
 	 : nothing was returned which should then be marked as 204 (No Content).
 	 :)
 	typeswitch ($response) 
@@ -87,12 +81,7 @@ declare function service:set-response($response as item()?, $contentType as xs:s
 		return 
 			(xdmp:set-response-code(201, 'Created'),
 			xdmp:add-response-header('Location', $response))
-		case element() 
-		return
-			(xdmp:set-response-content-type($contentType),
-			xdmp:set-response-code(200, 'Ok'),
-			$response)
-		case text() 
+		case node() 
 		return
 			(xdmp:set-response-content-type($contentType),
 			xdmp:set-response-code(200, 'Ok'),
@@ -108,36 +97,29 @@ declare function service:set-response($response as item()?, $contentType as xs:s
  : @param $response	the response document.
  : @return the response document. 
  :)
-declare function service:handle-response($response as item()?) 
+declare function service:handle-response($response as item()?, $contentType as xs:string) 
 		as item()?
 {
 	(
-		(: Need to update this to get the element/mime-type mappings from the service description. :)
 		typeswitch ($response)
-			case xs:anyURI return 
-					service:set-response($response, '')
-			case text() return 
-					service:set-response($response, 'text/plain')
-			case element(app:service) return
-					service:set-response($response, 'application/atomsvc+xml')
-			case element(app:categories) return
-					service:set-response($response, 'application/atomcat+xml')
-			case element(atom:feed) return
-					service:set-response($response, 'application/atom+xml')
-			case element(rdf:RDF) return
-					service:set-response($response, 'application/rdf+xml')
-			case element(trix:trix) return
-					service:set-response($response, 'application/xml')
-			case element(wadl:application) return
-					service:set-response($response, 'application/vnd.sun.wadl+xml')
-			case element(xhtml:html) return 
-					if (exists($response//xf:model)) then
-						service:set-response($response, 'application/xml')
-					else
-						(
-							'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
-							service:set-response($response/*, 'text/html')
-						)
+			(: 
+			 : If a URI was the result of an action then this implies a new 
+			 : resource has been created. There's no entity to return.
+			 :)
+			case xs:anyURI 
+			return 
+				service:set-response($response, '')
+				
+			(:
+			 : If a node, element() or text(), is the result of an action then 
+			 : there will be an enity returned in the response so pass the 
+			 : requested content type.
+			 :)
+			case node() 
+			return
+				service:set-response($response, $contentType)
+				
+			(: As a fallback return the response as plain text. :)
 			default return
 				service:set-response($response, 'text/plain')
 	)

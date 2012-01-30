@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mimetypes xmlns="http://marklogic.com/xdmp/mimetypes">
+<mimetypes xmlns="http://marklogic.com/xdmp/mimetypes"
+	 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="../schemas/mimetypes.xsd">
 	<mimetype>
 		<name>text/html</name>
 		<extensions>html htm</extensions>

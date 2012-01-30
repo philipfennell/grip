@@ -219,4 +219,4 @@ let $response as item()? :=
 let $debug := xdmp:log('[XQuery][GRIP] Response: &#10;', 'debug')
 let $debug := xdmp:log($response, 'debug')
 return 
-	service:handle-response($response)
+	service:handle-response($response, $contentType)

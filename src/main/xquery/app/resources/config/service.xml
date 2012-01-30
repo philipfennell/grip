@@ -9,7 +9,7 @@
 		xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://wadl.dev.java.net/2009/02 
-				../resources/schemas/wadl/wadl20090202.xsd">
+				../schemas/wadl/wadl20090202.xsd">
 	<doc>GRIP Graph Store Service Description.</doc>
 	
 	<grammars/>
@@ -38,12 +38,16 @@
 			<method name="POST">
 				<doc>Create a new graph</doc>
 				<request>
-					<param name="Slug" style="header" required="false" type="xs:string"/>
+					<param href="#slug"/>
+					<representation href="#rdf-xml"/>
+					<representation href="#trix"/>
+					<representation href="#ntriples"/>
 				</request>
-				<response status="201"/>
+				<response status="201">
+					<param href="#loaction"/>
+				</response>
 				<response status="409">
 					<doc>Report a conflict if the graph already exists.</doc>
-					<param name="Location" style="header" required="true" type="xs:string"/>
 				</response>
 			</method>
 		</resource>
@@ -79,6 +83,9 @@
 				<request>
 					<param href="#default"/>
 					<param href="#graph"/>
+					<representation href="#rdf-xml"/>
+					<representation href="#trix"/>
+					<representation href="#ntriples"/>
 				</request>
 				<response status="204"/>
 				<response status="404"/>
@@ -88,8 +95,13 @@
 				<request>
 					<param href="#default"/>
 					<param href="#graph"/>
+					<representation href="#rdf-xml"/>
+					<representation href="#trix"/>
+					<representation href="#ntriples"/>
 				</request>
-				<response status="201"/>
+				<response status="201">
+					<param href="#loaction"/>
+				</response>
 				<response status="204"/>
 				<response status="404"/>
 			</method>
@@ -113,6 +125,12 @@
 	</param>
 	<param id="graph" name="graph" required="false" style="query" type="xs:string">
 		<doc>URI encoded Named Graph URI</doc>
+	</param>
+	<param id="slug" name="Slug" required="false" style="header" type="xs:string">
+		<doc>Human readable title for graph that is used to derive the URI for a new graph.</doc>
+	</param>
+	<param id="loaction" name="Location" required="true" style="header" type="xs:string">
+		<doc>Location of a newly generated graph.</doc>
 	</param>
 	
 	<representation id="ntriples"	mediaType="text/plain"/>
