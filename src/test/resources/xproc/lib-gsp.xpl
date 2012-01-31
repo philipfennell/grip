@@ -347,7 +347,7 @@ limitations under the License.</p:documentation>
 		<p:option name="media-type" required="false" select="'application/rdf+xml'"/>
 		<p:option name="debug" required="false" select="'false'"/>
 		
-		<gsp:submission method="options">
+		<gsp:submission method="get">
 			<p:with-option name="request-uri" select="$uri"/>
 			<p:with-option name="media-type" select="$media-type"/>
 		</gsp:submission>

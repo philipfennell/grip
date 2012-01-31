@@ -14,19 +14,10 @@
 	
 	<grammars/>
 	
-	<resources base="http://www.grip.com">
+	<resources base="http://www.marklogic.com/grip">
 		
 		<resource path="/">
 			<doc>Service.</doc>
-			<method name="OPTIONS">
-				<doc>Retrieve the Graph Store's Service Description graph.</doc>
-				<request/>
-				<response status="200">
-					<representation href="#rdf-xml"/>
-					<representation href="#trix"/>
-					<representation href="#ntriples"/>
-				</response>
-			</method>
 			<method name="GET">
 				<doc>Retrieve the underlying Service Description (WADL).</doc>
 				<request/>
@@ -35,29 +26,12 @@
 					<representation href="#wadl"/>
 				</response>
 			</method>
-			<method name="POST">
-				<doc>Create a new graph</doc>
-				<request>
-					<param href="#slug"/>
-					<representation href="#rdf-xml"/>
-					<representation href="#trix"/>
-					<representation href="#ntriples"/>
-				</request>
-				<response status="201">
-					<param href="#loaction"/>
-				</response>
-				<response status="409">
-					<doc>Report a conflict if the graph already exists.</doc>
-				</response>
-			</method>
 		</resource>
 		
-		<resource path="/{PATH}">
-			<doc>This is a fallback resource. If no other URI pattern is matched then this one will.
-			It is intended that this resource will match any graph URI.</doc>
-			<param name="PATH" style="template" type="xs:string"/>
+		<resource path="/graphs">
+			<doc>Graphs collection.</doc>
 			<method name="HEAD">
-				<doc>Meta Information</doc>
+				<doc>Meta Information for the collection and/or default/named graph.</doc>
 				<request>
 					<param href="#default"/>
 					<param href="#graph"/>
@@ -66,7 +40,8 @@
 				<response status="404"/>
 			</method>
 			<method name="GET">
-				<doc>Retrieve Graph</doc>
+				<doc>Retrieve the Graph Store's Service Description graph or if 
+					you specify the default or named graph you retrieve that graph.</doc>
 				<request>
 					<param href="#default"/>
 					<param href="#graph"/>
@@ -79,19 +54,25 @@
 				<response status="404"/>
 			</method>
 			<method name="POST">
-				<doc>Merge Graph</doc>
+				<doc>Create a new graph or merge to the default/named graph.</doc>
 				<request>
+					<param href="#slug"/>
 					<param href="#default"/>
 					<param href="#graph"/>
 					<representation href="#rdf-xml"/>
 					<representation href="#trix"/>
 					<representation href="#ntriples"/>
 				</request>
+				<response status="201">
+					<param href="#loaction"/>
+				</response>
 				<response status="204"/>
-				<response status="404"/>
+				<response status="409">
+					<doc>Report a conflict if the proposed graph URI already exists.</doc>
+				</response>
 			</method>
 			<method name="PUT">
-				<doc>Insert/Replace Graph</doc>
+				<doc>Insert/Replace the default/named graph.</doc>
 				<request>
 					<param href="#default"/>
 					<param href="#graph"/>
@@ -103,14 +84,61 @@
 					<param href="#loaction"/>
 				</response>
 				<response status="204"/>
-				<response status="404"/>
 			</method>
 			<method name="DELETE">
-				<doc>Retrieve Graph</doc>
+				<doc>Delete the default/named graph.</doc>
 				<request>
 					<param href="#default"/>
 					<param href="#graph"/>
 				</request>
+				<response status="204"/>
+				<response status="404"/>
+			</method>
+		</resource>
+		
+		<resource path="/graphs/{NAME}">
+			<doc>Direct graph requests.</doc>
+			<param name="NAME" style="template" type="xs:string"/>
+			<method name="HEAD">
+				<doc>Meta Information for the context graph.</doc>
+				<response status="204"/>
+				<response status="404"/>
+			</method>
+			<method name="GET">
+				<doc>Retrieve the context graph.</doc>
+				<request/>
+				<response status="200">
+					<representation href="#rdf-xml"/>
+					<representation href="#trix"/>
+					<representation href="#ntriples"/>
+				</response>
+				<response status="404"/>
+			</method>
+			<method name="POST">
+				<doc>Merge to the context graph.</doc>
+				<request>
+					<representation href="#rdf-xml"/>
+					<representation href="#trix"/>
+					<representation href="#ntriples"/>
+				</request>
+				<response status="204"/>
+				<response status="404"/>
+			</method>
+			<method name="PUT">
+				<doc>Create/Replace the context graph.</doc>
+				<request>
+					<representation href="#rdf-xml"/>
+					<representation href="#trix"/>
+					<representation href="#ntriples"/>
+				</request>
+				<response status="201">
+					<param href="#loaction"/>
+				</response>
+				<response status="204"/>
+			</method>
+			<method name="DELETE">
+				<doc>Delete the context graph.</doc>
+				<request/>
 				<response status="204"/>
 				<response status="404"/>
 			</method>

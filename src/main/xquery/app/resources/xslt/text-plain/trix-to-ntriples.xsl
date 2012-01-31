@@ -2,7 +2,7 @@
 <xsl:transform 
 		xmlns:err="http://www.marklogic.com/rdf/error"
 		xmlns:gsp="http://www.w3.org/TR/sparql11-http-rdf-update/"
-		xmlns:nt="http://www.w3.org/TR/rdf-testcases/#ntriples"
+		xmlns:nt="http://www.w3.org/ns/formats/N-Triples"
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 		xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"

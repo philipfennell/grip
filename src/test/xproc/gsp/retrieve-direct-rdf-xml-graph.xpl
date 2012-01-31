@@ -17,7 +17,7 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:retrieve-graph uri="http://localhost:8005/test/data"/>
+	<gsp:retrieve-graph uri="http://localhost:8005/graphs/create-direct-graph-test"/>
 	
 	<test:validate-with-schematron assert-valid="true">
 		<p:input port="schema">
@@ -28,10 +28,10 @@
 		</p:input>
 	</test:validate-with-schematron>
 	
-	<!--<p:validate-with-relax-ng assert-valid="true">
+	<p:validate-with-relax-ng assert-valid="true">
 		<p:input port="source" select="/http:response/http:body/rdf:RDF"/>
 		<p:input port="schema">
 			<p:document href="test/resources/schemas/rdfxml.rng"/>
 		</p:input>
-	</p:validate-with-relax-ng>-->
+	</p:validate-with-relax-ng>
 </p:declare-step>

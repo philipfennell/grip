@@ -17,7 +17,7 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:retrieve-metainfo uri="http://localhost:8005/test/data"/>
+	<gsp:retrieve-metainfo uri="http://localhost:8005/graphs"/>
 	
 	<test:validate-with-schematron assert-valid="true">
 		<p:input port="schema">

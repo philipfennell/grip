@@ -7,12 +7,11 @@ xquery version "1.0-ml" encoding "utf-8";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
-import module namespace core = "http://www.marklogic.com/rig/core" 
-		at "/framework/core.xqy";
 import module namespace service = "http://www.marklogic.com/rig/service" 
 		at "/framework/service.xqy";
       
-import module namespace resource = "http://www.grip.com" at 
+import module namespace resource = "http://www.marklogic.com/grip" at 
 		"/root/resource.xqy";
 
-$service:DESCRIPTION
+
+$service:DESCRIPTION/*

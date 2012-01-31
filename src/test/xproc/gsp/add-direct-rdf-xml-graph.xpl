@@ -15,12 +15,12 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:add-graph name="test" uri="http://localhost:8005/test/data" 
+	<gsp:merge-graph name="test" uri="http://localhost:8005/graphs" slug="create direct graph test"
 			content-type="application-rdf+xml">
 		<p:input port="source">
 			<p:document href="test/resources/books.rdf"/>
 		</p:input>
-	</gsp:add-graph>
+	</gsp:merge-graph>
 	
 	<test:validate-with-schematron assert-valid="true">
 		<p:input port="schema">

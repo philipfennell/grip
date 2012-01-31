@@ -154,8 +154,7 @@ declare function local:dispatch($action as element())
 		if (data($error/error:code) = 'SVC-FILOPN') then 
 				core:error(
 					xs:QName('err:MOD001'), 
-					'Unsupported Module Invocation', 
-					(:namespace-uri($action):)
+					local-name($action), 
 					xdmp:quote($error)
 				)
 			else if (data($error/error:code) = 'SEC-PRIV') then

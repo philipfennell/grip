@@ -15,21 +15,21 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:add-graph debug="true" name="test" uri="http://localhost:8005/test/data" 
+	<gsp:merge-graph name="test" uri="http://localhost:8005/graphs" 
 			graph="http://www.books.com/harry-potter"
 			content-type="application/rdf+xml">
 		<p:input port="source">
 			<p:document href="test/resources/books.rdf"/>
 		</p:input>
-	</gsp:add-graph>
+	</gsp:merge-graph>
 	
-	<!--<test:validate-with-schematron assert-valid="true">
+	<test:validate-with-schematron assert-valid="true">
 		<p:input port="schema">
 			<p:document href="test/resources/schemas/successful-response.sch"/>
 		</p:input>
 		<p:input port="parameters">
 			<p:empty/>
 		</p:input>
-	</test:validate-with-schematron>-->
+	</test:validate-with-schematron>
 	
 </p:declare-step>

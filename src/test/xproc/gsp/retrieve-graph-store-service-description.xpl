@@ -17,7 +17,7 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:delete-graph uri="http://localhost:8005/graphs" default="true"/>
+	<gsp:retrieve-graph uri="http://localhost:8005/graphs"/>
 	
 	<test:validate-with-schematron assert-valid="false">
 		<p:input port="schema">

@@ -25,9 +25,9 @@ module namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
-declare namespace nt 	= "http://www.w3.org/TR/rdf-testcases/#ntriples";
+declare namespace nt 	= "http://www.w3.org/ns/formats/N-Triples";
 declare namespace rdf 	= "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-declare namespace ttl 	= "http://www.w3.org/TeamSubmission/turtle/";
+declare namespace ttl 	= "http://www.w3.org/ns/formats/Turtle";
 
 
 (:~

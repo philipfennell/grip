@@ -31,9 +31,9 @@ import module namespace sem = "http://marklogic.com/semantic"
 import module namespace trix = "http://www.w3.org/2004/03/trix/trix-1/"
 	at "/lib/lib-trix.xqy";
 
-declare namespace nt 	= "http://www.w3.org/TR/rdf-testcases/#ntriples";
+declare namespace nt 	= "http://www.w3.org/ns/formats/N-Triples";
 declare namespace rdf 	= "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-declare namespace ttl 	= "http://www.w3.org/TeamSubmission/turtle/";
+declare namespace ttl 	= "http://www.w3.org/ns/formats/Turtle";
 
 
 (:~
@@ -88,6 +88,7 @@ declare function gsp:parse-graph($graphURI as xs:string, $graphContent as item()
 			xdmp:unquote($graphContent)/*
 		else
 			error(xs:QName('err:REQ005'), concat('Unsupported Media Type: ', $mediaType))
+	let $info := xdmp:log(concat('[XQuery][GRIP] Parsing Graph: ', $graphURI, ' as ', $mediaType), 'info')
 	return
 		typeswitch ($source) 
 			case element(rdf:RDF) 
@@ -140,7 +141,7 @@ declare function gsp:get-graph($graphURI as xs:string)
 				}</graph>,
 				gsp:get-graph-namespace(doc($graphURI)/*))
 		else
-			error(xs:QName('err:RES001'), 'Graph Not Found', $graphURI)
+			gsp:graph-not-found($graphURI)
 };
 
 
@@ -359,6 +360,8 @@ declare function gsp:merge-graph($trix as element(trix:trix))
 {
 	let $graphURI as xs:string := string($trix/trix:graph/trix:uri)
 	let $info := xdmp:log(concat('[XQuery][GRIP] Merging Graph: ', $graphURI), 'info')
+	let $debug := xdmp:log('[XQuery][GRIP] Graph Content: ', 'fine')
+	let $debug := xdmp:log($trix, 'fine')
 	return
 		(: 
 		 : If the incoming graph already exists, add the triples and return
@@ -366,7 +369,7 @@ declare function gsp:merge-graph($trix as element(trix:trix))
 		 :)
 		( gsp:insert-graph($trix/trix:graph), 
 		gsp:merge-graph-docs($trix/trix:graph),
-		if (doc-available($graphURI)) then () else $graphURI )
+		if (doc-available($graphURI)) then () else xs:anyURI($graphURI) )
 };
 
 
@@ -454,7 +457,33 @@ declare function gsp:rq($qn as xs:QName+, $v as xs:string+)
 declare function gsp:create-new-uri($baseURI as xs:string, $slug as xs:string) 
 		as xs:string
 {
-	concat($baseURI, translate(normalize-space($slug), ' ', '-'))
+	concat($baseURI, if (ends-with($baseURI, '/')) then '' else '/', translate(normalize-space($slug), ' ', '-'))
+}; 
+
+
+(:~
+ : Check if a graph already exists for the passed graph URI.
+ : @param $graphURI the graph URI to be tested for.
+ : @return xs:boolean.
+ :)
+declare function gsp:graph-exists($graphURI as xs:string) 
+		as xs:boolean 
+{
+	if (doc-available($graphURI)) then 
+			true()
+		else
+			false()
+}; 
+
+
+(:~
+ : Throws an error because the graph URI does not exist.
+ : @param $graphURI the graph URI to be tested for.
+ : @throws err:RES001 - 'Graph Not Found'.
+ :)
+declare function gsp:graph-not-found($graphURI as xs:string) 
+{
+	error(xs:QName('err:RES001'), 'Graph Not Found', $graphURI)
 }; 
 
 

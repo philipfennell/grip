@@ -17,7 +17,7 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:retieve-service-description uri="http://localhost:8005/"/>
+	<gsp:retieve-service-description uri="http://localhost:8005/" media-type="application/xml"/>
 	
 	<test:validate-with-schematron assert-valid="false">
 		<p:input port="schema">
