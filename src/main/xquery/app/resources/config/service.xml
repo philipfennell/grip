@@ -10,7 +10,7 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://wadl.dev.java.net/2009/02 
 				../schemas/wadl/wadl20090202.xsd">
-	<doc>GRIP Graph Store Service Description.</doc>
+	<doc>GRIP: Graph Store Service Description.</doc>
 	
 	<grammars/>
 	

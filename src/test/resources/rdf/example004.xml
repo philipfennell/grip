@@ -6,7 +6,7 @@
 		<ex:editor>
 			<rdf:Description>
 				<ex:homePage>
-					<rdf:Description rdf:about="http://purl.org/net/dajobe/"> </rdf:Description>
+					<rdf:Description rdf:about="http://purl.org/net/dajobe/"/> 
 				</ex:homePage>
 			</rdf:Description>
 		</ex:editor>
