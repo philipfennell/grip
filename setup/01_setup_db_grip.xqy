@@ -110,4 +110,4 @@ let $config := admin:database-set-directory-creation($config, $dbid, "manual")
  (: let $config := admin:database-set-journaling($config, $dbid, "fast") :)
  (: let $config := admin:database-set-preallocate-journals($config, $dbid, fn:false()) :)
 
-return admin:save-configuration($config)
+return admin:save-configuration($config), true()

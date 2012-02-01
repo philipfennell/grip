@@ -15,14 +15,15 @@ let $group as xs:string := "Default"
 let $modulesDb as xs:string := "file-system"
 let $contentDb as xs:string := "grip"
 let $httpServer as xs:string := "8005-GRIP-HTTP"
+let $root as xs:string := "/grip/src/main/xquery/app"
 let $httpPort as xs:integer := 8005
 let $defaultUser as xs:string := "admin"
   
-let $userId := xdmp:user($defaultUser)  
+let $userId := try {xdmp:user($defaultUser)} catch ($error) {concat('User: ''', $defaultUser, ''', does not exist')}  
 let $config := admin:get-configuration()
 let $groupid := xdmp:group($group)
 let $config := admin:http-server-create($config, $groupid, $httpServer, 
-        "C:\Users\pfennell\Projects\SemanticWeb\grip\src\main\xquery\app", $httpPort, 
+        $root, $httpPort, 
         		$modulesDb, xdmp:database($contentDb))  
 let $config := admin:appserver-set-url-rewriter($config,
          admin:appserver-get-id($config, $groupid, $httpServer),
@@ -54,12 +55,13 @@ let $group as xs:string := "Default"
 let $modulesDb as xs:string := "file-system"
 let $contentDb as xs:string := "grip"
 let $xdbcServer as xs:string := "8006-GRIP-XDBC"
+let $root as xs:string := "/grip/src/main/xquery/app"
 let $xdbcPort as xs:integer := 8006
 let $defaultUser as xs:string := "admin"
   
 let $config := admin:get-configuration()
 let $groupid := admin:group-get-id($config, $group)  
 let $config := admin:xdbc-server-create($config, $groupid, $xdbcServer, 
-        "C:\Users\pfennell\Projects\SemanticWeb\grip\src\main\xquery\app", $xdbcPort, 
+        $root, $xdbcPort, 
         		$modulesDb, xdmp:database($contentDb))
-return admin:save-configuration($config)
+return admin:save-configuration($config), true()
