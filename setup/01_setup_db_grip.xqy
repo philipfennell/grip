@@ -12,7 +12,7 @@ xquery version "1.0-ml";
 import module namespace admin = "http://marklogic.com/xdmp/admin" at 
 		"/MarkLogic/admin.xqy";
 let $contentForest1 as xs:string := "grip"
-let $contentForestDir as xs:string := "D:\Data\MarkLogic\grip"
+let $contentForestDir as xs:string? := ()
 let $config :=   admin:forest-create(admin:get-configuration(), 
 		$contentForest1, xdmp:host(),$contentForestDir)
 return admin:save-configuration($config);
