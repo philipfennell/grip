@@ -215,7 +215,7 @@ let $response as item()? :=
 		local:dispatch($action)
 	else
 		core:representation(local:dispatch($action), $contentType)
-let $debug := xdmp:log('[XQuery][GRIP] Response: &#10;', 'debug')
+let $debug := xdmp:log('[XQuery][GRIP] Response:', 'debug')
 let $debug := xdmp:log($response, 'debug')
 return 
 	service:handle-response($response, $contentType)

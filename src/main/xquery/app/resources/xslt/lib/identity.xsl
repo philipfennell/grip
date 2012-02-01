@@ -15,7 +15,7 @@
 	</xsl:template>
 	
 	
-	<xsl:template match="/*">
+	<xsl:template match="*">
 		<xsl:copy-of select="processing-instruction() | ."/>
 	</xsl:template>
 </xsl:transform>

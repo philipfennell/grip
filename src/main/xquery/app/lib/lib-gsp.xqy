@@ -392,7 +392,7 @@ declare function gsp:get-service-description($requestURI as xs:string)
       xmlns:void="http://rdfs.org/ns/void#"
       xmlns:xs="http://www.w3.org/2001/XMLSchema#">
    <graph>
-      <uri>#default</uri>
+      <uri/>
       <triple>
          <id>d1e2</id>
          <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</uri>
