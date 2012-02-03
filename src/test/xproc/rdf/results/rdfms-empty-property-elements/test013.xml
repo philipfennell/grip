@@ -1,0 +1,27 @@
+<c:result xmlns:c="http://www.w3.org/ns/xproc-step">
+   <trix xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+      <graph>
+         <uri>#default</uri>
+         <triple>
+            <uri>http://random.ioctl.org/#bar</uri>
+            <uri>http://random.ioctl.org/#someProperty</uri>
+            <uri>http://random.ioctl.org/#foo</uri>
+         </triple>
+         <triple>
+            <uri>http://random.ioctl.org/#foo</uri>
+            <uri>http://random.ioctl.org/#prop2</uri>
+            <plainLiteral>baz</plainLiteral>
+         </triple>
+      </graph>
+   </trix>
+   <trix xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+      <graph>
+         <uri>#default</uri>
+         <triple>
+            <uri>http://random.ioctl.org/#bar</uri>
+            <uri>http://random.ioctl.org/#someProperty</uri>
+            <uri>http://random.ioctl.org/#foo</uri>
+         </triple>
+      </graph>
+   </trix>
+</c:result>

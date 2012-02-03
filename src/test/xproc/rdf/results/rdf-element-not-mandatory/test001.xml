@@ -1,0 +1,17 @@
+<c:result xmlns:c="http://www.w3.org/ns/xproc-step">
+   <trix xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+      <graph>
+         <uri>#default</uri>
+         <triple>
+            <id/>
+            <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</uri>
+            <uri>http://example.org/terms#Book</uri>
+         </triple>
+         <triple>
+            <id/>
+            <uri>http://example.org/terms#title</uri>
+            <plainLiteral>Dogs in Hats</plainLiteral>
+         </triple>
+      </graph>
+   </trix>
+</c:result>
