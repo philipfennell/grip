@@ -102,6 +102,14 @@
 	
 	
 	<!-- Expand property attributes into property elements. -->
+	<xsl:template match="@rdf:type" mode="rdf:property-attributes">
+		<xsl:element name="{name()}" namespace="{namespace-uri()}">
+			<xsl:attribute name="rdf:resource" select="."/>
+		</xsl:element>
+	</xsl:template>
+	
+	
+	<!-- Expand property attributes into property elements. -->
 	<xsl:template match="@*" mode="rdf:property-attributes">
 		<xsl:element name="{name()}" namespace="{namespace-uri()}">
 			<xsl:value-of select="."/>
