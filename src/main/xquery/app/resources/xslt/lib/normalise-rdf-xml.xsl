@@ -14,14 +14,17 @@
 	
 	<!-- Normalises RDF/XML into some form of canonical representation. -->
 	
+	<xsl:param name="BASE_URI" as="xs:string" select="base-uri(/*)"/>
 	
-	<xsl:template match="/">
-		<xsl:apply-templates select="*"/>
+	
+	<!-- Document root. -->
+	<xsl:template match="/" priority="2">
+		<xsl:apply-templates select="*" mode="rdf"/>
 	</xsl:template>
-		
+	
 	
 	<!-- The RDF root. -->
-	<xsl:template match="rdf:RDF">
+	<xsl:template match="/rdf:RDF" mode="rdf" priority="1">
 		<xsl:copy>
 			<xsl:copy-of select="@* except (@xml:base)"/>
 			<xsl:apply-templates select="*" mode="rdf:node-elements"/>
@@ -29,28 +32,67 @@
 	</xsl:template>
 	
 	
+	<!-- Root element that's not rdf:RDF. -->
+	<xsl:template match="/*" mode="rdf">
+		<rdf:RDF>
+			<xsl:apply-templates select="." mode="rdf:node-elements"/>
+		</rdf:RDF>
+	</xsl:template>
+	
+	
 	<!-- Node Elements. -->
-	<xsl:template match="rdf:Description" mode="rdf:node-elements">
+	<xsl:template match="rdf:Description" mode="rdf:node-elements" priority="1">
 		<xsl:copy>
 			<xsl:copy-of select="(rdf:resolve-uri-reference((@rdf:about|@rdf:ID)), rdf:generate-node-id-attr(..))[1]"/>
 			<xsl:apply-templates select="@* except (@rdf:*, @xml:*)" mode="rdf:property-attributes"/>
 			<xsl:apply-templates select="*" mode="rdf:property-elements"/>
-			<xsl:apply-templates select="*[element()]" mode="rdf:node-element-refs"/>
+			<xsl:apply-templates select="*[element()][not(@rdf:parseType = 'Literal')]" mode="rdf:node-element-refs"/>
 		</xsl:copy>
 		<xsl:apply-templates select="*[element()]" mode="rdf:referred-node-element"/>
 	</xsl:template>
 	
 	
-	<!-- Typed Element Nodes. -->
-	<xsl:template match="*[prefix-from-QName(resolve-QName(name(), .)) ne 'rdf']" mode="rdf:node-elements">
+	<!-- Node Elements with no child Node ELements. -->
+	<xsl:template match="rdf:Description[not(*)]" mode="rdf:node-elements" priority="2">
+		<xsl:copy>
+			<xsl:copy-of select="(rdf:resolve-uri-reference((@rdf:about|@rdf:ID)), rdf:generate-node-id-attr(..))[1]"/>
+			<xsl:copy-of select="@xml:*"/>
+			<xsl:apply-templates select="@* except (@rdf:about, @rdf:ID, @rdf:ID, @xml:*)" mode="rdf:property-attributes"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	
+	<!-- Other elements in the RDF namespace that aren't rdf:Description. -->
+	<xsl:template match="rdf:*" mode="rdf:node-elements">
 		<xsl:param name="nodeIDAttr" as="attribute()?">
 			<xsl:attribute name="nodeID" select="generate-id(..)"/>
 		</xsl:param>
 		
 		<rdf:Description>
-			<!--<xsl:attribute name="rdf:nodeID" select="(@rdf:about, @rdf:nodeID, $nodeID)[1]"></xsl:attribute>-->
 			<xsl:copy-of select="(rdf:resolve-uri-reference((@rdf:about|@rdf:ID)), $nodeIDAttr)[1]"/>
-			<rdf:type rdf:resource="{concat(namespace-uri-from-QName(resolve-QName(name(), .)), local-name())}"/>
+			<xsl:if test="not(../*[@rdf:parseType eq 'Resource'])">
+				<rdf:type rdf:resource="{concat(namespace-uri-from-QName(resolve-QName(name(), .)), local-name())}"/>
+			</xsl:if>
+			<xsl:apply-templates select="@* except (@rdf:*, @xml:*)" mode="rdf:property-attributes"/>
+			<xsl:apply-templates select="*" mode="rdf:property-elements"/>
+			<xsl:apply-templates select="*[element()]" mode="rdf:node-element-refs"/>
+		</rdf:Description>
+		<xsl:apply-templates select="*[element()]" mode="rdf:referred-node-element"/>
+	</xsl:template>
+	
+	
+	<!-- Typed Element Nodes. -->
+	<!-- <xsl:template match="*[prefix-from-QName(resolve-QName(name(), .)) ne 'rdf']" mode="rdf:node-elements"> -->
+	<xsl:template match="*[namespace-uri-from-QName(resolve-QName(name(), .)) ne 'http://www.w3.org/1999/02/22-rdf-syntax-ns#']" mode="rdf:node-elements">
+		<xsl:param name="nodeIDAttr" as="attribute()?">
+			<xsl:attribute name="rdf:nodeID" select="generate-id(..)"/>
+		</xsl:param>
+		
+		<rdf:Description>
+			<xsl:copy-of select="(rdf:resolve-uri-reference((@rdf:about|@rdf:ID)), $nodeIDAttr)[1]"/>
+			<xsl:if test="not(../*[@rdf:parseType eq 'Resource'])">
+				<rdf:type rdf:resource="{concat(namespace-uri-from-QName(resolve-QName(name(), .)), local-name())}"/>
+			</xsl:if>
 			<xsl:apply-templates select="@* except (@rdf:*, @xml:*)" mode="rdf:property-attributes"/>
 			<xsl:apply-templates select="*" mode="rdf:property-elements"/>
 			<xsl:apply-templates select="*[element()]" mode="rdf:node-element-refs"/>
@@ -70,8 +112,16 @@
 	<!-- Resource References -->
 	<xsl:template match="*[@rdf:resource]" mode="rdf:property-elements" priority="1">
 		<xsl:copy>
-			<!--<xsl:attribute name="rdf:resource" select="rdf:resolve-uri(@rdf:resource)"/>-->
 			<xsl:copy-of select="rdf:resolve-uri-reference(@rdf:resource)"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	
+	<!-- XML Literals. -->
+	<xsl:template match="*[@rdf:parseType = 'Literal'][element()]" mode="rdf:property-elements" priority="1">
+		<xsl:copy>
+			<xsl:apply-templates select="@*" mode="rdf:literal-attributes"/>
+			<xsl:copy-of select="*"/>
 		</xsl:copy>
 	</xsl:template>
 	
@@ -155,7 +205,7 @@
 		 if no @xml:base can be found. -->
 	<xsl:function name="rdf:resolve-uri" as="xs:string">
 		<xsl:param name="uriAttr" as="attribute()"/>
-		<xsl:variable name="baseURI" as="xs:anyURI" select="($uriAttr/ancestor-or-self::*[@xml:base][1]/@xml:base, static-base-uri())[1]"/>
+		<xsl:variable name="baseURI" as="xs:anyURI" select="xs:anyURI(($uriAttr/ancestor-or-self::*[@xml:base][1]/@xml:base, $BASE_URI)[1])"/>
 		
 		<xsl:choose>
 			<!-- Deal with fragment identifiers. -->
@@ -218,13 +268,13 @@
 	
 	<!-- Throw an exception for invalid/unsupported parse types. -->
 	<xsl:template match="*[@rdf:parseType and not(@rdf:parseType = ('Resource', 'Literal'))]" mode="#all" priority="10">
-		<xsl:copy-of select="error(xs:QName('err:TX001'), concat('Unsupported Parse Type: ''', @rdf:parseType, ''''), ())"/>
+		<xsl:message>[XSLT] <xsl:value-of select="concat('Unsupported Parse Type: ''', @rdf:parseType, '''')"/></xsl:message>
 	</xsl:template>
 	
 	
 	<!-- Throw an error if rdf:Bag, rdf:Seq, rdf:Alt, rdf:Statement, rdf:Property or rdf:List are present. -->
-	<xsl:template match="rdf:Bag | rdf:Seq | rdf:Alt | rdf:Statement | rdf:Property | rdf:List" mode="#all" priority="10">
-		<xsl:copy-of select="error(xs:QName('err:TX001'), 'Graphs using rdf:Bag, rdf:Seq, rdf:Alt, rdf:Statement, rdf:Property or rdf:List are not, currently, supported.')"/>
+	<xsl:template match="rdf:Bag | rdf:Seq | rdf:Alt | rdf:Statement | rdf:List" mode="#all" priority="10">
+		<xsl:message>[XSLT] <xsl:value-of select="'Graphs using rdf:Bag, rdf:Seq, rdf:Alt, rdf:Statement, rdf:Property or rdf:List are not, currently, supported.'"/></xsl:message>
 	</xsl:template>
 	
 </xsl:transform>

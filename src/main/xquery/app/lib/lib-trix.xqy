@@ -79,10 +79,10 @@ declare function trix:parse-reference($ref as element())
 	typeswitch ($ref) 
   	case $subject as element(trix:id) 
   	return 
-  		if (starts-with(string($subject), '_:')) then 
+  		if (starts-with(string($subject), '_:A')) then 
   			string($subject) 
   		else 
-  			concat('_:', string($subject))
+  			concat('_:A', string($subject))
  	default 
  	return 
  		string($ref)
@@ -101,7 +101,7 @@ declare function trix:rdf-xml-to-trix($rdf as element(rdf:RDF), $graphURI as xs:
 	let $params := map:map()
 	let $_put := map:put($params, 'GRAPH_URI', $graphURI)
 	return
-		xdmp:xslt-invoke('/resources/xslt/lib/rdf-xml-to-trix.xsl', $rdf, $params)/*
+		xdmp:xslt-invoke('/resources/xslt/lib/rdf-xml-to-trix.xsl', document {$rdf}, $params)/*
 };
 
 

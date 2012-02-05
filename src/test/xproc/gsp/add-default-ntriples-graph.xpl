@@ -15,7 +15,7 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:add-graph name="test" uri="http://localhost:8005/test/data" 
+	<gsp:add-graph name="test" uri="http://localhost:8005/graphs" 
 			default="true" content-type="text/plain">
 		<p:input port="source">
 			<p:inline exclude-inline-prefixes="#all"><c:body content-type="text/plain"><![CDATA[_:A265d1842X3aX1351f697243X3aXX2dX7ffe <http://www.w3.org/2001/vcard-rdf/3.0#N> _:A265d1842X3aX1351f697243X3aXX2dX7ffd .

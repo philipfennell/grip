@@ -43,18 +43,18 @@
 	
 	
 	<!--  -->
-	<xsl:template name="trix:triple" as="element(trix:triple)">
+	<xsl:template name="trix:triple"><!-- as="element(trix:triple)"-->
 		<xsl:variable name="tripleLine" as="xs:string" select="normalize-space(current())"/>
 		
 		
 		
-		<triple>
+		
 			<xsl:analyze-string select="$tripleLine" regex="{concat('(', nt:match-node-id(), '|', nt:match-uriref(), ')', nt:match-ws('+'), 
 																	'(', nt:match-uriref(), ')', nt:match-ws('+'),
 																	'(', nt:match-node-id(), '|', nt:match-uriref(), '|', nt:match-datatype-string(), '|', nt:match-lang-string(), ')',
 																	nt:match-ws('*'), '\.')}">
 				<xsl:matching-substring>
-					
+					<triple>
 					<!-- Subject. -->
 					<xsl:choose>
 						<xsl:when test="matches(regex-group(1), nt:match-node-id())">
@@ -103,14 +103,14 @@
 							<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Object: ', regex-group(5)))"/>
 						</xsl:otherwise>
 					</xsl:choose>
+						</triple>
 				</xsl:matching-substring>
 				<xsl:non-matching-substring>
-					
-					<xsl:message>[XSLT] Invalid Triple: <xsl:value-of select="."/></xsl:message>
-					<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Triple: ', .))"/>
+					<!--<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Triple: ', .))"/>-->
 				</xsl:non-matching-substring>
+				
 			</xsl:analyze-string>
-		</triple>
+		
 	</xsl:template>
 	
 	

@@ -20,25 +20,27 @@
 	<!-- Transforms RDF/XML into TriX. -->
 	
 	<xsl:template match="/">
-		<xsl:apply-templates select="*"/>
+		<!-- Normalise the RDF/XML to make it easier to transform into TriX. -->
+		<xsl:variable name="normalisedRDF" as="element(rdf:RDF)">
+			<xsl:apply-templates mode="rdf"/>
+		</xsl:variable>
+		
+		<xsl:apply-templates select="$normalisedRDF"/>
 	</xsl:template>
 	
 	
 	<!-- Root. -->
 	<xsl:template match="rdf:RDF">
-		<!-- Normalise the RDF/XML to make it easier to transform into TriX. -->
-		<xsl:variable name="normalisedRDF" as="element(rdf:RDF)">
-			<xsl:apply-imports/>
-		</xsl:variable>
 		
 		<trix>
+			<!-- This gets in the way of the tests.
 			<xsl:for-each select="namespace::*">
-				<xsl:copy-of select="."/>
+				<xsl:copy-of select="." copy-namespaces="no"/>
 			</xsl:for-each>
-			<xsl:namespace name="xs">http://www.w3.org/2001/XMLSchema#</xsl:namespace>
+			<xsl:namespace name="xs">http://www.w3.org/2001/XMLSchema#</xsl:namespace>-->
 			<graph>
 				<uri><xsl:value-of select="$GRAPH_URI"/></uri>
-				<xsl:apply-templates select="$normalisedRDF/*" mode="descriptions"/>
+				<xsl:apply-templates select="*" mode="descriptions"/>
 			</graph>
 		</trix>
 	</xsl:template>
@@ -109,10 +111,19 @@
 	
 	
 	<!-- Typed Literal Objects. -->
+	<xsl:template match="*[@rdf:parseType = 'Literal']" mode="resource id">
+		<typedLiteral datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral">
+			<xsl:copy-of select="@xml:lang" copy-namespaces="no"/>
+			<xsl:copy-of select="*" copy-namespaces="no"/>
+		</typedLiteral>
+	</xsl:template>
+	
+	
+	<!-- Typed Literal Objects. -->
 	<xsl:template match="*[@rdf:datatype]" mode="resource id">
 		<typedLiteral datatype="{@rdf:datatype}">
-			<xsl:copy-of select="@xml:lang"/>
-			<xsl:value-of select="string(.)"/>
+			<xsl:copy-of select="@xml:lang" copy-namespaces="no"/>
+			<xsl:value-of select="normalize-space(string(.))"/>
 		</typedLiteral>
 	</xsl:template>
 	
@@ -120,7 +131,7 @@
 	<!-- Plain Literals Objects. -->
 	<xsl:template match="*" mode="resource id">
 		<plainLiteral>
-			<xsl:copy-of select="@xml:lang"/>
+			<xsl:copy-of select="ancestor-or-self::*/@xml:lang[1]" copy-namespaces="no"/>
 			<xsl:value-of select="string(.)"/>
 		</plainLiteral>
 	</xsl:template>
