@@ -105,10 +105,9 @@
 					</xsl:choose>
 						</triple>
 				</xsl:matching-substring>
-				<xsl:non-matching-substring>
-					<!--<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Triple: ', .))"/>-->
-				</xsl:non-matching-substring>
-				
+				<xsl:non-matching-substring/>
+					<!--<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Triple: ', .))"/>
+				</xsl:non-matching-substring>-->
 			</xsl:analyze-string>
 		
 	</xsl:template>
@@ -219,5 +218,27 @@
 		<xsl:analyze-string select="$string" regex="{nt:match-lang-code()}">
 			<xsl:matching-substring><xsl:value-of select="substring-after(., '@')"/></xsl:matching-substring>
 		</xsl:analyze-string>
+	</xsl:function>
+	
+	
+	<!--  -->
+	<xsl:function name="nt:hex2num">
+		<xsl:param name="hexstr" />
+		<xsl:variable name="head" select="substring( $hexstr, 1, string-length( $hexstr ) - 1 )"/>
+		<xsl:variable name="nybble" select="substring( $hexstr, string-length( $hexstr ) )"/>
+		<xsl:choose>
+			<xsl:when test="string-length( $hexstr ) = 0">
+				<xsl:value-of select="0" />
+			</xsl:when>
+			<xsl:when test="string( number( $nybble ) ) = 'NaN'">
+				<xsl:value-of select="
+					nt:hex2num( $head ) * 16
+					+ number( concat( 1, translate( $nybble, 'ABCDEF', '012345' ) ) )
+					"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="nt:hex2num( $head ) * 16 + number( $nybble )" />
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:function>
 </xsl:transform>

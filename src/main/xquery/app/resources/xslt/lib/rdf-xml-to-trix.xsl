@@ -104,6 +104,12 @@
 	</xsl:template>
 	
 	
+	<!-- ID Objects.
+	<xsl:template match="*[@rdf:parseType eq 'Resource']" mode="resource id">
+		<id><xsl:value-of select="@rdf:nodeID"/></id>
+	</xsl:template> -->
+	
+	
 	<!-- Resource Objects. -->
 	<xsl:template match="*[@rdf:resource]" mode="resource id">
 		<uri><xsl:value-of select="@rdf:resource"/></uri>

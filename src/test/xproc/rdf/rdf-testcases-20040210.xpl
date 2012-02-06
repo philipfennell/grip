@@ -68,7 +68,16 @@
 				<p:empty/>
 			</p:input>
 		</p:xslt>
-		<p:string-replace name="expected" match="//trix:id/text()" replace="''"/>
+		<p:string-replace match="//trix:id/text()" replace="''"/>
+		<p:xslt name="expected">
+			<p:documentation>Convert to Canonical TriX.</p:documentation>
+			<p:input port="stylesheet">
+				<p:document href="../../../main/xquery/app/resources/xslt/lib/canonical-trix.xsl"/>
+			</p:input>
+			<p:input port="parameters">
+				<p:empty/>
+			</p:input>
+		</p:xslt>
 		
 		<p:xslt>
 			<p:documentation>Transform the test's source into TriX.</p:documentation>
@@ -83,7 +92,16 @@
 			</p:input>
 			<p:with-param name="BASE_URI" select="$testURI"/>
 		</p:xslt>
-		<p:string-replace name="actual" match="//trix:id/text()" replace="''"/>
+		<p:string-replace match="//trix:id/text()" replace="''"/>
+		<p:xslt name="actual">
+			<p:documentation>Convert to Canonical TriX.</p:documentation>
+			<p:input port="stylesheet">
+				<p:document href="../../../main/xquery/app/resources/xslt/lib/canonical-trix.xsl"/>
+			</p:input>
+			<p:input port="parameters">
+				<p:empty/>
+			</p:input>
+		</p:xslt>
 		
 		<p:wrap-sequence wrapper="c:result">
 			<p:input port="source">
@@ -167,4 +185,7 @@
 	</p:for-each>
 	
 	<p:wrap-sequence wrapper="c:results"/>
+	<p:add-attribute match="/c:results" attribute-name="successes">
+		<p:with-option name="attribute-value" select="count(/c:results/c:success)"/>
+	</p:add-attribute>
 </p:declare-step>

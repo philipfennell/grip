@@ -17,7 +17,7 @@
 		<xsl:output-character character="&#9;" string="&amp;#9;"/>
 		<xsl:output-character character="&#10;" string="&amp;#10;"/>
 		<xsl:output-character character="&#13;" string="&amp;#13;"/>
-		<!--<xsl:output-character character="&amp;" string="&amp;"/>-->
+		<xsl:output-character character="&amp;" string="&amp;"/>
 	</xsl:character-map>
 	
 	
