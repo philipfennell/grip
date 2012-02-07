@@ -17,7 +17,6 @@
 		<xsl:output-character character="&#9;" string="&amp;#9;"/>
 		<xsl:output-character character="&#10;" string="&amp;#10;"/>
 		<xsl:output-character character="&#13;" string="&amp;#13;"/>
-		<xsl:output-character character="&amp;" string="&amp;"/>
 	</xsl:character-map>
 	
 	
@@ -55,7 +54,7 @@
 						<xsl:non-matching-substring><xsl:value-of select="."/></xsl:non-matching-substring>
 					</xsl:analyze-string>
 				</xsl:variable>
-				<xsl:value-of select="string-join($result, '')"/>
+				<xsl:value-of select="nt:escape-non-ascii(string-join($result, ''))"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:function>
@@ -113,5 +112,59 @@
 		<xsl:param name="sequence" as="item()*"/>
 		
 		<xsl:sequence select="subsequence($sequence, 2)"/>
+	</xsl:function>
+	
+	
+	<xsl:function name="nt:escape-non-ascii" as="xs:string">
+		<xsl:param name="unescapedString" as="xs:string?"/>
+		
+		<xsl:value-of select="nt:escape-non-ascii($unescapedString, '')"/>
+	</xsl:function>
+	
+	
+	<!-- Wrapper for recursive function that applies \u character escaping to non-ASCII characters. -->
+	<xsl:function name="nt:escape-non-ascii" as="xs:string">
+		<xsl:param name="unescapedString" as="xs:string?"/>
+		<xsl:param name="escapedString" as="xs:string?"/>
+		<xsl:variable name="head" as="xs:string?" select="substring($unescapedString, 1, 1)"/>
+		<xsl:variable name="tail" as="xs:string?" select="substring($unescapedString, 2)"/>
+		
+		<xsl:choose>
+			<xsl:when test="$head">
+				<xsl:value-of select="nt:escape-non-ascii($tail, concat($escapedString, nt:escape-character($head)))"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="$escapedString"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:function>
+	
+	
+	<!-- Apply \u escaping to the passed character if it's in the xF7 - xFFFC range. -->
+	<xsl:function name="nt:escape-character" as="xs:string?">
+		<xsl:param name="char" as="xs:string?"/>
+		<xsl:variable name="charCode" as="xs:integer" select="string-to-codepoints($char)"/>
+		<xsl:value-of select="
+			if ($charCode = (for $n in 127 to 65533 return $n)) then 
+				concat('\u', nt:int-to-hex($charCode))
+			else
+				$char"/>
+	</xsl:function>
+	
+	
+	<!-- Converts an xs:integer to a hexadecimal string.
+		 Curtosy of M. Kay. -->
+	<xsl:function name="nt:int-to-hex" as="xs:string">
+		<xsl:param name="in" as="xs:integer"/>
+		
+		<xsl:sequence select="
+			if ($in eq 0) then 
+				'0' 
+			else concat(
+				if ($in gt 16) then 
+					nt:int-to-hex($in idiv 16) 
+				else 
+					'',
+           		substring('0123456789ABCDEF', ($in mod 16) + 1, 1))"/>
 	</xsl:function>
 </xsl:transform>

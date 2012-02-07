@@ -4,6 +4,7 @@
 		xmlns:gsp="http://www.w3.org/TR/sparql11-http-rdf-update/"
 		xmlns:nt="http://www.w3.org/ns/formats/N-Triples"
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:saxon="http://saxon.sf.net/"
 		xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 		exclude-result-prefixes="#all"
@@ -12,7 +13,9 @@
 	
 	<xsl:strip-space elements="*"/>
 	
-	<xsl:output encoding="UTF-8" indent="yes" media-type="text/plain" method="text"/>
+	<xsl:output encoding="ASCII" indent="yes" media-type="text/plain" method="text"/>
+	<xsl:output name="escaped-xml" encoding="ASCII" indent="no" 
+			media-type="application/xml" method="xml" omit-xml-declaration="yes"/>
 	
 	<xsl:include href="../lib/ntriples.xsl"/>
 	
@@ -64,7 +67,19 @@
 	
 	
 	<xsl:template match="typedLiteral" mode="ntriples">
-		<xsl:value-of select="nt:datatype-string(string(), @datatype)"/>
+		<xsl:choose>
+			<xsl:when test="ends-with(@datatype, '#XMLLiteral')">
+				<xsl:value-of use-when="system-property('xsl:product-name') eq 'SAXON'"
+						select="nt:datatype-string(substring-after(substring-before(nt:escape-string(saxon:serialize(., 'escaped-xml')), '&lt;/typedLiteral&gt;'), '&gt;'), @datatype)" />
+				<!--<xsl:value-of use-when="system-property('xsl:product-name') eq 'SAXON'"
+						select="nt:escape-string(saxon:serialize(., 'escaped-xml'))" />-->
+				<xsl:copy-of use-when="system-property('xsl:product-name') ne 'SAXON'"
+						select="(* | text())"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="nt:datatype-string(string(), @datatype)"/>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 	
 	

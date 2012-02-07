@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<trix xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+   <graph>
+      <uri>#default</uri>
+      <triple>
+         <uri>http://example.org/resource1</uri>
+         <uri>http://example.org/property</uri>
+         <uri>http://example.org/resource2</uri>
+      </triple>
+      <triple>
+         <id>anon</id>
+         <uri>http://example.org/property</uri>
+         <uri>http://example.org/resource2</uri>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource2</uri>
+         <uri>http://example.org/property</uri>
+         <id>anon</id>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource3</uri>
+         <uri>http://example.org/property</uri>
+         <uri>http://example.org/resource2</uri>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource4</uri>
+         <uri>http://example.org/property</uri>
+         <uri>http://example.org/resource2</uri>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource5</uri>
+         <uri>http://example.org/property</uri>
+         <uri>http://example.org/resource2</uri>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource6</uri>
+         <uri>http://example.org/property</uri>
+         <uri>http://example.org/resource2</uri>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource7</uri>
+         <uri>http://example.org/property</uri>
+         <plainLiteral>simple literal</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource8</uri>
+         <uri>http://example.org/property</uri>
+         <plainLiteral>backslash:\</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource9</uri>
+         <uri>http://example.org/property</uri>
+         <plainLiteral>dquote:"</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource10</uri>
+         <uri>http://example.org/property</uri>
+         <plainLiteral>newline:&#10;</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource11</uri>
+         <uri>http://example.org/property</uri>
+         <plainLiteral>return&#13;</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource12</uri>
+         <uri>http://example.org/property</uri>
+         <plainLiteral>tab:&#9;</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource13</uri>
+         <uri>http://example.org/property</uri>
+         <uri>http://example.org/resource2</uri>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource14</uri>
+         <uri>http://example.org/property</uri>
+         <plainLiteral>x</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource15</uri>
+         <uri>http://example.org/property</uri>
+         <id>anon</id>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource16</uri>
+         <uri>http://example.org/property</uri>
+         <plainLiteral>&#x00E9;</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource17</uri>
+         <uri>http://example.org/property</uri>
+         <plainLiteral>&#x20AC;</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource21</uri>
+         <uri>http://example.org/property</uri>
+         <typedLiteral datatype="http://www.w3.org/2000/01/rdf-schema#XMLLiteral"/>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource22</uri>
+         <uri>http://example.org/property</uri>
+         <typedLiteral datatype="http://www.w3.org/2000/01/rdf-schema#XMLLiteral"> </typedLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource23</uri>
+         <uri>http://example.org/property</uri>
+         <typedLiteral datatype="http://www.w3.org/2000/01/rdf-schema#XMLLiteral">x</typedLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource23</uri>
+         <uri>http://example.org/property</uri>
+         <typedLiteral datatype="http://www.w3.org/2000/01/rdf-schema#XMLLiteral">"</typedLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource24</uri>
+         <uri>http://example.org/property</uri>
+         <typedLiteral datatype="http://www.w3.org/2000/01/rdf-schema#XMLLiteral"><a xmlns=""/></typedLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource25</uri>
+         <uri>http://example.org/property</uri>
+         <typedLiteral datatype="http://www.w3.org/2000/01/rdf-schema#XMLLiteral">a <b xmlns=""/></typedLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource26</uri>
+         <uri>http://example.org/property</uri>
+         <typedLiteral datatype="http://www.w3.org/2000/01/rdf-schema#XMLLiteral">a <b xmlns=""/> c</typedLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource26</uri>
+         <uri>http://example.org/property</uri>
+         <typedLiteral datatype="http://www.w3.org/2000/01/rdf-schema#XMLLiteral">a&#10;<b xmlns=""/>&#10;c</typedLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource27</uri>
+         <uri>http://example.org/property</uri>
+         <typedLiteral datatype="http://www.w3.org/2000/01/rdf-schema#XMLLiteral">chat</typedLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource30</uri>
+         <uri>http://example.org/property</uri>
+         <plainLiteral xml:lang="fr">chat</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource31</uri>
+         <uri>http://example.org/property</uri>
+         <plainLiteral xml:lang="en">chat</plainLiteral>
+      </triple>
+      <triple>
+         <uri>http://example.org/resource32</uri>
+         <uri>http://example.org/property</uri>
+         <typedLiteral datatype="http://example.org/datatype1">abc</typedLiteral>
+      </triple>
+   </graph>
+</trix>
+
