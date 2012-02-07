@@ -5,6 +5,7 @@
 		xmlns:gsp="http://www.w3.org/TR/sparql11-http-rdf-update/"
 		xmlns:nt="http://www.w3.org/ns/formats/N-Triples"
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:saxon="http://saxon.sf.net/"
 		xmlns:trix="http://www.w3.org/2004/03/trix/trix-1/"
 		xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -44,7 +45,7 @@
 	
 	<!--  -->
 	<xsl:template name="trix:triple"><!-- as="element(trix:triple)"-->
-		<xsl:variable name="tripleLine" as="xs:string" select="normalize-space(current())"/>
+		<xsl:variable name="tripleLine" as="xs:string" select="current()"/>
 		
 		
 		
@@ -82,7 +83,16 @@
 					<xsl:choose>
 						<xsl:when test="matches(regex-group(5), nt:match-datatype-string())">
 							<typedLiteral datatype="{nt:get-datatype(regex-group(5))}">
-								<xsl:value-of select="nt:get-data-value(regex-group(5))"/>
+								<xsl:choose>
+									<!-- XML Literals. -->
+									<xsl:when test="ends-with(nt:get-datatype(regex-group(5)), '#XMLLiteral')">
+										<xsl:copy-of select="saxon:parse(concat('&lt;_XMLLiteral xmlns=''http://www.w3.org/2004/03/trix/trix-1/''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/_XMLLiteral&gt;'))/trix:_XMLLiteral/(* | text())"/>
+									</xsl:when>
+									<!-- Other Typed Literals. -->
+									<xsl:otherwise>
+										<xsl:value-of select="nt:get-data-value(regex-group(5))"/>
+									</xsl:otherwise>
+								</xsl:choose>
 							</typedLiteral>
 						</xsl:when>
 						<xsl:when test="matches(regex-group(5), nt:match-lang-string())">
@@ -189,8 +199,9 @@
 	<!-- Returns the value from the object. -->
 	<xsl:function name="nt:get-data-value" as="xs:string">
 		<xsl:param name="string" as="xs:string"/>
+		<xsl:variable name="value" as="xs:string?" select="substring-before($string, '^^')"/>
 		
-		<xsl:value-of select="replace(substring-before($string, '^^'), '&quot;', '')"/>
+		<xsl:value-of select="substring($value, 2, string-length($value) - 2)"/>
 	</xsl:function>
 	
 	

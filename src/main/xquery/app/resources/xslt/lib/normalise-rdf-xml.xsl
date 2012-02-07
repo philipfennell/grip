@@ -62,7 +62,6 @@
 			<xsl:copy-of select="$subjectAttr"/>
 			<xsl:apply-templates select="@* except (@rdf:*, @xml:*)" mode="rdf:property-attributes"/>
 			<xsl:apply-templates select="*" mode="rdf:property-elements"/>
-			<!--<xsl:apply-templates select="*[element()]" mode="rdf:node-element-refs"/>-->
 		</xsl:copy>
 		<xsl:apply-templates select="*[element()]" mode="rdf:referred-node-element"/>
 		<xsl:apply-templates select="*" mode="rdf:reify-if-required">
@@ -87,7 +86,6 @@
 			</xsl:if>
 			<xsl:apply-templates select="@* except (@rdf:*, @xml:*)" mode="rdf:property-attributes"/>
 			<xsl:apply-templates select="*" mode="rdf:property-elements"/>
-			<!--<xsl:apply-templates select="*[element()] | *[@rdf:parseType = 'Resource']" mode="rdf:node-element-refs"/>-->
 		</rdf:Description>
 		<xsl:apply-templates select="*[element()]" mode="rdf:referred-node-element"/>
 		<xsl:apply-templates select="*" mode="rdf:reify-if-required">
@@ -111,7 +109,6 @@
 			</xsl:if>
 			<xsl:apply-templates select="@* except (@rdf:*, @xml:*)" mode="rdf:property-attributes"/>
 			<xsl:apply-templates select="*" mode="rdf:property-elements"/>
-			<!--<xsl:apply-templates select="*[element()]" mode="rdf:node-element-refs"/>-->
 		</rdf:Description>
 		<xsl:apply-templates select="*[element()]" mode="rdf:referred-node-element"/>
 		<xsl:apply-templates select="*" mode="rdf:reify-if-required">
@@ -155,7 +152,7 @@
 	<xsl:template match="*[@rdf:parseType = 'Literal'][element()]" mode="rdf:property-elements" priority="2">
 		<xsl:copy>
 			<xsl:apply-templates select="@*" mode="rdf:literal-attributes"/>
-			<xsl:copy-of select="*"/>
+			<xsl:copy-of select="* | text()" copy-namespaces="yes"/>
 		</xsl:copy>
 	</xsl:template>
 	
@@ -186,10 +183,6 @@
 			<xsl:value-of select="."/>
 		</xsl:copy>
 	</xsl:template>
-	
-	
-	<!-- Don't automaically descend the tree in this mode. -->
-	<!--<xsl:template match="*[element()]" mode="rdf:property-elements"/>-->
 	
 	
 	<!-- Property Elements with Property Attributes. -->
@@ -273,31 +266,9 @@
 	</xsl:template>
 	
 	
-	<!-- Generate reference to a Typed Node Element. -->
-	<!--<xsl:template match="*[element()]" mode="rdf:node-element-refs">
-		<xsl:copy>
-			<xsl:attribute name="rdf:nodeID" select="generate-id()"/>
-		</xsl:copy>
-	</xsl:template>-->
-	
-	
-	<!-- Another 'special case' - what would have been a node-element reference 
-		 where it not for the presence of the child rdf:Description. -->
-	<!--<xsl:template match="*[rdf:Description[@rdf:nodeID]]" mode="rdf:node-element-refs" priority="2">
-		<xsl:copy>
-			<!-\-<xsl:attribute name="rdf:nodeID" select="''"/>-\->
-			<xsl:copy-of select="rdf:Description/@rdf:nodeID"/>
-		</xsl:copy>
-	</xsl:template>-->
-	
-	
-	<!-- Special case - what would have been a node-element reference where it 
-		 not for the presence of the child rdf:Description. -->
-	<!--<xsl:template match="*[rdf:Description]" mode="rdf:node-element-refs" priority="1">
-		<xsl:copy>
-			<xsl:attribute name="rdf:resource" select="rdf:Description/@rdf:about"/>
-		</xsl:copy>
-	</xsl:template>-->
+	<!-- Prevent processing of XML Literals as RDF/XML. -->
+	<xsl:template match="*[@rdf:parseType eq 'Literal']" mode="rdf:referred-node-element" priority="2"/>
+		
 	
 	
 	<!--  -->
@@ -309,12 +280,6 @@
 			</xsl:with-param>
 		</xsl:apply-templates>
 	</xsl:template>
-	
-	
-	 <!-- 
-	<xsl:template match="*[rdf:Description]" mode="rdf:referred-node-element">
-		<xsl:apply-templates select="*[element()]" mode="rdf:node-elements"/>
-	</xsl:template>  -->
 	
 	
 	<!-- Suppress unwanted text nodes. -->

@@ -3,6 +3,7 @@
 		xmlns="http://www.w3.org/2004/03/trix/trix-1/"
 		xmlns:err="http://www.marklogic.com/rig/error"
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:saxon="http://saxon.sf.net/"
 		xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 		exclude-result-prefixes="#all"
