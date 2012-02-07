@@ -193,7 +193,7 @@
 	
 	
 	<!-- Property Elements with Property Attributes. -->
-	<xsl:template match="*[@*[contains(name(), ':')]][not(@xml:* | @rdf:datatype | @rdf:nodeID)]" mode="rdf:property-elements-property-attributes">
+	<xsl:template match="*[@*[contains(name(), ':')]][not(@xml:* | @rdf:datatype | @rdf:nodeID | @rdf:parseType)]" mode="rdf:property-elements-property-attributes">
 		<rdf:Description>
 			<xsl:choose>
 				<xsl:when test="@rdf:resource">
