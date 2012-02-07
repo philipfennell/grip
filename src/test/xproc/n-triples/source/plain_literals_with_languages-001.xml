@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nt:RDF xmlns:nt="http://www.w3.org/ns/formats/N-Triples"><![CDATA[<http://example.org/resource30> <http://example.org/property> "chat"@fr .
+<http://example.org/resource31> <http://example.org/property> "chat"@en .]]></nt:RDF>

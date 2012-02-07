@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nt:RDF xmlns:nt="http://www.w3.org/ns/formats/N-Triples"><![CDATA[<http://example.org/resource4> <http://example.org/property> <http://example.org/resource2> .
+]]></nt:RDF>
