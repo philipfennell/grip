@@ -68,7 +68,6 @@
 				<p:empty/>
 			</p:input>
 		</p:xslt>
-		<!--<p:string-replace match="//trix:id/text()" replace="''"/>-->
 		<p:xslt name="expected">
 			<p:documentation>Convert to Canonical TriX.</p:documentation>
 			<p:input port="stylesheet">
@@ -92,7 +91,6 @@
 			</p:input>
 			<p:with-param name="BASE_URI" select="$testURI"/>
 		</p:xslt>
-		<!--<p:string-replace match="//trix:id/text()" replace="''"/>-->
 		<p:xslt name="actual">
 			<p:documentation>Convert to Canonical TriX.</p:documentation>
 			<p:input port="stylesheet">

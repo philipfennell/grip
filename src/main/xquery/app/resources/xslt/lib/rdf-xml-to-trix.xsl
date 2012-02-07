@@ -119,8 +119,8 @@
 	<!-- Typed Literal Objects. -->
 	<xsl:template match="*[@rdf:parseType = 'Literal']" mode="resource id">
 		<typedLiteral datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral">
-			<xsl:copy-of select="@xml:lang" copy-namespaces="no"/>
-			<xsl:copy-of select="*" copy-namespaces="no"/>
+			<!--<xsl:copy-of select="@xml:lang" copy-namespaces="no"/>-->
+			<xsl:copy-of select="* | text()" copy-namespaces="no"/>
 		</typedLiteral>
 	</xsl:template>
 	
@@ -128,7 +128,6 @@
 	<!-- Typed Literal Objects. -->
 	<xsl:template match="*[@rdf:datatype]" mode="resource id">
 		<typedLiteral datatype="{@rdf:datatype}">
-			<xsl:copy-of select="@xml:lang" copy-namespaces="no"/>
 			<xsl:value-of select="normalize-space(string(.))"/>
 		</typedLiteral>
 	</xsl:template>

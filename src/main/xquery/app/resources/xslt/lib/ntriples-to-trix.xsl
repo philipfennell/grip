@@ -115,7 +115,7 @@
 	
 	<!-- Match Typed Literal. -->
 	<xsl:function name="nt:match-datatype-string" as="xs:string">
-		<xsl:value-of select="'&quot;.*&quot;\^\^&lt;xs:\w+&gt;'"/>
+		<xsl:value-of select="'&quot;.*&quot;\^\^&lt;.*\w+&gt;'"/>
 	</xsl:function>
 	
 	
