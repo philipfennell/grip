@@ -68,7 +68,7 @@
 				<p:empty/>
 			</p:input>
 		</p:xslt>
-		<p:string-replace match="//trix:id/text()" replace="''"/>
+		<!--<p:string-replace match="//trix:id/text()" replace="''"/>-->
 		<p:xslt name="expected">
 			<p:documentation>Convert to Canonical TriX.</p:documentation>
 			<p:input port="stylesheet">
@@ -92,7 +92,7 @@
 			</p:input>
 			<p:with-param name="BASE_URI" select="$testURI"/>
 		</p:xslt>
-		<p:string-replace match="//trix:id/text()" replace="''"/>
+		<!--<p:string-replace match="//trix:id/text()" replace="''"/>-->
 		<p:xslt name="actual">
 			<p:documentation>Convert to Canonical TriX.</p:documentation>
 			<p:input port="stylesheet">
@@ -118,12 +118,12 @@
 			<p:when test="not(exists(/c:result/trix:trix[1]/trix:graph/trix:triple))">
 				<p:identity>
 					<p:input port="source">
-						<p:inline exclude-inline-prefixes="#all"><c:no-source-triples/></p:inline>
+						<p:inline exclude-inline-prefixes="#all"><c:test success="false">No Source Triples</c:test></p:inline>
 					</p:input>
 				</p:identity>
-				<cx:message>
-					<p:with-option name="message" select="concat('[XProc][Failed]  ', $testName, ' - No Source Triples')"/>
-				</cx:message>
+				<p:add-attribute match="/c:*" attribute-name="uri">
+					<p:with-option name="attribute-value" select="$testName"/>
+				</p:add-attribute>
 			</p:when>
 			<p:when test="exists(/c:result/trix:trix[2]/trix:graph/trix:triple)">
 				<p:try>
@@ -135,40 +135,38 @@
 						
 						<p:identity>
 							<p:input port="source">
-								<p:inline exclude-inline-prefixes="#all"><c:success/></p:inline>
+								<p:inline exclude-inline-prefixes="#all"><c:test success="true"/></p:inline>
 							</p:input>
 						</p:identity>
-						<cx:message>
-							<p:with-option name="message" select="concat('[XProc][Success] ', $testName)"/>
-						</cx:message>
+						<p:add-attribute match="/c:*" attribute-name="uri">
+							<p:with-option name="attribute-value" select="$testName"/>
+						</p:add-attribute>
 					</p:group>
 					<p:catch>
 						<p:identity>
 							<p:input port="source">
-								<p:inline exclude-inline-prefixes="#all"><c:failed/></p:inline>
+								<p:inline exclude-inline-prefixes="#all"><c:test success="false">Unknown</c:test></p:inline>
 							</p:input>
 						</p:identity>
-						<cx:message>
-							<p:with-option name="message" select="concat('[XProc][Failed]  ', $testName)"/>
-						</cx:message>
+						<p:add-attribute match="/c:*" attribute-name="uri">
+							<p:with-option name="attribute-value" select="$testName"/>
+						</p:add-attribute>
 					</p:catch>
 				</p:try>
 			</p:when>
 			<p:otherwise>
 				<p:identity>
 					<p:input port="source">
-						<p:inline exclude-inline-prefixes="#all"><c:no-result-triples/></p:inline>
+						<p:inline exclude-inline-prefixes="#all"><c:test success="false">No Result Triples</c:test></p:inline>
 					</p:input>
 				</p:identity>
-				<cx:message>
-					<p:with-option name="message" select="concat('[XProc][Failed]  ', $testName, ' - No Result Triples')"/>
-				</cx:message>
+				<p:add-attribute match="/c:*" attribute-name="uri">
+					<p:with-option name="attribute-value" select="$testName"/>
+				</p:add-attribute>
 			</p:otherwise>
 		</p:choose>
 		
 		<p:identity name="result"/>
-		
-		
 		
 		<p:store encoding="UTF-8" indent="true" media-type="application/xml" method="xml">
 			<p:input port="source">
@@ -186,6 +184,21 @@
 	
 	<p:wrap-sequence wrapper="c:results"/>
 	<p:add-attribute match="/c:results" attribute-name="successes">
-		<p:with-option name="attribute-value" select="count(/c:results/c:success)"/>
+		<p:with-option name="attribute-value" select="count(/c:results/c:test[xs:boolean(@success) = true()])"/>
 	</p:add-attribute>
+	<p:add-attribute match="/c:results" attribute-name="success-rate">
+		<p:with-option name="attribute-value" select="concat(string((count(/c:results/c:test[xs:boolean(@success) = true()]) div count(/c:results/c:test)) * 100), '%')"/>
+	</p:add-attribute>
+	
+	<p:identity name="report"/>
+	
+	<p:store encoding="UTF-8" indent="true" media-type="application/xml" method="xml">
+		<p:with-option name="href" select="concat('./results/results_', translate(substring-before(string(current-time()), '.'), ':', '-'), '.xml')"/>
+	</p:store>
+	
+	<p:identity>
+		<p:input port="source">
+			<p:pipe port="result" step="report"/>
+		</p:input>
+	</p:identity>
 </p:declare-step>

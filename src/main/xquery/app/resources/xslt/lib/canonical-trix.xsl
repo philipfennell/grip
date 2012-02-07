@@ -25,8 +25,22 @@
 			<xsl:apply-templates select="triple" mode="#current">
 				<!-- Sort triples by the predicate URI. -->
 				<xsl:sort select="string(*[2])"/>
+				<xsl:with-param name="idLUT" as="element()" tunnel="yes">
+					<ids xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+						<xsl:for-each select="distinct-values(descendant::id)">
+							<id xmlns="http://www.w3.org/2004/03/trix/trix-1/" 
+									value="{.}" replacement="{concat('A', string(position()))}"/>
+						</xsl:for-each>
+					</ids>
+				</xsl:with-param>
 			</xsl:apply-templates>
 		</xsl:copy>
+	</xsl:template>
+	
+	
+	<xsl:template match="id" mode="canon">
+		<xsl:param name="idLUT" as="element()" tunnel="yes"/>
+		<xsl:copy><xsl:value-of select="$idLUT/id[@value eq string(current())]/@replacement"/></xsl:copy>
 	</xsl:template>
 	
 	

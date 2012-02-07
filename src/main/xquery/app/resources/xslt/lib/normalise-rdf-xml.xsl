@@ -7,14 +7,16 @@
 		exclude-result-prefixes="#all"
 		version="2.0">
 	
+	
+	<!-- Normalises RDF/XML into some form of canonical representation. -->
+	
 	<xsl:strip-space elements="*"/>
 	
 	<xsl:output encoding="UTF-8" indent="yes" media-type="application/rdf+xml" method="xml"/>
 	
-	
-	<!-- Normalises RDF/XML into some form of canonical representation. -->
-	
 	<xsl:param name="BASE_URI" as="xs:string" select="base-uri(/*)"/>
+	
+	
 	
 	
 	<!-- Document root. -->
@@ -40,31 +42,33 @@
 	</xsl:template>
 	
 	
-	<!-- Node Elements. -->
-	<xsl:template match="rdf:Description" mode="rdf:node-elements" priority="1">
-		<xsl:variable name="subjectAttr" as="attribute()" 
-				select="(rdf:resolve-uri-reference((@rdf:about|@rdf:ID)), rdf:generate-node-id-attr(..))[1]"/>
-		
-		<xsl:copy>
-			<xsl:copy-of select="$subjectAttr"/>
-			<xsl:apply-templates select="@* except (@rdf:*, @xml:*)" mode="rdf:property-attributes"/>
-			<xsl:apply-templates select="*" mode="rdf:property-elements"/>
-			<xsl:apply-templates select="*[element()][not(@rdf:parseType eq 'Literal')]" mode="rdf:node-element-refs"/>
-		</xsl:copy>
-		<xsl:apply-templates select="*[element()]" mode="rdf:referred-node-element"/>
-		<xsl:apply-templates select="*" mode="rdf:reify-if-required">
-			<xsl:with-param name="subjectURI" as="xs:string" select="string($subjectAttr)"/>
-		</xsl:apply-templates>
-	</xsl:template>
-	
-	
 	<!-- Node Elements with no child Node ELements. -->
 	<xsl:template match="rdf:Description[not(*)]" mode="rdf:node-elements" priority="2">
 		<xsl:copy>
 			<xsl:copy-of select="(rdf:resolve-uri-reference((@rdf:about|@rdf:ID)), rdf:generate-node-id-attr(..))[1]"/>
 			<xsl:copy-of select="@xml:*"/>
-			<xsl:apply-templates select="@* except (@rdf:about, @rdf:ID, @rdf:ID, @xml:*)" mode="rdf:property-attributes"/>
+			<xsl:apply-templates select="@* except (@rdf:about, @rdf:ID, @rdf:nodeID, @xml:*)" mode="rdf:property-attributes"/>
 		</xsl:copy>
+	</xsl:template>
+	
+	
+	<!-- Node Elements. -->
+	<xsl:template match="rdf:Description" mode="rdf:node-elements" priority="1">
+		<xsl:param name="nodeIDAttr" as="attribute()?" select="@rdf:nodeID"/>
+		<xsl:variable name="subjectAttr" as="attribute()" 
+				select="(rdf:resolve-uri-reference((@rdf:about | @rdf:ID)), $nodeIDAttr, rdf:generate-node-id-attr(.))[1]"/>
+		
+		<xsl:copy>
+			<xsl:copy-of select="$subjectAttr"/>
+			<xsl:apply-templates select="@* except (@rdf:*, @xml:*)" mode="rdf:property-attributes"/>
+			<xsl:apply-templates select="*" mode="rdf:property-elements"/>
+			<!--<xsl:apply-templates select="*[element()]" mode="rdf:node-element-refs"/>-->
+		</xsl:copy>
+		<xsl:apply-templates select="*[element()]" mode="rdf:referred-node-element"/>
+		<xsl:apply-templates select="*" mode="rdf:reify-if-required">
+			<xsl:with-param name="subjectAttr" as="attribute()" select="$subjectAttr"/>
+		</xsl:apply-templates>
+		<xsl:apply-templates select="*" mode="rdf:property-elements-property-attributes"/>
 	</xsl:template>
 	
 	
@@ -83,17 +87,16 @@
 			</xsl:if>
 			<xsl:apply-templates select="@* except (@rdf:*, @xml:*)" mode="rdf:property-attributes"/>
 			<xsl:apply-templates select="*" mode="rdf:property-elements"/>
-			<xsl:apply-templates select="*[element()] | *[@rdf:parseType = 'Resource']" mode="rdf:node-element-refs"/>
+			<!--<xsl:apply-templates select="*[element()] | *[@rdf:parseType = 'Resource']" mode="rdf:node-element-refs"/>-->
 		</rdf:Description>
 		<xsl:apply-templates select="*[element()]" mode="rdf:referred-node-element"/>
 		<xsl:apply-templates select="*" mode="rdf:reify-if-required">
-			<xsl:with-param name="subjectURI" as="xs:string" select="string($subjectAttr)"/>
+			<xsl:with-param name="subjectAttr" as="attribute()" select="$subjectAttr"/>
 		</xsl:apply-templates>
 	</xsl:template>
 	
 	
 	<!-- Typed Element Nodes. -->
-	<!-- <xsl:template match="*[prefix-from-QName(resolve-QName(name(), .)) ne 'rdf']" mode="rdf:node-elements"> -->
 	<xsl:template match="*[namespace-uri-from-QName(resolve-QName(name(), .)) ne 'http://www.w3.org/1999/02/22-rdf-syntax-ns#']" mode="rdf:node-elements">
 		<xsl:param name="nodeIDAttr" as="attribute()?">
 			<xsl:attribute name="rdf:nodeID" select="generate-id(..)"/>
@@ -108,11 +111,11 @@
 			</xsl:if>
 			<xsl:apply-templates select="@* except (@rdf:*, @xml:*)" mode="rdf:property-attributes"/>
 			<xsl:apply-templates select="*" mode="rdf:property-elements"/>
-			<xsl:apply-templates select="*[element()]" mode="rdf:node-element-refs"/>
+			<!--<xsl:apply-templates select="*[element()]" mode="rdf:node-element-refs"/>-->
 		</rdf:Description>
 		<xsl:apply-templates select="*[element()]" mode="rdf:referred-node-element"/>
 		<xsl:apply-templates select="*" mode="rdf:reify-if-required">
-			<xsl:with-param name="subjectURI" as="xs:string" select="string($subjectAttr)"/>
+			<xsl:with-param name="subjectAttr" as="attribute()" select="$subjectAttr"/>
 		</xsl:apply-templates>
 	</xsl:template>
 	
@@ -134,18 +137,44 @@
 	
 	
 	<!-- Resource References -->
-	<xsl:template match="*[@rdf:resource]" mode="rdf:property-elements" priority="1">
+	<xsl:template match="*[@rdf:resource][not(*)]" mode="rdf:property-elements" priority="2">
 		<xsl:copy>
 			<xsl:copy-of select="rdf:resolve-uri-reference(@rdf:resource)"/>
 		</xsl:copy>
 	</xsl:template>
 	
 	
+	<xsl:template match="*[rdf:Description]" mode="rdf:property-elements" priority="2">
+		<xsl:copy>
+			<xsl:attribute name="rdf:nodeID" select="generate-id(rdf:Description)"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	
 	<!-- XML Literals. -->
-	<xsl:template match="*[@rdf:parseType = 'Literal'][element()]" mode="rdf:property-elements" priority="1">
+	<xsl:template match="*[@rdf:parseType = 'Literal'][element()]" mode="rdf:property-elements" priority="2">
 		<xsl:copy>
 			<xsl:apply-templates select="@*" mode="rdf:literal-attributes"/>
 			<xsl:copy-of select="*"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	
+	<!-- Generate reference to a Resource. -->
+	<xsl:template match="*[@rdf:parseType eq 'Resource']" mode="rdf:property-elements" priority="2">
+		<xsl:copy>
+			<xsl:copy-of select="@rdf:parseType"/>
+			<xsl:if test="not(@rdf:nodeID)">
+				<xsl:attribute name="rdf:nodeID" select="generate-id()"/>
+			</xsl:if>
+		</xsl:copy>
+	</xsl:template>
+	
+	
+	<!-- Property Elements with Property Attributes. -->
+	<xsl:template match="*[not(* | text())][@* except (@rdf:*, @xml:*)]" mode="rdf:property-elements" priority="1">
+		<xsl:copy>
+			<xsl:attribute name="rdf:nodeID" select="generate-id()"/>
 		</xsl:copy>
 	</xsl:template>
 	
@@ -159,18 +188,52 @@
 	</xsl:template>
 	
 	
+	<!-- Don't automaically descend the tree in this mode. -->
+	<!--<xsl:template match="*[element()]" mode="rdf:property-elements"/>-->
+	
+	
+	<!-- Property Elements with Property Attributes. -->
+	<xsl:template match="*[@*[contains(name(), ':')]][not(@xml:* | @rdf:datatype | @rdf:nodeID)]" mode="rdf:property-elements-property-attributes">
+		<rdf:Description>
+			<xsl:choose>
+				<xsl:when test="@rdf:resource">
+					<xsl:attribute name="rdf:about" select="@rdf:resource"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:attribute name="rdf:nodeID" select="generate-id()"/>
+				</xsl:otherwise>
+			</xsl:choose>
+			<xsl:apply-templates select="@* except (@rdf:*, @xml:*)" mode="#current"/>
+		</rdf:Description>
+	</xsl:template>
+	
+	
 	<!-- Empty Property Elements require reification. -->
 	<xsl:template match="*[@rdf:ID][not(* | text())]" mode="rdf:reify-if-required">
-		<xsl:param name="subjectURI" as="xs:string"/>
+		<xsl:param name="subjectAttr" as="attribute()"/>
 		
 		<rdf:Description rdf:about="{rdf:resolve-uri-reference(@rdf:ID)}">
 			<rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement"/>
-			<rdf:subject rdf:resource="{$subjectURI}"/>
+			<rdf:subject>
+				<xsl:choose>
+					<xsl:when test="$subjectAttr instance of attribute(rdf:nodeID)">
+						<xsl:copy-of select="$subjectAttr"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:attribute name="rdf:resource" select="string($subjectAttr)"></xsl:attribute>
+					</xsl:otherwise>
+				</xsl:choose>
+			</rdf:subject>
 			<rdf:predicate rdf:resource="{concat(namespace-uri-from-QName(resolve-QName(name(), .)), local-name())}"/>
 			<xsl:choose>
 				<xsl:when test="@rdf:parseType eq 'Resource'">
 					<rdf:object>
 						<xsl:copy-of select="rdf:generate-node-id-attr(.)"/>
+					</rdf:object>
+				</xsl:when>
+				<xsl:when test="@rdf:nodeID">
+					<rdf:object>
+						<xsl:copy-of select="@rdf:nodeID"/>
 					</rdf:object>
 				</xsl:when>
 				<xsl:otherwise>
@@ -202,56 +265,56 @@
 	</xsl:template>
 	
 	
-	<!-- Generate reference to a Resource. -->
-	<xsl:template match="*[@rdf:parseType eq 'Resource']" mode="rdf:property-elements" priority="1">
-		<xsl:copy>
-			<xsl:copy-of select="@rdf:parseType"/>
-			<xsl:if test="not(@rdf:nodeID)">
-				<xsl:attribute name="rdf:nodeID" select="generate-id()"/>
-			</xsl:if>
-		</xsl:copy>
+	<!-- Property Attributes on Property Elements. -->
+	<xsl:template match="@*" mode="rdf:property-elements-property-attributes">
+		<xsl:element name="{name()}" namespace="{namespace-uri()}">
+			<xsl:value-of select="."/>
+		</xsl:element>
 	</xsl:template>
-	
-	
-	<!-- Don't automaically descend the tree in this mode. -->
-	<xsl:template match="*[*]" mode="rdf:property-elements"/>
 	
 	
 	<!-- Generate reference to a Typed Node Element. -->
-	<xsl:template match="*[element()]" mode="rdf:node-element-refs">
+	<!--<xsl:template match="*[element()]" mode="rdf:node-element-refs">
 		<xsl:copy>
 			<xsl:attribute name="rdf:nodeID" select="generate-id()"/>
 		</xsl:copy>
-	</xsl:template>
+	</xsl:template>-->
+	
+	
+	<!-- Another 'special case' - what would have been a node-element reference 
+		 where it not for the presence of the child rdf:Description. -->
+	<!--<xsl:template match="*[rdf:Description[@rdf:nodeID]]" mode="rdf:node-element-refs" priority="2">
+		<xsl:copy>
+			<!-\-<xsl:attribute name="rdf:nodeID" select="''"/>-\->
+			<xsl:copy-of select="rdf:Description/@rdf:nodeID"/>
+		</xsl:copy>
+	</xsl:template>-->
 	
 	
 	<!-- Special case - what would have been a node-element reference where it 
 		 not for the presence of the child rdf:Description. -->
-	<xsl:template match="*[rdf:Description]" mode="rdf:node-element-refs" priority="1">
+	<!--<xsl:template match="*[rdf:Description]" mode="rdf:node-element-refs" priority="1">
 		<xsl:copy>
 			<xsl:attribute name="rdf:resource" select="rdf:Description/@rdf:about"/>
 		</xsl:copy>
-	</xsl:template>
+	</xsl:template>-->
 	
 	
 	<!--  -->
-	<xsl:template match="*[@rdf:parseType = 'Resource']" mode="rdf:referred-node-element" priority="1">
+	<xsl:template match="*[not(rdf:Description)]" mode="rdf:referred-node-element" priority="1">
 		<xsl:apply-templates select="." mode="rdf:node-elements">
 			<xsl:with-param name="nodeIDAttr" as="attribute()?">
-				<xsl:attribute name="rdf:nodeID" select="generate-id()"/>
+				<!-- When the rdf:Description is a child of a Typed Property Element ignore its rdf:nodeID. -->
+				<xsl:attribute name="rdf:nodeID" select="(if (@rdf:*) then () else @rdf:nodeID, generate-id())[1]"/>
 			</xsl:with-param>
 		</xsl:apply-templates>
 	</xsl:template>
 	
 	
-	<!--  -->
-	<xsl:template match="*" mode="rdf:referred-node-element">
+	 <!-- 
+	<xsl:template match="*[rdf:Description]" mode="rdf:referred-node-element">
 		<xsl:apply-templates select="*[element()]" mode="rdf:node-elements"/>
-	</xsl:template>
-	
-	
-	
-	
+	</xsl:template>  -->
 	
 	
 	<!-- Suppress unwanted text nodes. -->
