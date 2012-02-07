@@ -112,7 +112,7 @@
 			</p:input>
 		</p:insert>
 		
-		<p:choose>
+		<!--<p:choose>
 			<p:when test="not(exists(/c:result/trix:trix[1]/trix:graph/trix:triple))">
 				<p:identity>
 					<p:input port="source">
@@ -162,7 +162,35 @@
 					<p:with-option name="attribute-value" select="$testName"/>
 				</p:add-attribute>
 			</p:otherwise>
-		</p:choose>
+		</p:choose>-->
+		
+		<p:try>
+			<p:group>
+				<p:compare fail-if-not-equal="true">
+					<p:input port="source" select="/c:result/trix:trix[1]"/>
+					<p:input port="alternate" select="/c:result/trix:trix[2]"/>
+				</p:compare>
+				
+				<p:identity>
+					<p:input port="source">
+						<p:inline exclude-inline-prefixes="#all"><c:test success="true"/></p:inline>
+					</p:input>
+				</p:identity>
+				<p:add-attribute match="/c:*" attribute-name="uri">
+					<p:with-option name="attribute-value" select="$testName"/>
+				</p:add-attribute>
+			</p:group>
+			<p:catch>
+				<p:identity>
+					<p:input port="source">
+						<p:inline exclude-inline-prefixes="#all"><c:test success="false">Unknown</c:test></p:inline>
+					</p:input>
+				</p:identity>
+				<p:add-attribute match="/c:*" attribute-name="uri">
+					<p:with-option name="attribute-value" select="$testName"/>
+				</p:add-attribute>
+			</p:catch>
+		</p:try>
 		
 		<p:identity name="result"/>
 		

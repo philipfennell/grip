@@ -86,7 +86,10 @@
 								<xsl:choose>
 									<!-- XML Literals. -->
 									<xsl:when test="ends-with(nt:get-datatype(regex-group(5)), '#XMLLiteral')">
-										<xsl:copy-of select="saxon:parse(concat('&lt;_XMLLiteral xmlns=''http://www.w3.org/2004/03/trix/trix-1/''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/_XMLLiteral&gt;'))/trix:_XMLLiteral/(* | text())"/>
+										<xsl:copy-of use-when="system-property('xsl:product-name') eq 'SAXON'"
+												select="saxon:parse(concat('&lt;trix:XMLLiteral xmlns:trix=''http://www.w3.org/2004/03/trix/trix-1/''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/trix:XMLLiteral&gt;'))/trix:XMLLiteral/(* | text())"/>
+										<xsl:copy-of use-when="system-property('xsl:product-name') ne 'SAXON'"
+												select="nt:unescape-string(nt:get-data-value(regex-group(5)))"/>
 									</xsl:when>
 									<!-- Other Typed Literals. -->
 									<xsl:otherwise>
