@@ -358,7 +358,7 @@
 	
 	
 	<!-- Throw an error if rdf:Bag, rdf:Seq, rdf:Alt, rdf:Statement, rdf:Property or rdf:List are present. -->
-	<xsl:template match="rdf:Bag | rdf:Seq | rdf:Alt | rdf:Statement | rdf:List" mode="#all" priority="10">
+	<xsl:template match="rdf:Bag | rdf:Seq | rdf:Alt | rdf:List" mode="#all" priority="10">
 		<xsl:message>[XSLT] <xsl:value-of select="'Graphs using rdf:Bag, rdf:Seq, rdf:Alt, rdf:Statement, rdf:Property or rdf:List are not, currently, supported.'"/></xsl:message>
 	</xsl:template>
 	
