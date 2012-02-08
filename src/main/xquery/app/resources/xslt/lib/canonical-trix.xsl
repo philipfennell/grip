@@ -24,18 +24,25 @@
 	<xsl:template match="graph" mode="canon">
 		<xsl:copy copy-namespaces="no">
 			<xsl:copy-of select="uri"/>
-			<xsl:apply-templates select="triple" mode="#current">
-				<!-- Sort triples by the predicate URI. -->
+			<xsl:variable name="relabeledNodes" as="element()*">
+				<xsl:apply-templates select="triple" mode="#current">
+					<!-- Sort triples by the predicate URI. -->
+					<xsl:sort select="string(*[2])"/>
+					<xsl:with-param name="idLUT" as="element()" tunnel="yes">
+						<ids xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+							<xsl:for-each select="distinct-values(descendant::id)">
+								<id xmlns="http://www.w3.org/2004/03/trix/trix-1/" 
+										value="{.}" replacement="{concat('A', string(position()))}"/>
+							</xsl:for-each>
+						</ids>
+					</xsl:with-param>
+				</xsl:apply-templates>
+			</xsl:variable>
+			<xsl:for-each select="$relabeledNodes">
+				<xsl:sort select="string(*[1])"/>
 				<xsl:sort select="string(*[2])"/>
-				<xsl:with-param name="idLUT" as="element()" tunnel="yes">
-					<ids xmlns="http://www.w3.org/2004/03/trix/trix-1/">
-						<xsl:for-each select="distinct-values(descendant::id)">
-							<id xmlns="http://www.w3.org/2004/03/trix/trix-1/" 
-									value="{.}" replacement="{concat('A', string(position()))}"/>
-						</xsl:for-each>
-					</ids>
-				</xsl:with-param>
-			</xsl:apply-templates>
+				<xsl:copy-of select="."/>
+			</xsl:for-each>
 		</xsl:copy>
 	</xsl:template>
 	

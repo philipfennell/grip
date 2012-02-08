@@ -42,6 +42,59 @@
 	</xsl:template>
 	
 	
+	<!--  -->
+	<xsl:template match="rdf:Bag | rdf:Seq | rdf:Alt" mode="rdf:node-elements" priority="3">
+		<rdf:Description>
+			<xsl:copy-of select="(rdf:resolve-uri-reference((@rdf:about | @rdf:ID)), @rdf:nodeID, rdf:generate-node-id-attr(.))[1]"/>
+			<rdf:type rdf:resource="{concat(namespace-uri-from-QName(resolve-QName(name(), .)), local-name())}"/>
+			<xsl:apply-templates select="*" mode="rdf:container"/>
+		</rdf:Description>	
+	</xsl:template>
+	
+	
+	<!--  -->
+	<xsl:template match="*[rdf:is-typed-element-node(.)][rdf:li]" mode="rdf:node-elements" priority="3">
+		<rdf:Description>
+			<xsl:copy-of select="(rdf:resolve-uri-reference((@rdf:about | @rdf:ID)), @rdf:nodeID, rdf:generate-node-id-attr(.))[1]"/>
+			<rdf:type rdf:resource="{concat(namespace-uri-from-QName(resolve-QName(name(), .)), local-name())}"/>
+			<xsl:apply-templates select="*" mode="rdf:container"/>
+		</rdf:Description>	
+	</xsl:template>
+	
+	
+	<!--  -->
+	<xsl:template match="rdf:li" mode="rdf:container rdf:node-elements rdf:property-elements" priority="3">
+		<xsl:element name="rdf:_{count(preceding-sibling::rdf:li) + 1}">
+			<xsl:apply-templates select="* | text()" mode="rdf:node-elements"/>
+		</xsl:element>
+	</xsl:template>
+	
+	
+	<!--  -->
+	<xsl:template match="rdf:li[@rdf:resource]" mode="rdf:container rdf:node-elements rdf:property-elements" priority="4">
+		<xsl:element name="rdf:_{count(preceding-sibling::rdf:li) + 1}">
+			<xsl:copy-of select="@rdf:resource"/>
+		</xsl:element>
+	</xsl:template>
+	
+	
+	<!--  -->
+	<xsl:template match="rdf:li[rdf:Description]" mode="rdf:container rdf:property-elements" priority="3">
+		<xsl:element name="rdf:_{count(preceding-sibling::rdf:li) + 1}">
+			<xsl:attribute name="rdf:nodeID" select="generate-id(rdf:Description)"/>
+		</xsl:element>
+	</xsl:template>
+	
+	
+	<!--  -->
+	<xsl:template match="rdf:*[matches(local-name(), '_\d+')]" mode="rdf:container">
+		<xsl:copy>
+			<xsl:copy-of select="@*"/>
+			<xsl:apply-templates select="* | text()" mode="rdf:node-elements"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	
 	<!-- Node Elements with no child Node ELements. -->
 	<xsl:template match="rdf:Description[not(*)]" mode="rdf:node-elements" priority="2">
 		<xsl:copy>
@@ -95,7 +148,7 @@
 	
 	
 	<!-- Typed Element Nodes. -->
-	<xsl:template match="*[namespace-uri-from-QName(resolve-QName(name(), .)) ne 'http://www.w3.org/1999/02/22-rdf-syntax-ns#']" mode="rdf:node-elements">
+	<xsl:template match="*[rdf:is-typed-element-node(.)]" mode="rdf:node-elements">
 		<xsl:param name="nodeIDAttr" as="attribute()?">
 			<xsl:attribute name="rdf:nodeID" select="generate-id(..)"/>
 		</xsl:param>
@@ -133,10 +186,28 @@
 	</xsl:template>
 	
 	
+	<!-- rdfms-seq-representation/test001 ??? -->
+	<xsl:template match="rdf:type[@rdf:parseType eq 'Resource']" mode="rdf:property-elements" priority="3">
+		<xsl:copy>
+			<xsl:attribute name="rdf:nodeID" select="generate-id(.)"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	
 	<!-- Resource References -->
 	<xsl:template match="*[@rdf:resource][not(*)]" mode="rdf:property-elements" priority="2">
 		<xsl:copy>
 			<xsl:copy-of select="rdf:resolve-uri-reference(@rdf:resource)"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	
+	<!-- Collections. -->
+	<xsl:template match="*[@rdf:parseType = 'Collection']" mode="rdf:property-elements" priority="3">
+		<xsl:copy>
+			<xsl:if test="not(@rdf:nodeID)">
+				<xsl:attribute name="rdf:nodeID" select="generate-id(*[1])"/>
+			</xsl:if>
 		</xsl:copy>
 	</xsl:template>
 	
@@ -183,6 +254,10 @@
 			<xsl:value-of select="."/>
 		</xsl:copy>
 	</xsl:template>
+	
+	
+	<!-- Ignore lists in this mode. -->
+	<xsl:template match="rdf:List | rdf:li | *[@rdf:parseType eq 'Collection']" mode="rdf:property-elements-property-attributes" priority="1"/>
 	
 	
 	<!-- Property Elements with Property Attributes. -->
@@ -266,9 +341,45 @@
 	</xsl:template>
 	
 	
+	<!-- rdfms-seq-representation/test001 ??? -->
+	<xsl:template match="rdf:type[@rdf:parseType eq 'Resource'][element()]" mode="rdf:referred-node-element" priority="2">
+		<rdf:Description rdf:nodeID="{generate-id(.)}">
+			<xsl:apply-templates select="*" mode="rdf:property-elements"/>
+		</rdf:Description>
+		<xsl:apply-templates select="*" mode="rdf:referred-node-element"/>
+	</xsl:template>
+	
+	
+	<!-- Prevent processing of Resources on type declarations.
+	<xsl:template match="rdf:type[@rdf:parseType eq 'Resource']" mode="rdf:referred-node-element" priority="2"/> -->
+	
+	
 	<!-- Prevent processing of XML Literals as RDF/XML. -->
 	<xsl:template match="*[@rdf:parseType eq 'Literal']" mode="rdf:referred-node-element" priority="2"/>
-		
+	
+	
+	<!-- RDF Collections -->
+	<xsl:template match="*[@rdf:parseType eq 'Collection']" mode="rdf:referred-node-element" priority="2">
+		<xsl:apply-templates select="*" mode="rdf:collection"/>
+	</xsl:template>
+	
+	
+	<!--  -->
+	<xsl:template match="rdf:Description[following-sibling::rdf:Description]" mode="rdf:collection">
+		<rdf:Description rdf:nodeID="{generate-id(.)}">
+			<rdf:first rdf:resource="{@rdf:about}"/>
+			<rdf:rest rdf:nodeID="{generate-id(following-sibling::rdf:Description[1])}"/>
+		</rdf:Description>
+	</xsl:template>
+	
+	
+	<!--  -->
+	<xsl:template match="rdf:Description[not(following-sibling::rdf:Description)]" mode="rdf:collection">
+		<rdf:Description rdf:nodeID="{generate-id(.)}">
+			<rdf:first rdf:resource="{@rdf:about}"/>
+			<rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+		</rdf:Description>
+	</xsl:template>
 	
 	
 	<!--  -->
@@ -283,7 +394,7 @@
 	
 	
 	<!-- Suppress unwanted text nodes. -->
-	<xsl:template match="text()" mode="#all"/>
+	<xsl:template match="text()" mode="rdf:referred-node-element rdf:reify-if-required rdf:property-elements rdf:property-elements-property-attributes"/>
 	
 	
 	<!-- Resolves a relative URI against the xml:base or the Static Base URI 
@@ -304,7 +415,7 @@
 						<xsl:value-of select="resolve-uri(string($uriAttr), $baseURI)"/>
 					</xsl:when>
 					<xsl:otherwise>
-						<xsl:value-of select="resolve-uri(string($uriAttr), concat($baseURI, '/'))"/>
+						<xsl:value-of select="resolve-uri(string($uriAttr), concat($baseURI, if (starts-with(string($uriAttr), '#')) then '' else '/'))"/>
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:otherwise>
@@ -346,20 +457,27 @@
 	</xsl:function>
 	
 	
+	<!-- Returns true if the context node is not in the RDF namespace. -->
+	<xsl:function name="rdf:is-typed-element-node" as="xs:boolean">
+		<xsl:param name="contextNode" as="element()"/>
+		
+		<xsl:value-of select="namespace-uri-from-QName(resolve-QName(name($contextNode), $contextNode)) ne 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'"/>
+	</xsl:function>
+	
 	
 	
 	<!-- === Errors or Unsupported. ======================================================= -->
 	
 	
-	<!-- Throw an exception for invalid/unsupported parse types. -->
+	<!-- Throw an exception for invalid/unsupported parse types.
 	<xsl:template match="*[@rdf:parseType and not(@rdf:parseType = ('Resource', 'Literal'))]" mode="#all" priority="10">
 		<xsl:message>[XSLT] <xsl:value-of select="concat('Unsupported Parse Type: ''', @rdf:parseType, '''')"/></xsl:message>
-	</xsl:template>
+	</xsl:template> -->
 	
 	
-	<!-- Throw an error if rdf:Bag, rdf:Seq, rdf:Alt, rdf:Statement, rdf:Property or rdf:List are present. -->
-	<xsl:template match="rdf:Bag | rdf:Seq | rdf:Alt | rdf:List" mode="#all" priority="10">
+	<!-- Throw an error if ? elements are present.
+	<xsl:template match="" mode="#all" priority="10">
 		<xsl:message>[XSLT] <xsl:value-of select="'Graphs using rdf:Bag, rdf:Seq, rdf:Alt, rdf:Statement, rdf:Property or rdf:List are not, currently, supported.'"/></xsl:message>
-	</xsl:template>
+	</xsl:template> -->
 	
 </xsl:transform>

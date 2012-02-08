@@ -14,8 +14,7 @@
 	
 	<xsl:strip-space elements="*"/>
 	
-	<xsl:output encoding="UTF-8" indent="yes" media-type="application/xml" 
-			use-character-maps="ntriples" method="xml"/>
+	<xsl:output encoding="UTF-8" use-character-maps="ntriples" indent="yes" media-type="application/xml" method="xml"/>
 	
 	<xsl:include href="ntriples.xsl"/>
 	
@@ -47,82 +46,78 @@
 	<xsl:template name="trix:triple"><!-- as="element(trix:triple)"-->
 		<xsl:variable name="tripleLine" as="xs:string" select="current()"/>
 		
-		
-		
-		
-			<xsl:analyze-string select="$tripleLine" regex="{concat('(', nt:match-node-id(), '|', nt:match-uriref(), ')', nt:match-ws('+'), 
-																	'(', nt:match-uriref(), ')', nt:match-ws('+'),
-																	'(', nt:match-node-id(), '|', nt:match-uriref(), '|', nt:match-datatype-string(), '|', nt:match-lang-string(), ')',
-																	nt:match-ws('*'), '\.')}">
-				<xsl:matching-substring>
-					<triple>
-					<!-- Subject. -->
-					<xsl:choose>
-						<xsl:when test="matches(regex-group(1), nt:match-node-id())">
-							<id><xsl:value-of select="nt:get-node-id(regex-group(1))"/></id>
-						</xsl:when>
-						<xsl:when test="matches(regex-group(1), nt:match-uriref())">
-							<uri><xsl:value-of select="nt:get-uriref(regex-group(1))"/></uri>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Subject: ', regex-group(1)))"/>
-						</xsl:otherwise>
-					</xsl:choose>
-					
-					<!-- Predicate. -->
-					<xsl:choose>
-						<xsl:when test="matches(regex-group(3), nt:match-uriref())">
-							<uri><xsl:value-of select="nt:get-uriref(regex-group(3))"/></uri>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Predicate: ', regex-group(3)))"/>
-						</xsl:otherwise>
-					</xsl:choose>
-					
-					<!-- Object. -->
-					<xsl:choose>
-						<xsl:when test="matches(regex-group(5), nt:match-datatype-string())">
-							<typedLiteral datatype="{nt:get-datatype(regex-group(5))}">
-								<xsl:choose>
-									<!-- XML Literals. -->
-									<xsl:when test="ends-with(nt:get-datatype(regex-group(5)), '#XMLLiteral')">
-										<xsl:copy-of use-when="system-property('xsl:product-name') eq 'SAXON'"
-												select="saxon:parse(concat('&lt;trix:XMLLiteral xmlns:trix=''http://www.w3.org/2004/03/trix/trix-1/''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/trix:XMLLiteral&gt;'))/trix:XMLLiteral/(* | text())"/>
-										<xsl:copy-of use-when="system-property('xsl:product-name') ne 'SAXON'"
-												select="nt:unescape-string(nt:get-data-value(regex-group(5)))"/>
-									</xsl:when>
-									<!-- Other Typed Literals. -->
-									<xsl:otherwise>
-										<xsl:value-of select="nt:get-data-value(regex-group(5))"/>
-									</xsl:otherwise>
-								</xsl:choose>
-							</typedLiteral>
-						</xsl:when>
-						<xsl:when test="matches(regex-group(5), nt:match-lang-string())">
-							<plainLiteral>
-								<xsl:if test="nt:get-language-code(regex-group(5))">
-									<xsl:attribute name="xml:lang" select="nt:get-language-code(regex-group(5))"></xsl:attribute>
-								</xsl:if>
-								<xsl:value-of select="nt:get-string-value(regex-group(5))"/>
-							</plainLiteral>
-						</xsl:when>
-						<xsl:when test="matches(regex-group(5), nt:match-node-id())">
-							<id><xsl:value-of select="nt:get-node-id(regex-group(5))"/></id>
-						</xsl:when>
-						<xsl:when test="matches(regex-group(5), nt:match-uriref())">
-							<uri><xsl:value-of select="nt:get-uriref(regex-group(5))"/></uri>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Object: ', regex-group(5)))"/>
-						</xsl:otherwise>
-					</xsl:choose>
-						</triple>
-				</xsl:matching-substring>
-				<xsl:non-matching-substring/>
-					<!--<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Triple: ', .))"/>
-				</xsl:non-matching-substring>-->
-			</xsl:analyze-string>
-		
+		<xsl:analyze-string select="$tripleLine" regex="{concat('(', nt:match-node-id(), '|', nt:match-uriref(), ')', nt:match-ws('+'), 
+																'(', nt:match-uriref(), ')', nt:match-ws('+'),
+																'(', nt:match-node-id(), '|', nt:match-uriref(), '|', nt:match-datatype-string(), '|', nt:match-lang-string(), ')',
+																nt:match-ws('*'), '\.')}">
+			<xsl:matching-substring>
+				<triple>
+				<!-- Subject. -->
+				<xsl:choose>
+					<xsl:when test="matches(regex-group(1), nt:match-node-id())">
+						<id><xsl:value-of select="nt:get-node-id(regex-group(1))"/></id>
+					</xsl:when>
+					<xsl:when test="matches(regex-group(1), nt:match-uriref())">
+						<uri><xsl:value-of select="nt:get-uriref(regex-group(1))"/></uri>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Subject: ', regex-group(1)))"/>
+					</xsl:otherwise>
+				</xsl:choose>
+				
+				<!-- Predicate. -->
+				<xsl:choose>
+					<xsl:when test="matches(regex-group(3), nt:match-uriref())">
+						<uri><xsl:value-of select="nt:get-uriref(regex-group(3))"/></uri>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Predicate: ', regex-group(3)))"/>
+					</xsl:otherwise>
+				</xsl:choose>
+				
+				<!-- Object. -->
+				<xsl:choose>
+					<xsl:when test="matches(regex-group(5), nt:match-datatype-string())">
+						<typedLiteral datatype="{nt:get-datatype(regex-group(5))}">
+							<xsl:choose>
+								<!-- XML Literals. -->
+								<xsl:when test="ends-with(nt:get-datatype(regex-group(5)), '#XMLLiteral')">
+									<xsl:copy-of use-when="system-property('xsl:product-name') eq 'SAXON'"
+											select="saxon:parse(concat('&lt;trix:XMLLiteral xmlns:trix=''http://www.w3.org/2004/03/trix/trix-1/''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/trix:XMLLiteral&gt;'))/trix:XMLLiteral/(* | text())"/>
+									<xsl:copy-of use-when="system-property('xsl:product-name') ne 'SAXON'"
+											select="nt:unescape-string(nt:get-data-value(regex-group(5)))"/>
+								</xsl:when>
+								<!-- Other Typed Literals. -->
+								<xsl:otherwise>
+									<xsl:value-of select="nt:get-data-value(regex-group(5))"/>
+								</xsl:otherwise>
+							</xsl:choose>
+						</typedLiteral>
+					</xsl:when>
+					<xsl:when test="matches(regex-group(5), nt:match-lang-string())">
+						<plainLiteral>
+							<xsl:if test="nt:get-language-code(regex-group(5))">
+								<xsl:attribute name="xml:lang" select="nt:get-language-code(regex-group(5))"></xsl:attribute>
+							</xsl:if>
+							<xsl:value-of select="nt:get-string-value(regex-group(5))"/>
+						</plainLiteral>
+					</xsl:when>
+					<xsl:when test="matches(regex-group(5), nt:match-node-id())">
+						<id><xsl:value-of select="nt:get-node-id(regex-group(5))"/></id>
+					</xsl:when>
+					<xsl:when test="matches(regex-group(5), nt:match-uriref())">
+						<uri><xsl:value-of select="nt:get-uriref(regex-group(5))"/></uri>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Object: ', regex-group(5)))"/>
+					</xsl:otherwise>
+				</xsl:choose>
+					</triple>
+			</xsl:matching-substring>
+			<xsl:non-matching-substring/>
+				<!--<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid Triple: ', .))"/>
+			</xsl:non-matching-substring>-->
+		</xsl:analyze-string>
 	</xsl:template>
 	
 	
@@ -182,7 +177,7 @@
 	<xsl:function name="nt:get-uriref" as="xs:string">
 		<xsl:param name="string" as="xs:string"/>
 		
-		<xsl:value-of select="replace($string, '&lt;|&gt;', '')"/>
+		<xsl:value-of select="nt:unescape-string(replace($string, '&lt;|&gt;', ''))"/>
 	</xsl:function>
 	
 	

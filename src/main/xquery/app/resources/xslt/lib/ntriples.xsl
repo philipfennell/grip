@@ -3,6 +3,7 @@
 		xmlns="http://www.w3.org/2004/03/trix/trix-1/"
 		xmlns:err="http://www.marklogic.com/rdf/error"
 		xmlns:gsp="http://www.w3.org/TR/sparql11-http-rdf-update/"
+		xmlns:math="http://exslt.org/math"
 		xmlns:nt="http://www.w3.org/ns/formats/N-Triples"
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 		xmlns:trix="http://www.w3.org/2004/03/trix/trix-1/"
@@ -17,6 +18,7 @@
 		<xsl:output-character character="&#9;" string="&amp;#9;"/>
 		<xsl:output-character character="&#10;" string="&amp;#10;"/>
 		<xsl:output-character character="&#13;" string="&amp;#13;"/>
+		<!--<xsl:output-character character="&#38;" string="&amp;"/>-->
 	</xsl:character-map>
 	
 	
@@ -89,7 +91,7 @@
 			<xsl:otherwise>
 				<xsl:variable name="result">
 					<xsl:analyze-string select="$escapedString" regex="(\\u)([0-9A-F]{{2,8}})" flags="i">
-						<xsl:matching-substring><xsl:value-of select="concat('&amp;#x', regex-group(2), ';')"/></xsl:matching-substring>
+						<xsl:matching-substring><xsl:value-of select="codepoints-to-string(nt:hex-to-int(regex-group(2)))"/></xsl:matching-substring>
 						<xsl:non-matching-substring><xsl:value-of select="."/></xsl:non-matching-substring>
 					</xsl:analyze-string>
 				</xsl:variable>
@@ -131,7 +133,7 @@
 		
 		<xsl:choose>
 			<xsl:when test="$head">
-				<xsl:value-of select="nt:escape-non-ascii($tail, concat($escapedString, nt:escape-character($head)))"/>
+				<xsl:value-of select="nt:escape-non-ascii($tail, concat($escapedString, nt:u-escape-character($head)))"/>
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:value-of select="$escapedString"/>
@@ -141,7 +143,7 @@
 	
 	
 	<!-- Apply \u escaping to the passed character if it's in the xF7 - xFFFC range. -->
-	<xsl:function name="nt:escape-character" as="xs:string?">
+	<xsl:function name="nt:u-escape-character" as="xs:string?">
 		<xsl:param name="char" as="xs:string?"/>
 		<xsl:variable name="charCode" as="xs:integer" select="string-to-codepoints($char)"/>
 		<xsl:value-of select="
@@ -166,5 +168,35 @@
 				else 
 					'',
            		substring('0123456789ABCDEF', ($in mod 16) + 1, 1))"/>
+	</xsl:function>
+	
+	
+	<!-- Converts a hexadecimal string to an xs:integer. -->
+	<xsl:function name="nt:hex-to-int" as="xs:integer">
+		<xsl:param name="in" as="xs:string"/>
+		<xsl:variable name="head" as="xs:string?" select="substring($in, 1, 1)"/>
+		<xsl:variable name="tail" as="xs:string?" select="substring($in, 2)"/>
+		<xsl:variable name="multiplier" as="xs:integer" select="nt:power(16,  string-length($tail))"/>
+		<xsl:variable name="decimalValue" as="xs:integer" 
+				select="index-of(('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'), $head) - 1"/>
+		
+		<xsl:value-of select="
+			if (string-length($head) gt 0) then 
+				($decimalValue * $multiplier) + nt:hex-to-int(string-join($tail, ''))
+			else
+				0"/>
+	</xsl:function>
+	
+	
+	<!-- Raises the first argument passed to the power of the second. -->
+	<xsl:function name="nt:power" as="xs:integer">
+		<xsl:param name="arg1" as="xs:integer"/>
+		<xsl:param name="arg2" as="xs:integer"/>
+		
+		<xsl:value-of select="
+			if ($arg2 ne 0) then  
+				$arg1 * nt:power($arg1, $arg2 - 1)
+			else 
+				1"/>
 	</xsl:function>
 </xsl:transform>

@@ -68,7 +68,7 @@
 				<p:empty/>
 			</p:input>
 		</p:xslt>
-		<p:xslt name="expected">
+		<p:xslt>
 			<p:documentation>Convert to Canonical TriX.</p:documentation>
 			<p:input port="stylesheet">
 				<p:document href="../../../main/xquery/app/resources/xslt/lib/canonical-trix.xsl"/>
@@ -77,6 +77,7 @@
 				<p:empty/>
 			</p:input>
 		</p:xslt>
+		<p:identity name="expected"/>
 		
 		<p:xslt>
 			<p:documentation>Transform the test's source into TriX.</p:documentation>
@@ -91,7 +92,7 @@
 			</p:input>
 			<p:with-param name="BASE_URI" select="$testURI"/>
 		</p:xslt>
-		<p:xslt name="actual">
+		<p:xslt>
 			<p:documentation>Convert to Canonical TriX.</p:documentation>
 			<p:input port="stylesheet">
 				<p:document href="../../../main/xquery/app/resources/xslt/lib/canonical-trix.xsl"/>
@@ -100,6 +101,7 @@
 				<p:empty/>
 			</p:input>
 		</p:xslt>
+		<p:identity name="actual"/>
 		
 		<p:wrap-sequence wrapper="c:result">
 			<p:input port="source">
@@ -111,58 +113,6 @@
 				<p:pipe port="result" step="actual"/>
 			</p:input>
 		</p:insert>
-		
-		<!--<p:choose>
-			<p:when test="not(exists(/c:result/trix:trix[1]/trix:graph/trix:triple))">
-				<p:identity>
-					<p:input port="source">
-						<p:inline exclude-inline-prefixes="#all"><c:test success="false">No Source Triples</c:test></p:inline>
-					</p:input>
-				</p:identity>
-				<p:add-attribute match="/c:*" attribute-name="uri">
-					<p:with-option name="attribute-value" select="$testName"/>
-				</p:add-attribute>
-			</p:when>
-			<p:when test="exists(/c:result/trix:trix[2]/trix:graph/trix:triple)">
-				<p:try>
-					<p:group>
-						<p:compare fail-if-not-equal="true">
-							<p:input port="source" select="/c:result/trix:trix[1]"/>
-							<p:input port="alternate" select="/c:result/trix:trix[2]"/>
-						</p:compare>
-						
-						<p:identity>
-							<p:input port="source">
-								<p:inline exclude-inline-prefixes="#all"><c:test success="true"/></p:inline>
-							</p:input>
-						</p:identity>
-						<p:add-attribute match="/c:*" attribute-name="uri">
-							<p:with-option name="attribute-value" select="$testName"/>
-						</p:add-attribute>
-					</p:group>
-					<p:catch>
-						<p:identity>
-							<p:input port="source">
-								<p:inline exclude-inline-prefixes="#all"><c:test success="false">Unknown</c:test></p:inline>
-							</p:input>
-						</p:identity>
-						<p:add-attribute match="/c:*" attribute-name="uri">
-							<p:with-option name="attribute-value" select="$testName"/>
-						</p:add-attribute>
-					</p:catch>
-				</p:try>
-			</p:when>
-			<p:otherwise>
-				<p:identity>
-					<p:input port="source">
-						<p:inline exclude-inline-prefixes="#all"><c:test success="false">No Result Triples</c:test></p:inline>
-					</p:input>
-				</p:identity>
-				<p:add-attribute match="/c:*" attribute-name="uri">
-					<p:with-option name="attribute-value" select="$testName"/>
-				</p:add-attribute>
-			</p:otherwise>
-		</p:choose>-->
 		
 		<p:try>
 			<p:group>
