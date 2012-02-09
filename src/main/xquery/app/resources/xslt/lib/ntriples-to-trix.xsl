@@ -7,6 +7,7 @@
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 		xmlns:saxon="http://saxon.sf.net/"
 		xmlns:trix="http://www.w3.org/2004/03/trix/trix-1/"
+		xmlns:xdmp="http://marklogic.com/xdmp"
 		xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 		exclude-result-prefixes="#all"
@@ -83,9 +84,11 @@
 								<!-- XML Literals. -->
 								<xsl:when test="ends-with(nt:get-datatype(regex-group(5)), '#XMLLiteral')">
 									<xsl:copy-of use-when="system-property('xsl:product-name') eq 'SAXON'"
-											select="saxon:parse(concat('&lt;trix:XMLLiteral xmlns:trix=''http://www.w3.org/2004/03/trix/trix-1/''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/trix:XMLLiteral&gt;'))/trix:XMLLiteral/(* | text())"/>
-									<xsl:copy-of use-when="system-property('xsl:product-name') ne 'SAXON'"
-											select="nt:unescape-string(nt:get-data-value(regex-group(5)))"/>
+											select="saxon:parse(concat('&lt;trix:XMLLiteral xmlns:trix=''http://www.w3.org/2004/03/trix/trix-1/''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/trix:XMLLiteral&gt;'))/trix:XMLLiteral/(* | text())"
+											copy-namespaces="no"/>
+									<xsl:copy-of use-when="system-property('xsl:product-name') eq 'MarkLogic Server'"
+											select="xdmp:unquote(concat('&lt;trix:XMLLiteral xmlns:trix=''http://www.w3.org/2004/03/trix/trix-1/''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/trix:XMLLiteral&gt;'))/trix:XMLLiteral/(* | text())"
+											copy-namespaces="no"/>
 								</xsl:when>
 								<!-- Other Typed Literals. -->
 								<xsl:otherwise>

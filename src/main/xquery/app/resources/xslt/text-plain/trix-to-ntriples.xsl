@@ -5,6 +5,7 @@
 		xmlns:nt="http://www.w3.org/ns/formats/N-Triples"
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 		xmlns:saxon="http://saxon.sf.net/"
+		xmlns:xdmp="http://marklogic.com/xdmp"
 		xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 		exclude-result-prefixes="#all"
@@ -15,7 +16,7 @@
 	
 	<xsl:output encoding="ASCII" indent="yes" media-type="text/plain" method="text"/>
 	<xsl:output name="escaped-xml" encoding="ASCII" indent="no" 
-			media-type="application/xml" method="xml" omit-xml-declaration="yes"/>
+			media-type="application/xml" method="xml"/>
 	
 	<xsl:include href="../lib/ntriples.xsl"/>
 	
@@ -67,14 +68,20 @@
 	
 	
 	<xsl:template match="typedLiteral" mode="ntriples">
+		<xsl:variable name="outputFormat" as="element()">
+			<options xmlns="xdmp:quote">
+				<encoding>ASCII</encoding>
+				<indent>no</indent>
+				<media-type>application/xml</media-type>
+				<method>xml</method>
+			</options>
+		</xsl:variable>
 		<xsl:choose>
 			<xsl:when test="ends-with(@datatype, '#XMLLiteral')">
 				<xsl:value-of use-when="system-property('xsl:product-name') eq 'SAXON'"
-						select="nt:datatype-string(substring-after(substring-before(nt:escape-string(saxon:serialize(., 'escaped-xml')), '&lt;/typedLiteral&gt;'), '&gt;'), @datatype)" />
-				<!--<xsl:value-of use-when="system-property('xsl:product-name') eq 'SAXON'"
-						select="nt:escape-string(saxon:serialize(., 'escaped-xml'))" />-->
-				<xsl:copy-of use-when="system-property('xsl:product-name') ne 'SAXON'"
-						select="(* | text())"/>
+						select="nt:datatype-string(substring-after(substring-before(nt:escape-string(saxon:serialize(., 'escaped-xml')), '&lt;/typedLiteral&gt;'), '&gt;'), @datatype)"/>
+				<xsl:value-of use-when="system-property('xsl:product-name') eq 'MarkLogic Server'"
+						select="nt:datatype-string(substring-after(substring-before(nt:escape-string(xdmp:quote(., $outputFormat)), '&lt;/typedLiteral&gt;'), '&gt;'), @datatype)"/>
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:value-of select="nt:datatype-string(string(), @datatype)"/>
