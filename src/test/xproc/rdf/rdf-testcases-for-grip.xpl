@@ -3,6 +3,7 @@
 		xmlns:c="http://www.w3.org/ns/xproc-step" version="1.0"
 		xmlns:cx="http://xmlcalabash.com/ns/extensions"
 		xmlns:gsp="http://www.w3.org/TR/sparql11-http-rdf-update/"
+		xmlns:http="http://www.w3.org/Protocols/rfc2616"
 		xmlns:nt="http://www.w3.org/ns/formats/N-Triples"
 		xmlns:p="http://www.w3.org/ns/xproc"
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -29,7 +30,7 @@
 	
 	<p:for-each>
 		<!-- <p:iteration-source select="/rdf:RDF/node()[ends-with(local-name(), 'ParserTest')][test:status eq 'APPROVED']"/> -->
-		<p:iteration-source select="/rdf:RDF/test:PositiveParserTest[test:status eq 'APPROVED'][1]"/>
+		<p:iteration-source select="/rdf:RDF/test:PositiveParserTest[test:status eq 'APPROVED']"/>
 		
 		
 		
@@ -57,9 +58,6 @@
 		
 		<p:identity name="test-case"/>
 		
-		<p:load name="source">
-			<p:with-option name="href" select="/test:*/test:inputDocument/test:RDF-XML-Document/@rdf:about"/>
-		</p:load>
 		<p:sink/>
 		
 		<p:add-attribute match="/c:request" attribute-name="href">
@@ -83,6 +81,7 @@
 			<p:input port="parameters">
 				<p:empty/>
 			</p:input>
+			<p:with-param name="GRAPH_URI" select="$testURI"/>
 		</p:xslt>
 		<p:xslt>
 			<p:documentation>Convert to Canonical TriX.</p:documentation>
@@ -100,36 +99,14 @@
 		
 		<!-- === Get and process the test. ================================= -->
 		
-		<!--<p:xslt>
-			<p:documentation>Transform the test's source into TriX.</p:documentation>
-			<p:input port="source">
-				<p:pipe port="result" step="source"/>
-			</p:input>
-			<p:input port="stylesheet">
-				<p:document href="../../../main/xquery/app/resources/xslt/lib/rdf-xml-to-trix.xsl"/>
-			</p:input>
-			<p:input port="parameters">
-				<p:empty/>
-			</p:input>
-			<p:with-param name="BASE_URI" select="$testURI"/>
-		</p:xslt>-->
 		
-		<gsp:add-graph name="test" uri="http://localhost:8005/graphs" 
-				content-type="application/rdf+xml">
-			<p:documentation>Load the source test graph into GRIP.</p:documentation>
-			<p:input port="source">
-				<p:pipe port="result" step="source"/>
-			</p:input>
-			<p:with-option name="graph" select="$testURI"/>
-		</gsp:add-graph>
-		
-		<p:sink/>
-		
-		<gsp:retrieve-graph uri="http://localhost:8005/test/data" 
+		<gsp:retrieve-graph name="retrieve" uri="http://localhost:8005/graphs" 
 				media-type="application/xml">
 			<p:documentation>Retrieve the test graph as TriX for comparison.</p:documentation>
 			<p:with-option name="graph" select="$testURI"/>
 		</gsp:retrieve-graph>
+		
+		<p:filter select="/http:response/http:body/trix:trix"/>
 		
 		<p:xslt>
 			<p:documentation>Convert to Canonical TriX.</p:documentation>
@@ -197,7 +174,7 @@
 			<p:input port="source">
 				<p:pipe port="result" step="expected-and-actual"/>
 			</p:input>
-			<p:with-option name="href" select="concat('./results/', $testName, '.xml')"/>
+			<p:with-option name="href" select="concat('./grip/', $testName, '.xml')"/>
 		</p:store>
 		
 		<p:identity>
@@ -227,10 +204,18 @@
 	
 	<!-- Re-save the previous report for comparing with the new one. ======= -->
 	
-	<p:load href="./results/results.xml"/>
+	<!--<p:try>
+		<p:group>
+			<p:load href="./grip/results.xml"/>
 	
-	<p:store encoding="UTF-8" indent="true" media-type="application/xml" method="xml"
-			href="./results/grip-previous-results.xml"/>
+			<p:store encoding="UTF-8" indent="true" media-type="application/xml" method="xml"
+					href="./grip/previous-results.xml"/>
+		</p:group>
+		<p:catch>
+			<p:sink/>
+		</p:catch>
+	</p:try>-->
+	
 	
 	
 	

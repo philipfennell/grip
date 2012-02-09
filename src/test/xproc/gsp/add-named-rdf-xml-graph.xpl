@@ -15,13 +15,13 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:merge-graph name="test" uri="http://localhost:8005/graphs" 
+	<gsp:add-graph name="test" uri="http://localhost:8005/graphs" 
 			graph="http://www.books.com/harry-potter"
 			content-type="application/rdf+xml">
 		<p:input port="source">
 			<p:document href="test/resources/books.rdf"/>
 		</p:input>
-	</gsp:merge-graph>
+	</gsp:add-graph>
 	
 	<test:validate-with-schematron assert-valid="false">
 		<p:input port="schema">

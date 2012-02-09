@@ -100,6 +100,7 @@ declare function trix:rdf-xml-to-trix($rdf as element(rdf:RDF), $graphURI as xs:
 {
 	let $params := map:map()
 	let $_put := map:put($params, 'GRAPH_URI', $graphURI)
+	let $_put := map:put($params, 'BASE_URI', $graphURI)
 	return
 		xdmp:xslt-invoke('/resources/xslt/lib/rdf-xml-to-trix.xsl', document {$rdf}, $params)/*
 };

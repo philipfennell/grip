@@ -1,0 +1,22 @@
+<c:result xmlns:c="http://www.w3.org/ns/xproc-step">
+   <trix xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+      <graph>
+         <uri>http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/test001.rdf</uri>
+         <triple>
+            <uri>http://example/q?abc=1&amp;def=2</uri>
+            <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#value</uri>
+            <plainLiteral>xxx</plainLiteral>
+         </triple>
+      </graph>
+   </trix>
+   <trix xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+      <graph>
+         <uri>http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/test001.rdf</uri>
+         <triple>
+            <uri>http://example/q?abc=1&amp;def=2</uri>
+            <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#value</uri>
+            <plainLiteral>xxx</plainLiteral>
+         </triple>
+      </graph>
+   </trix>
+</c:result>

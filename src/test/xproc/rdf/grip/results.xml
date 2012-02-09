@@ -1,0 +1,3 @@
+<c:results xmlns:c="http://www.w3.org/ns/xproc-step" success-rate="100%" successes="1">
+   <c:test success="true" uri="amp-in-url/test001"/>
+</c:results>
