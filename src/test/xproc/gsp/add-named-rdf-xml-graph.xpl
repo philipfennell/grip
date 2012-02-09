@@ -23,7 +23,7 @@
 		</p:input>
 	</gsp:merge-graph>
 	
-	<test:validate-with-schematron assert-valid="true">
+	<test:validate-with-schematron assert-valid="false">
 		<p:input port="schema">
 			<p:document href="test/resources/schemas/successful-response.sch"/>
 		</p:input>

@@ -2,6 +2,7 @@
 <p:declare-step 
 		xmlns:c="http://www.w3.org/ns/xproc-step" version="1.0"
 		xmlns:cx="http://xmlcalabash.com/ns/extensions"
+		xmlns:gsp="http://www.w3.org/TR/sparql11-http-rdf-update/"
 		xmlns:nt="http://www.w3.org/ns/formats/N-Triples"
 		xmlns:p="http://www.w3.org/ns/xproc"
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -10,12 +11,13 @@
 		exclude-inline-prefixes="#all"
 		name="rdf-test-cases">
 	
-	<p:documentation>RDF Test Cases (Latest Approved)</p:documentation>
+	<p:documentation>RDF Test Cases (Latest Approved) round-tripped through GRIP.</p:documentation>
 	<p:input port="source">
 		<p:document href="latest_Approved/Manifest.rdf"/>
 	</p:input>
 	<p:output port="result"/>
 	
+	<p:import href="../../resources/xproc/lib-gsp.xpl"/>
 	<p:import href="../../resources/xproc/library-1.0.xpl"/>
 	
 	<p:serialization port="result" encoding="UTF-8" indent="true" media-type="application/xml" method="xml"/>
@@ -27,7 +29,7 @@
 	
 	<p:for-each>
 		<!-- <p:iteration-source select="/rdf:RDF/node()[ends-with(local-name(), 'ParserTest')][test:status eq 'APPROVED']"/> -->
-		<p:iteration-source select="/rdf:RDF/test:PositiveParserTest[test:status eq 'APPROVED']"/>
+		<p:iteration-source select="/rdf:RDF/test:PositiveParserTest[test:status eq 'APPROVED'][1]"/>
 		
 		
 		
@@ -98,7 +100,7 @@
 		
 		<!-- === Get and process the test. ================================= -->
 		
-		<p:xslt>
+		<!--<p:xslt>
 			<p:documentation>Transform the test's source into TriX.</p:documentation>
 			<p:input port="source">
 				<p:pipe port="result" step="source"/>
@@ -110,7 +112,25 @@
 				<p:empty/>
 			</p:input>
 			<p:with-param name="BASE_URI" select="$testURI"/>
-		</p:xslt>
+		</p:xslt>-->
+		
+		<gsp:add-graph name="test" uri="http://localhost:8005/graphs" 
+				content-type="application/rdf+xml">
+			<p:documentation>Load the source test graph into GRIP.</p:documentation>
+			<p:input port="source">
+				<p:pipe port="result" step="source"/>
+			</p:input>
+			<p:with-option name="graph" select="$testURI"/>
+		</gsp:add-graph>
+		
+		<p:sink/>
+		
+		<gsp:retrieve-graph uri="http://localhost:8005/test/data" 
+				media-type="application/xml">
+			<p:documentation>Retrieve the test graph as TriX for comparison.</p:documentation>
+			<p:with-option name="graph" select="$testURI"/>
+		</gsp:retrieve-graph>
+		
 		<p:xslt>
 			<p:documentation>Convert to Canonical TriX.</p:documentation>
 			<p:input port="stylesheet">
@@ -210,7 +230,7 @@
 	<p:load href="./results/results.xml"/>
 	
 	<p:store encoding="UTF-8" indent="true" media-type="application/xml" method="xml"
-			href="./results/previous-results.xml"/>
+			href="./results/grip-previous-results.xml"/>
 	
 	
 	

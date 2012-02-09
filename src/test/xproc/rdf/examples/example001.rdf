@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+		xmlns:test="http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#">
+	
+	<!-- Here there are three ways of expressing the same thing -->
+	
+	<rdf:Description rdf:about="http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/Manifest.rdf#test001">
+		<rdf:type rdf:resource="http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#PositiveParserTest"/>
+		
+		<test:inputDocument>
+			<test:RDF-XML-Document rdf:about="http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/test001.rdf" />
+		</test:inputDocument>
+		
+		<test:inputDocument>
+			<rdf:Description rdf:about="http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/test001.rdf">
+				<rdf:type rdf:resource="http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#RDF-XML-Document"/>
+			</rdf:Description>
+		</test:inputDocument>
+		
+		<test:inputDocument rdf:resource="http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/test001.rdf"/>
+	</rdf:Description>
+	
+	<rdf:Description rdf:about="http://www.w3.org/2000/10/rdf-tests/rdfcore/amp-in-url/test001.rdf">
+		<rdf:type rdf:resource="http://www.w3.org/2000/10/rdf-tests/rdfcore/testSchema#RDF-XML-Document"/>
+	</rdf:Description>
+</rdf:RDF>

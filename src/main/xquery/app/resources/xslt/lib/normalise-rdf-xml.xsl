@@ -170,6 +170,23 @@
 	</xsl:template>
 	
 	
+	<!-- Typed Element Nodes. -->
+	<xsl:template match="*[rdf:is-typed-element-node(.)]" mode="rdf:typed-node-elements">
+		<xsl:param name="nodeIDAttr" as="attribute()?">
+			<xsl:attribute name="rdf:nodeID" select="generate-id(..)"/>
+		</xsl:param>
+		<xsl:variable name="subjectAttr" as="attribute()" 
+				select="(rdf:resolve-uri-reference((@rdf:about|@rdf:ID)), $nodeIDAttr)[1]"/>
+		
+		<rdf:Description>
+			<xsl:copy-of select="$subjectAttr"/>
+			<xsl:if test="not(../*[@rdf:parseType eq 'Resource'])">
+				<rdf:type rdf:resource="{concat(namespace-uri-from-QName(resolve-QName(name(), .)), local-name())}"/>
+			</xsl:if>
+		</rdf:Description>
+	</xsl:template>
+	
+	
 	<!-- Expand property attributes into property elements. -->
 	<xsl:template match="@rdf:type" mode="rdf:property-attributes">
 		<xsl:element name="{name()}" namespace="{namespace-uri()}">
@@ -212,7 +229,21 @@
 	</xsl:template>
 	
 	
-	<xsl:template match="*[rdf:Description]" mode="rdf:property-elements" priority="2">
+	<xsl:template match="*[rdf:is-typed-element-node(.) and *[@rdf:about]]" mode="rdf:property-elements" priority="2">
+		<xsl:copy>
+			<xsl:attribute name="rdf:resource" select="rdf:resolve-uri(*/@rdf:about)"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	
+	<xsl:template match="*[rdf:Description[@rdf:about]]" mode="rdf:property-elements" priority="2">
+		<xsl:copy>
+			<xsl:attribute name="rdf:resource" select="rdf:Description/@rdf:about"/>
+		</xsl:copy>
+	</xsl:template>
+	
+	
+	<xsl:template match="*[rdf:Description[@rdf:nodeID]]" mode="rdf:property-elements" priority="2">
 		<xsl:copy>
 			<xsl:attribute name="rdf:nodeID" select="generate-id(rdf:Description)"/>
 		</xsl:copy>
@@ -259,6 +290,10 @@
 	<!-- Ignore lists in this mode. -->
 	<xsl:template match="rdf:List | rdf:li | *[@rdf:parseType eq 'Collection']" mode="rdf:property-elements-property-attributes" priority="1"/>
 	
+	
+	<!-- Ignore element and typed element nodes that have only RDF attributes. -->
+	<xsl:template match="*[not(exists(@* except (@rdf:*)))]" mode="rdf:property-elements-property-attributes" priority="2"/>
+	 
 	
 	<!-- Property Elements with Property Attributes. -->
 	<xsl:template match="*[@*[contains(name(), ':')]][not(@xml:* | @rdf:datatype | @rdf:nodeID | @rdf:parseType)]" mode="rdf:property-elements-property-attributes">
@@ -383,6 +418,16 @@
 	
 	
 	<!--  -->
+	<xsl:template match="*[rdf:is-typed-element-node(*) and */@rdf:about]" mode="rdf:referred-node-element" priority="2">
+		<xsl:apply-templates select="*" mode="rdf:typed-node-elements">
+			<xsl:with-param name="nodeIDAttr" as="attribute()?">
+				<xsl:attribute name="rdf:about" select="rdf:resolve-uri(*/@rdf:about)"/>
+			</xsl:with-param>
+		</xsl:apply-templates>
+	</xsl:template>
+	
+	
+	<!--  -->
 	<xsl:template match="*[not(rdf:Description)]" mode="rdf:referred-node-element" priority="1">
 		<xsl:apply-templates select="." mode="rdf:node-elements">
 			<xsl:with-param name="nodeIDAttr" as="attribute()?">
@@ -466,18 +511,8 @@
 	
 	
 	
-	<!-- === Errors or Unsupported. ======================================================= -->
 	
+	<!-- === Errors or Unsupported. ======================================== -->
 	
-	<!-- Throw an exception for invalid/unsupported parse types.
-	<xsl:template match="*[@rdf:parseType and not(@rdf:parseType = ('Resource', 'Literal'))]" mode="#all" priority="10">
-		<xsl:message>[XSLT] <xsl:value-of select="concat('Unsupported Parse Type: ''', @rdf:parseType, '''')"/></xsl:message>
-	</xsl:template> -->
-	
-	
-	<!-- Throw an error if ? elements are present.
-	<xsl:template match="" mode="#all" priority="10">
-		<xsl:message>[XSLT] <xsl:value-of select="'Graphs using rdf:Bag, rdf:Seq, rdf:Alt, rdf:Statement, rdf:Property or rdf:List are not, currently, supported.'"/></xsl:message>
-	</xsl:template> -->
 	
 </xsl:transform>
