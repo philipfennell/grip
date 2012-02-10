@@ -1,7 +1,0 @@
-<c:results xmlns:c="http://www.w3.org/ns/xproc-step">
-   <response xmlns="http://www.w3.org/Protocols/rfc2616" status="204">
-      <header name="Server" value="MarkLogic"/>
-      <header name="Content-Length" value="0"/>
-      <header name="Connection" value="close"/>
-   </response>
-</c:results>
