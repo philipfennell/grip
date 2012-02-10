@@ -91,14 +91,14 @@ declare function gsp:parse-graph($graphURI as xs:string, $graphContent as item()
 	let $info := xdmp:log(concat('[XQuery][GRIP] Parsing Graph: ', $graphURI, ' as ', $mediaType), 'info')
 	return
 		typeswitch ($source) 
-			case element(rdf:RDF) 
-				return trix:rdf-xml-to-trix($source, $graphURI)
 			case element(trix:trix) 
 				return trix:trix-set-graph-uri($source, $graphURI)
 			case element(nt:RDF) 
 				return trix:ntriples-to-trix($source, $graphURI)
 			(: case element(ttl:RDF) 
 				return trix:turtle-to-trix($source, $graphURI) :)
+			case element() 
+				return trix:rdf-xml-to-trix($source, $graphURI)
 			default 
 				return error(xs:QName('err:REQ005'), concat('Unsupported Media Type: ', name($source)))
 };
@@ -219,15 +219,15 @@ declare function gsp:tuple-insert($triple as element(trix:triple), $graphURI as 
 {
 	let $subject as xs:string := trix:subject-from-triple($triple)
 	let $predicate as xs:string := trix:predicate-from-triple($triple)
-	let $object as xs:string := trix:object-from-triple($triple)
+	let $object as item()* := trix:object-from-triple($triple)
 	return
 		xdmp:document-insert(
-			sem:uri-for-tuple($subject, $predicate, $object, $graphURI),
+			sem:uri-for-tuple($subject, $predicate, gsp:string($object), $graphURI),
 			element t {
 				( element s {
 				( typeswitch ($triple/*[1])
 					case $sub as element(trix:id) 
-						return gsp:generate-blank-node-id($subject, $graphURI)
+						return $subject
 					default 
 						return $subject ) },
 				element p {$predicate},
@@ -239,15 +239,28 @@ declare function gsp:tuple-insert($triple as element(trix:triple), $graphURI as 
 				 : xs:anyURI, otherwise copy the datatype, if any.
 				 :)
 				( typeswitch ($triple/*[3]) 
-					case $obj as element(trix:uri) 
+					case element(trix:uri) 
 						return ( attribute datatype {'http://www.w3.org/2001/XMLSchema#anyURI'}, $object )
-					case $obj as element(trix:id) 
-						return gsp:generate-blank-node-id($object, $graphURI)
+					case element(trix:id) 
+						return $object
 					default 
 						return ( $triple/*[3]/@datatype, $object ) ) )},
 				element c {$graphURI} )
 	    	} )
 };
+
+
+(:~
+ : Takes a possible sequence of nodes (element and text()) and serialises them
+ : to a string.
+ : @param $items items to be serialised as a string.
+ : @return xs:string
+ :)
+declare function gsp:string($items as item()*) 
+		as xs:string 
+{
+	xdmp:quote(<item>{$items}</item>)
+}; 
 
 
 (:~

@@ -14,7 +14,7 @@
 	
 	<xsl:output encoding="UTF-8" indent="yes" media-type="application/rdf+xml" method="xml"/>
 	
-	<xsl:param name="BASE_URI" as="xs:string" select="base-uri(/*)"/>
+	<xsl:param name="BASE_URI" as="xs:string" select="(base-uri(/*), '/')[1]"/>
 	
 	
 	
@@ -418,7 +418,7 @@
 	
 	
 	<!--  -->
-	<xsl:template match="*[rdf:is-typed-element-node(*) and */@rdf:about]" mode="rdf:referred-node-element" priority="2">
+	<xsl:template match="*[rdf:is-typed-element-node(element()) and */@rdf:about]" mode="rdf:referred-node-element" priority="2">
 		<xsl:apply-templates select="*" mode="rdf:typed-node-elements">
 			<xsl:with-param name="nodeIDAttr" as="attribute()?">
 				<xsl:attribute name="rdf:about" select="rdf:resolve-uri(*/@rdf:about)"/>
@@ -504,9 +504,13 @@
 	
 	<!-- Returns true if the context node is not in the RDF namespace. -->
 	<xsl:function name="rdf:is-typed-element-node" as="xs:boolean">
-		<xsl:param name="contextNode" as="element()"/>
+		<xsl:param name="contextNode" as="item()*"/>
 		
-		<xsl:value-of select="namespace-uri-from-QName(resolve-QName(name($contextNode), $contextNode)) ne 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'"/>
+		<xsl:value-of select="
+			if ($contextNode instance of element()) then 
+				namespace-uri-from-QName(resolve-QName(name($contextNode), $contextNode)) ne 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+			else
+				false()"/>
 	</xsl:function>
 	
 	

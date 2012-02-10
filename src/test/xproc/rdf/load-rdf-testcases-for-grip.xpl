@@ -67,12 +67,19 @@
 		
 		<!-- === Get and process the test. ================================= -->
 		
+		<cx:message>
+			<p:with-option name="message" select="$testURI"/>
+		</cx:message>
+		
 		<gsp:add-graph name="insert" uri="http://localhost:8005/graphs" 
 				content-type="application/rdf+xml">
 			<p:documentation>Load the source test graph into GRIP.</p:documentation>
 			<p:with-option name="graph" select="$testURI"/>
 		</gsp:add-graph>
 		
+		<p:add-attribute attribute-name="uri" match="/http:response">
+			<p:with-option name="attribute-value" select="$testURI"/>
+		</p:add-attribute>
 	</p:for-each>
 	
 	<p:wrap-sequence wrapper="c:results"/>

@@ -255,9 +255,9 @@ limitations under the License.</p:documentation>
 			<p:with-option name="media-type" select="$media-type"/>
 		</gsp:submission>
 		
-		<gsp:debug-submission>
+		<!--<gsp:debug-submission>
 			<p:with-option name="debug" select="$debug"/>
-		</gsp:debug-submission>
+		</gsp:debug-submission>-->
 		
 		<gsp:http-request/>
 	</p:declare-step>
@@ -307,9 +307,9 @@ limitations under the License.</p:documentation>
 			<p:with-option name="content-type" select="$content-type"/>
 		</gsp:graph-submission>
 		
-		<gsp:debug-submission>
+		<!--<gsp:debug-submission>
 			<p:with-option name="debug" select="$debug"/>
-		</gsp:debug-submission>
+		</gsp:debug-submission>-->
 		
 		<gsp:http-request/>
 	</p:declare-step>

@@ -17,6 +17,7 @@
 		<p:document href="latest_Approved/Manifest.rdf"/>
 	</p:input>
 	<p:output port="result"/>
+	<p:option name="TEST_URI" required="false" select="''"/>
 	
 	<p:import href="../../resources/xproc/lib-gsp.xpl"/>
 	<p:import href="../../resources/xproc/library-1.0.xpl"/>
@@ -58,7 +59,9 @@
 		
 		<p:identity name="test-case"/>
 		
-		<p:sink/>
+		<p:load name="source">
+			<p:with-option name="href" select="/test:*/test:inputDocument/test:RDF-XML-Document/@rdf:about"/>
+		</p:load>
 		
 		<p:add-attribute match="/c:request" attribute-name="href">
 			<p:input port="source">
@@ -99,24 +102,45 @@
 		
 		<!-- === Get and process the test. ================================= -->
 		
-		
-		<gsp:retrieve-graph name="retrieve" uri="http://localhost:8005/graphs" 
-				media-type="application/xml">
-			<p:documentation>Retrieve the test graph as TriX for comparison.</p:documentation>
+		<gsp:add-graph name="insert" uri="http://localhost:8005/graphs" 
+				content-type="application/rdf+xml">
+			<p:documentation>Load the source test graph into GRIP.</p:documentation>
 			<p:with-option name="graph" select="$testURI"/>
-		</gsp:retrieve-graph>
+		</gsp:add-graph>
 		
-		<p:filter select="/http:response/http:body/trix:trix"/>
+		<cx:message>
+			<p:with-option name="message" select="concat('[XProc] Insert:   ', $testURI, ' - ', /http:response/@status)"/>
+		</cx:message>
 		
-		<p:xslt>
-			<p:documentation>Convert to Canonical TriX.</p:documentation>
-			<p:input port="stylesheet">
-				<p:document href="../../../main/xquery/app/resources/xslt/lib/canonical-trix.xsl"/>
-			</p:input>
-			<p:input port="parameters">
-				<p:empty/>
-			</p:input>
-		</p:xslt>
+		<p:choose>
+			<p:when test="/http:response/@status eq '500'">
+				<p:identity/>
+			</p:when>
+			<p:otherwise>
+				<gsp:retrieve-graph name="retrieve" uri="http://localhost:8005/graphs" 
+						media-type="application/xml">
+					<p:documentation>Retrieve the test graph as TriX for comparison.</p:documentation>
+					<p:with-option name="graph" select="$testURI"/>
+				</gsp:retrieve-graph>
+		
+				<cx:message>
+					<p:with-option name="message" select="concat('[XProc] Retrieve: ', $testURI, ' - ', /http:response/@status)"/>
+				</cx:message>
+				
+				<p:filter select="/http:response/http:body/trix:trix"/>
+				
+				<p:xslt>
+					<p:documentation>Convert to Canonical TriX.</p:documentation>
+					<p:input port="stylesheet">
+						<p:document href="../../../main/xquery/app/resources/xslt/lib/canonical-trix.xsl"/>
+					</p:input>
+					<p:input port="parameters">
+						<p:empty/>
+					</p:input>
+				</p:xslt>
+			</p:otherwise>
+		</p:choose>
+		
 		<p:identity name="actual"/>
 		
 		
@@ -170,12 +194,20 @@
 		
 		<!-- === Store the test result with the expected result. =========== -->
 		
-		<p:store encoding="UTF-8" indent="true" media-type="application/xml" method="xml">
-			<p:input port="source">
-				<p:pipe port="result" step="expected-and-actual"/>
-			</p:input>
-			<p:with-option name="href" select="concat('./grip/', $testName, '.xml')"/>
-		</p:store>
+		<p:choose>
+			<p:when test="not(xs:boolean(/c:test/@success))">
+				<p:store encoding="UTF-8" indent="true" media-type="application/xml" method="xml">
+					<p:input port="source">
+						<p:pipe port="result" step="expected-and-actual"/>
+					</p:input>
+					<p:with-option name="href" select="concat('./grip/', $testName, '.xml')"/>
+				</p:store>
+			</p:when>
+			<p:otherwise>
+				<p:sink/>
+			</p:otherwise>
+		</p:choose>
+		
 		
 		<p:identity>
 			<p:input port="source">
@@ -204,7 +236,7 @@
 	
 	<!-- Re-save the previous report for comparing with the new one. ======= -->
 	
-	<!--<p:try>
+	<p:try>
 		<p:group>
 			<p:load href="./grip/results.xml"/>
 	
@@ -212,9 +244,10 @@
 					href="./grip/previous-results.xml"/>
 		</p:group>
 		<p:catch>
+			<cx:message message="[XProc] Something's up!"/>
 			<p:sink/>
 		</p:catch>
-	</p:try>-->
+	</p:try>
 	
 	
 	

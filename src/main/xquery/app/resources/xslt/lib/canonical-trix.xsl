@@ -41,6 +41,7 @@
 			<xsl:for-each select="$relabeledNodes">
 				<xsl:sort select="string(*[1])"/>
 				<xsl:sort select="string(*[2])"/>
+				<xsl:sort select="string(*[3])"/>
 				<xsl:copy-of select="."/>
 			</xsl:for-each>
 		</xsl:copy>

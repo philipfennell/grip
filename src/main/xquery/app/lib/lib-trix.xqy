@@ -38,7 +38,7 @@ declare namespace ttl 	= "http://www.w3.org/ns/formats/Turtle";
 declare function trix:subject-from-triple($triple as element(trix:triple)) 
 		as xs:string 
 {
-	trix:parse-reference($triple/*[1])
+	trix:parse-content($triple/*[1])
 };
 
 
@@ -60,9 +60,9 @@ declare function trix:predicate-from-triple($triple as element(trix:triple))
  : @return xs:string
  :)
 declare function trix:object-from-triple($triple as element(trix:triple)) 
-		as xs:string 
+		as item()*
 {
-	trix:parse-reference($triple/*[3])
+	trix:parse-content($triple/*[3])
 };
 
 
@@ -70,22 +70,30 @@ declare function trix:object-from-triple($triple as element(trix:triple))
  : Takes a reference (uri or id) and returns either the URI as-is or a nodeID 
  : with '_:' prepended on the front to uniquiely identify the value as a nodeID
  : in that context.
- : @param $ref the reference value.
+ : @param $obj the object.
  : @return xs:string
  :)
-declare function trix:parse-reference($ref as element()) 
-		as xs:string
+declare function trix:parse-content($object as element()) 
+		as item()*
 {
-	typeswitch ($ref) 
-  	case $subject as element(trix:id) 
+	typeswitch ($object) 
+  	case element(trix:id) 
   	return 
-  		if (starts-with(string($subject), '_:A')) then 
-  			string($subject) 
+  		if (starts-with(string($object), '_:A')) then 
+  			string($object) 
   		else 
-  			concat('_:A', string($subject))
+  			concat('_:A', string($object))
+  	case element(trix:typedLiteral) 
+	return 
+		(: If an XML Literal... copy the children... :)
+		if (ends-with(string($object/@datatype), '#XMLLiteral')) then
+			$object/(* | text())
+		(: ...otherwise, take the string value. :)
+		else
+			string($object)
  	default 
  	return 
- 		string($ref)
+ 		string($object)
 };
 
 
@@ -95,7 +103,7 @@ declare function trix:parse-reference($ref as element())
  : @param $graphURI the graph URI.
  : @return element(trix:trix)
  :)
-declare function trix:rdf-xml-to-trix($rdf as element(rdf:RDF), $graphURI as xs:string)
+declare function trix:rdf-xml-to-trix($rdf as element(), $graphURI as xs:string)
 	as element(trix:trix)
 {
 	let $params := map:map()

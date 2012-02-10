@@ -64,12 +64,22 @@
 	
 	
 	<!-- Resources -->
-	<xsl:template match="t[o/@datatype eq 'http://www.w3.org/2001/XMLSchema#anyURI']" mode="trix" priority="2">
+	<xsl:template match="t[o/@datatype][ends-with(o/@datatype, '#anyURI')]" mode="trix" priority="2">
 		<uri><xsl:value-of select="o"/></uri>
 	</xsl:template>
 	
 	
-	<xsl:template match="t[o/@datatype ne 'http://www.w3.org/2001/XMLSchema#anyURI']" mode="trix" priority="2">
+	<!-- XML Literals -->
+	<xsl:template match="t[o/@datatype][ends-with(o/@datatype, '#XMLLiteral')]" mode="trix" priority="2.5">
+		<typedLiteral>
+			<xsl:copy-of select="o/@*"/>
+			<xsl:copy-of select="o/(* | text())" copy-namespaces="no"/>
+		</typedLiteral>
+	</xsl:template>
+	
+	
+	<!-- Type Literals that aren't URIs. -->
+	<xsl:template match="t[o/@datatype][not(ends-with(o/@datatype, '#anyURI'))]" mode="trix" priority="2">
 		<typedLiteral datatype="{o/@datatype}">
 			<xsl:copy-of select="o/@xml:lang"/>
 			<xsl:value-of select="o"/>
