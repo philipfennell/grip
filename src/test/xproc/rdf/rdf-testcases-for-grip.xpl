@@ -244,7 +244,6 @@
 					href="./grip/previous-results.xml"/>
 		</p:group>
 		<p:catch>
-			<cx:message message="[XProc] Something's up!"/>
 			<p:sink/>
 		</p:catch>
 	</p:try>
