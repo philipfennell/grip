@@ -155,7 +155,7 @@ declare function gsp:insert-graph($graphContent as element(trix:graph))
 {
 	for $triple in $graphContent/trix:triple 
 	return
-		gsp:tuple-insert($triple, string(string($graphContent/trix:uri))) 
+		gsp:tuple-insert($triple, string($graphContent/trix:uri)) 
 };
 
 
@@ -341,9 +341,9 @@ declare function gsp:add-graph($trix as element(trix:trix))
 				for $triple in $trix/trix:graph/trix:triple
 				let $subject as xs:string := trix:subject-from-triple($triple)
 				let $predicate as xs:string := trix:predicate-from-triple($triple)
-				let $object as xs:string := trix:object-from-triple($triple)
+				let $object as item()* := trix:object-from-triple($triple)
 				let $tupleURI as xs:string := 
-						sem:uri-for-tuple($subject, $predicate, $object, $graphURI)
+						sem:uri-for-tuple($subject, $predicate, gsp:string($object), $graphURI)
 				where doc-available($tupleURI)
 				return
 					doc($tupleURI)/*
