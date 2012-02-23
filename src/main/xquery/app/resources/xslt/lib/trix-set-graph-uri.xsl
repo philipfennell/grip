@@ -22,12 +22,12 @@
 	
 	
 	<xsl:template match="trix:graph/trix:uri">
-		<xsl:copy><xsl:value-of select="$GRAPH_URI"/></xsl:copy>
+		<xsl:copy copy-namespaces="no"><xsl:value-of select="$GRAPH_URI"/></xsl:copy>
 	</xsl:template>
 	
 	
 	<xsl:template match="*">
-		<xsl:copy>
+		<xsl:copy copy-namespaces="no">
 			<xsl:copy-of select="@*"/>
 			<xsl:apply-templates select="* | text()"/>
 		</xsl:copy>

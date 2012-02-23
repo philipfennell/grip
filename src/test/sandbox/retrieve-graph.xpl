@@ -17,6 +17,8 @@
 	<p:import href="test/resources/xproc/test.xpl"/>
 	
 	
-	<gsp:retrieve-graph uri="http://localhost:8005/merge-to-service-test"/>
+	<gsp:retrieve-graph uri="http://localhost:8005/graphs" 
+		graph="http://www.w3.org/2000/10/rdf-tests/rdfcore/rdfms-syntax-incomplete/test002.rdf"
+		media-type="application/xml"/>
 	
 </p:declare-step>

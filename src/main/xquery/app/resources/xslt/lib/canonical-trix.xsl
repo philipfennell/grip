@@ -49,8 +49,11 @@
 	
 	
 	<xsl:template match="id" mode="canon">
-		<xsl:param name="idLUT" as="element()" tunnel="yes"/>
-		<xsl:copy><xsl:value-of select="$idLUT/id[@value eq string(current())]/@replacement"/></xsl:copy>
+		<!--<xsl:param name="idLUT" as="element()" tunnel="yes"/>
+		<xsl:copy copy-namespaces="no"><xsl:value-of select="$idLUT/id[@value eq string(current())]/@replacement"/></xsl:copy>-->
+		<xsl:copy copy-namespaces="no">
+			<xsl:copy-of select="@*"/>
+		</xsl:copy>
 	</xsl:template>
 	
 	
