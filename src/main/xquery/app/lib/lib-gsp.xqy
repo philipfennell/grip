@@ -390,34 +390,71 @@ declare function gsp:merge-graph($trix as element(trix:trix))
  : Returns the graph store's Service Decription according to the SPARQL 1.1 
  : Service Description.
  : @see http://www.w3.org/TR/sparql11-service-description/
- : Note: this is only a 'place holder' function - full support will follow.
  : @param $requestURI the URI of the original request to the service.
  : @return element(trix:trix)
  :)
 declare function gsp:get-service-description($requestURI as xs:string) 
-		as element(trix:trix) 
+		as element(trix:trix)
 {
-<trix xmlns="http://www.w3.org/2004/03/trix/trix-1/"
-      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-      xmlns:prof="http://www.w3.org/ns/owl-profile/"
-      xmlns:sd="http://www.w3.org/ns/sparql-service-description#"
-      xmlns:scovo="http://purl.org/NET/scovo#"
-      xmlns:void="http://rdfs.org/ns/void#"
-      xmlns:xs="http://www.w3.org/2001/XMLSchema#">
-   <graph>
-      <uri/>
-      <triple>
-         <id>d1e2</id>
-         <uri>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</uri>
-         <uri>http://www.w3.org/ns/sparql-service-description#Service</uri>
-      </triple>
-      <triple>
-         <id>d1e2</id>
-         <uri>http://www.w3.org/ns/sparql-service-description#endpoint</uri>
-         <uri>{$requestURI}</uri>
-      </triple>
-   </graph>
-</trix>
+let $serviceURI as xs:string := $requestURI
+let $defaultGraphURI as xs:string := concat($serviceURI, '?default=')
+let $serviceDescription as element(rdf:RDF) := 
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+			xmlns:sd="http://www.w3.org/ns/sparql-service-description#"
+			xmlns:void="http://rdfs.org/ns/void#">{
+		
+		(: Basic service details. :)
+		<rdf:Description rdf:nodeID="SD1">
+			<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#Service"/>
+			<sd:inputFormat rdf:resource="http://www.w3.org/ns/formats/N-Triples"/>
+			<sd:inputFormat rdf:resource="http://www.w3.org/ns/formats/RDF_XML"/>
+			<sd:endpoint rdf:resource="{$serviceURI}"/>
+			<sd:availableGraphs rdf:nodeID="AG1"/>
+		</rdf:Description>,
+		
+		(: Available Graphs. :)
+		<rdf:Description rdf:nodeID="AG1">{
+			( <rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#Dataset"/>,
+				
+				(: Default Graph - if present. :)
+				( if (doc-available($defaultGraphURI)) then 
+					<sd:defaultGraph rdf:nodeID="DG1"/>
+				else 
+					() ),
+				
+				(: Named Graphs. :)
+				for $namedGraph in (element graphs {//graph except (doc($defaultGraphURI)/graph)})/graph
+				return
+					<sd:namedGraph rdf:nodeID="NG{count($namedGraph/preceding-sibling::graph) + 1}"/> )
+		}</rdf:Description>,
+		
+		(: Default Graph details. :)
+		( if (doc-available($defaultGraphURI)) then 
+			<rdf:Description rdf:nodeID="DG1">
+				<void:triples rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">{count(gsp:tuples-for-context($defaultGraphURI))}</void:triples>
+				<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#Graph"/>
+			</rdf:Description>
+		else 
+			() ),
+		
+		(: Named Graphs details. :)
+		( for $namedGraph in (element graphs {//graph except (doc($defaultGraphURI)/graph)})/graph
+		let $n as xs:integer := count($namedGraph/preceding-sibling::graph) + 1
+		let $graphURI as xs:string := string($namedGraph/@uri)
+		return
+			( <rdf:Description rdf:nodeID="NG{$n}">
+				<sd:graph rdf:nodeID="G{$n}"/>
+				<sd:name rdf:resource="{$graphURI}"/>
+				<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#NamedGraph"/>
+			</rdf:Description>,
+			
+			<rdf:Description rdf:nodeID="G{$n}">
+				<void:triples rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">{count(gsp:tuples-for-context($graphURI))}</void:triples>
+				<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#Graph"/>
+			</rdf:Description> )
+	)}</rdf:RDF>
+return
+	trix:rdf-xml-to-trix($serviceDescription, '')
 }; 
 
 

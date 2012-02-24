@@ -1,0 +1,33 @@
+[] <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+<http://www.w3.org/ns/sparql-service-description#Service> ;
+<http://www.w3.org/ns/sparql-service-description#availableGraphs>
+
+[ <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+	<http://www.w3.org/ns/sparql-service-description#Dataset> ;
+	<http://www.w3.org/ns/sparql-service-description#defaultGraph> [ 
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+		<http://www.w3.org/ns/sparql-service-description#Graph> ;
+		<http://rdfs.org/ns/void#triples> 17 
+	] ;
+	
+	<http://www.w3.org/ns/sparql-service-description#namedGraph> [ 
+		<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+		<http://www.w3.org/ns/sparql-service-description#NamedGraph> ;
+		<http://www.w3.org/ns/sparql-service-description#graph> [ 
+			<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+			<http://www.w3.org/ns/sparql-service-description#Graph> ;
+			<http://rdfs.org/ns/void#triples> 1	
+		] ;
+		<http://www.w3.org/ns/sparql-service-description#name>
+		<http://www.w3.org/2000/10/rdf-tests/rdfcore/rdfms-rdf-names-use/warn-001.rdf>
+	]
+] ;
+
+<http://www.w3.org/ns/sparql-service-description#endpoint>
+<http://localhost:8005/graphs> ;
+
+<http://www.w3.org/ns/sparql-service-description#inputFormat>
+<http://www.w3.org/ns/formats/RDF_XML> ;
+
+<http://www.w3.org/ns/sparql-service-description#inputFormat>
+<http://www.w3.org/ns/formats/N-Triples> .

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF 
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:sd="http://www.w3.org/ns/sparql-service-description#"
+	xmlns:void="http://rdfs.org/ns/void#">
+	
+	<rdf:Description rdf:nodeID="A1">
+		<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#Service"/>
+		<sd:inputFormat rdf:resource="http://www.w3.org/ns/formats/N-Triples"/>
+		<sd:inputFormat rdf:resource="http://www.w3.org/ns/formats/RDF_XML"/>
+		<sd:endpoint rdf:resource="http://localhost:8005/graphs"/>
+		<sd:availableGraphs rdf:nodeID="A2"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:nodeID="A2">
+		<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#Dataset"/>
+		<sd:defaultGraph rdf:nodeID="A4"/>
+		<sd:namedGraph rdf:nodeID="A3"/>
+	</rdf:Description>
+	
+	<rdf:Description rdf:nodeID="A4">
+		<void:triples rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">17</void:triples>
+		<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#Graph"/>
+	</rdf:Description>
+
+	<rdf:Description rdf:nodeID="A3">
+		<sd:graph rdf:nodeID="A0"/>
+		<sd:name rdf:resource="http://www.w3.org/2000/10/rdf-tests/rdfcore/rdfms-rdf-names-use/warn-001.rdf"/>
+		<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#NamedGraph"/>
+	</rdf:Description>
+	
+	<rdf:Description rdf:nodeID="A0">
+		<void:triples rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</void:triples>
+		<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#Graph"/>
+	</rdf:Description>
+</rdf:RDF>

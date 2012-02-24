@@ -5,7 +5,7 @@
 		xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 		xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-		exclude-result-prefixes="err"
+		exclude-result-prefixes="#all"
 		version="2.0">
 	
 	<xsl:import href="normalise-rdf-xml.xsl"/>
@@ -33,11 +33,11 @@
 	<xsl:template match="rdf:RDF">
 		
 		<trix>
-			<!-- This gets in the way of the tests.
+			<!-- This gets in the way of the tests.-->
 			<xsl:for-each select="namespace::*">
 				<xsl:copy-of select="." copy-namespaces="no"/>
 			</xsl:for-each>
-			<xsl:namespace name="xs">http://www.w3.org/2001/XMLSchema#</xsl:namespace>-->
+			<xsl:namespace name="xs">http://www.w3.org/2001/XMLSchema#</xsl:namespace>
 			<graph>
 				<uri><xsl:value-of select="$GRAPH_URI"/></uri>
 				<xsl:apply-templates select="*" mode="descriptions"/>

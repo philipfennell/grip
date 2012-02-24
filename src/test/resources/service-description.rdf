@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:formats="http://www.w3.org/ns/formats/"
+	xmlns:prof="http://www.w3.org/ns/owl-profile/"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:scovo="http://purl.org/NET/scovo#"
+	xmlns:sd="http://www.w3.org/ns/sparql-service-description#"
+	xmlns:void="http://rdfs.org/ns/void#">
+	<sd:Service>
+		<sd:endpoint rdf:resource="http://localhost:8005/graphs"/>
+		<sd:inputFormat rdf:resource="http://www.w3.org/ns/formats/RDF_XML"/>
+		<sd:inputFormat rdf:resource="http://www.w3.org/ns/formats/N-Triples"/>
+		<sd:availableGraphs>
+			<sd:Dataset>
+				<sd:defaultGraph>
+					<sd:Graph>
+						<void:triples rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">17</void:triples>
+					</sd:Graph>
+				</sd:defaultGraph>
+				<sd:namedGraph>
+					<sd:NamedGraph>
+						<sd:name rdf:resource="http://www.w3.org/2000/10/rdf-tests/rdfcore/rdfms-rdf-names-use/warn-001.rdf"/>
+						<sd:graph>
+							<sd:Graph>
+								<void:triples rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</void:triples>
+							</sd:Graph>
+						</sd:graph>
+					</sd:NamedGraph>
+				</sd:namedGraph>
+			</sd:Dataset>
+		</sd:availableGraphs>
+	</sd:Service>
+</rdf:RDF>
