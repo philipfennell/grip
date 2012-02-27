@@ -69,19 +69,30 @@
 	<xsl:template name="ttl:triples">
 		<!--<xsl:analyze-string select="string(.)" regex="{concat(ttl:match-comment(), ttl:match-triples(), ttl:match-ws('*'), '\.', ttl:match-ws('*'))}">-->
 			<xsl:analyze-string select="string(.)" 
-					regex="{concat('((&lt;.*&gt;)|(([A-Za-z_])([A-Za-z_\-0-9])*)?:[A-Za-z_]([A-Za-z_\-0-9])*)', 
-									ttl:match-ws('*'),
-									'((&lt;.*&gt;)|(([A-Za-z_])([A-Za-z_\-0-9])*)?:[A-Za-z_]([A-Za-z_\-0-9])*)', ttl:match-ws('*'), '(', ttl:match-string(), ')', ttl:match-ws('*'), '\.', ttl:match-ws('*'))}">
+					regex="{concat('(', ttl:match-subject(),  ')', ttl:match-ws('*'), '(', ttl:match-prediact-object-list(), ')')}">
 			<xsl:matching-substring>
 				<triple>
 					<subject><xsl:value-of select="regex-group(1)"/></subject>
-					<predicate><xsl:value-of select="regex-group(8)"/></predicate>
-					<object><xsl:value-of select="regex-group(15)"/></object>
+					<xsl:call-template name="ttl:predicate-object-list">
+						<xsl:with-param name="predicateObjectList" as="xs:string" select="regex-group(7)"/>
+					</xsl:call-template>
 				</triple>
 			</xsl:matching-substring>
 			<xsl:non-matching-substring/>
 		</xsl:analyze-string>
-		<!--<xsl:value-of select="ttl:match-triples()"/>-->
+	</xsl:template>
+	
+	
+	<!--  -->
+	<xsl:template name="ttl:predicate-object-list">
+		<xsl:param name="predicateObjectList" as="xs:string"/>
+		<xsl:analyze-string select="$predicateObjectList" regex="{ttl:match-prediact-object-list()}">
+			<xsl:matching-substring>
+				<predicate><xsl:value-of select="regex-group(1)"/></predicate>
+				<object><xsl:value-of select="regex-group(8)"/></object>
+			</xsl:matching-substring>
+			<xsl:non-matching-substring/>
+		</xsl:analyze-string>
 	</xsl:template>
 	
 	
@@ -120,6 +131,12 @@
 	<xsl:function name="ttl:match-subject" as="xs:string">
 		<!--<xsl:value-of select="concat(ttl:match-resource(), '|', ttl:match-blank())"/>-->
 		<xsl:value-of select="ttl:match-resource()"/>
+	</xsl:function>
+	
+	
+	<!--  -->
+	<xsl:function name="ttl:match-prediact-object-list" as="xs:string">
+		<xsl:value-of select="concat('((&lt;.*&gt;)|(([A-Za-z_])([A-Za-z_\-0-9])*)?:[A-Za-z_]([A-Za-z_\-0-9])*)', ttl:match-ws('*'), '(', ttl:match-string(), ')', ttl:match-ws('*'), '\.', ttl:match-ws('*'))"/>
 	</xsl:function>
 	
 	
