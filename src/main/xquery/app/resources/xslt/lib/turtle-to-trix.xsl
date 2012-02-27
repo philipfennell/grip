@@ -67,9 +67,8 @@
 	
 	<!--  -->
 	<xsl:template name="ttl:triples">
-		<!--<xsl:analyze-string select="string(.)" regex="{concat(ttl:match-comment(), ttl:match-triples(), ttl:match-ws('*'), '\.', ttl:match-ws('*'))}">-->
-			<xsl:analyze-string select="string(.)" 
-					regex="{concat('(', ttl:match-subject(),  ')', ttl:match-ws('*'), '(', ttl:match-prediact-object-list(), ')')}">
+		<xsl:analyze-string select="string(.)" 
+					regex="{ttl:match-triples()}">
 			<xsl:matching-substring>
 				<triple>
 					<subject><xsl:value-of select="regex-group(1)"/></subject>
@@ -80,21 +79,23 @@
 			</xsl:matching-substring>
 			<xsl:non-matching-substring/>
 		</xsl:analyze-string>
+		<!--<xsl:value-of select="ttl:match-triples()"/>-->
 	</xsl:template>
 	
 	
 	<!--  -->
 	<xsl:template name="ttl:predicate-object-list">
 		<xsl:param name="predicateObjectList" as="xs:string"/>
+		
 		<xsl:analyze-string select="$predicateObjectList" regex="{ttl:match-prediact-object-list()}">
 			<xsl:matching-substring>
 				<predicate><xsl:value-of select="regex-group(1)"/></predicate>
-				<object><xsl:value-of select="regex-group(8)"/></object>
+				<object><xsl:value-of select="regex-group(7)"/></object>
 			</xsl:matching-substring>
 			<xsl:non-matching-substring/>
 		</xsl:analyze-string>
+		<!--<xsl:value-of select="ttl:match-prediact-object-list()"/>-->
 	</xsl:template>
-	
 	
 	
 	<!--  -->
@@ -123,7 +124,7 @@
 	
 	<!--  -->
 	<xsl:function name="ttl:match-triples" as="xs:string">
-		<xsl:value-of select="ttl:match-subject()"/>
+		<xsl:value-of select="concat('(', ttl:match-subject(), ')', ttl:match-ws('+'), '(', ttl:match-prediact-object-list(), ')')"/>
 	</xsl:function>
 	
 	
@@ -136,7 +137,25 @@
 	
 	<!--  -->
 	<xsl:function name="ttl:match-prediact-object-list" as="xs:string">
-		<xsl:value-of select="concat('((&lt;.*&gt;)|(([A-Za-z_])([A-Za-z_\-0-9])*)?:[A-Za-z_]([A-Za-z_\-0-9])*)', ttl:match-ws('*'), '(', ttl:match-string(), ')', ttl:match-ws('*'), '\.', ttl:match-ws('*'))"/>
+		<xsl:value-of select="concat('(', ttl:match-verb(), ')', ttl:match-ws('*'), ttl:match-object-list())"/>
+	</xsl:function>
+	
+	
+	<!--  -->
+	<xsl:function name="ttl:match-verb" as="xs:string">
+		<xsl:value-of select="concat(ttl:match-resource(), '|', 'a')"/>
+	</xsl:function>
+	
+	
+	<!--  -->
+	<xsl:function name="ttl:match-object-list" as="xs:string">
+		<xsl:value-of select="concat(ttl:match-object(), ttl:match-ws('*'), '(,', ttl:match-ws('*'), ttl:match-object(), ')*')"/>
+	</xsl:function>
+	
+	
+	<!--  -->
+	<xsl:function name="ttl:match-object" as="xs:string">
+		<xsl:value-of select="concat('(', ttl:match-string(), ')')"/>
 	</xsl:function>
 	
 	
