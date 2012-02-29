@@ -69,8 +69,7 @@
 	
 	<!--  -->
 	<xsl:template name="ttl:parse-triples">
-		<xsl:analyze-string select="string(.)" 
-					regex="{ttl:match-triples()}">
+		<xsl:analyze-string select="string(.)" regex="{ttl:match-triples()}">
 			<xsl:matching-substring>
 				<statement>
 					<triple>
@@ -78,10 +77,10 @@
 							<xsl:with-param name="subject" select="regex-group(1)"/>
 						</xsl:call-template>
 						<xsl:call-template name="ttl:parse-predicate-object-list">
-							<xsl:with-param name="predicateObjectList" as="xs:string" select="regex-group(7)"/>
+							<xsl:with-param name="predicateObjectList" as="xs:string" select="regex-group(11)"/>
 						</xsl:call-template>
-						<!--<xsl:value-of select="ttl:match-triples()"/>-->
 					</triple>
+					<!--<xsl:value-of select="ttl:match-triples()" disable-output-escaping="no"/>-->
 				</statement>
 			</xsl:matching-substring>
 			<xsl:non-matching-substring/>
@@ -159,31 +158,32 @@
 	<xsl:template name="ttl:parse-predicate-object-list">
 		<xsl:param name="predicateObjectList" as="xs:string"/>
 		<predicate-object-list>
-			<xsl:analyze-string select="$predicateObjectList" regex="{ttl:match-prediact-object-list()}">
+			<xsl:analyze-string select="$predicateObjectList" regex="{ttl:match-predicate-object-list()}">
 				<xsl:matching-substring>
 					<predicate><xsl:value-of select="regex-group(1)"/></predicate>
 					<xsl:call-template name="ttl:parse-object-list">
-						<xsl:with-param name="objectList" select="regex-group(7)"/>
+						<xsl:with-param name="objectList" select="regex-group(11)"/>
 					</xsl:call-template>
 				</xsl:matching-substring>
 				<xsl:non-matching-substring/>
 			</xsl:analyze-string>
-		<!--<xsl:value-of select="ttl:match-prediact-object-list()"/>-->
 		</predicate-object-list>
+		<!--<xsl:value-of select="ttl:match-predicate-object-list()"/>-->
 	</xsl:template>
-	
 	
 	<!--  -->
 	<xsl:template name="ttl:parse-object-list">
 		<xsl:param name="objectList" as="xs:string"/>
 		
 		<object-list>
-			<xsl:analyze-string select="$objectList" regex="(&quot;([A-Za-z0-9-.,']|\s)*&quot;)">
+			<!--<xsl:analyze-string select="$objectList" regex="(&quot;([A-Za-z0-9-.,']|\s)*&quot;)">-->
+			<xsl:analyze-string select="$objectList" regex="{ttl:match-object()}">
 				<xsl:matching-substring>
 					<object><xsl:value-of select="regex-group(1)"/></object>
 				</xsl:matching-substring>
 			</xsl:analyze-string>
 		</object-list>
+		<!--<xsl:value-of select="ttl:match-object-list()"/>-->
 	</xsl:template>
 	
 	
@@ -215,7 +215,7 @@
 	
 	<!--  -->
 	<xsl:function name="ttl:match-triples" as="xs:string">
-		<xsl:value-of select="concat('(', ttl:match-subject(), ')', ttl:match-ws('+'), '(', ttl:match-prediact-object-list(), ')')"/>
+		<xsl:value-of select="concat('(', ttl:match-subject(), ')', ttl:match-ws('*'), '(', ttl:match-predicate-object-list(), ')')"/>
 	</xsl:function>
 	
 	
@@ -227,8 +227,8 @@
 	
 	
 	<!--  -->
-	<xsl:function name="ttl:match-prediact-object-list" as="xs:string">
-		<xsl:value-of select="concat('(', ttl:match-verb(), ')', ttl:match-ws('*'), ttl:match-object-list(), '(', ';', '(', ttl:match-verb(), ')', ttl:match-ws('*'), ')*', ttl:match-ws('*'), '(', ';', ')?')"/>
+	<xsl:function name="ttl:match-predicate-object-list" as="xs:string">
+		<xsl:value-of select="concat('(', ttl:match-verb(), ')', ttl:match-ws('*'), ttl:match-object-list(), ttl:match-ws('*'), '(', ';', ttl:match-ws('*'), '(', ttl:match-verb(), ')', ttl:match-ws('*'), ttl:match-object-list(), ')*', ttl:match-ws('*'), '(', ';', ')?', ttl:match-ws('*'))"/>
 	</xsl:function>
 	
 	
@@ -240,7 +240,7 @@
 	
 	<!--  -->
 	<xsl:function name="ttl:match-object-list" as="xs:string">
-		<xsl:value-of select="concat(ttl:match-object(), ttl:match-ws('*'), '(,', ttl:match-ws('*'), ttl:match-object(), ')*')"/>
+		<xsl:value-of select="concat('(', ttl:match-object(), ttl:match-ws('*'), '(,', ttl:match-ws('*'), ttl:match-object(), ')*)')"/>
 	</xsl:function>
 	
 	
