@@ -157,17 +157,19 @@
 	<!--  -->
 	<xsl:template name="ttl:parse-predicate-object-list">
 		<xsl:param name="predicateObjectList" as="xs:string"/>
-		<predicate-object-list>
-			<xsl:analyze-string select="$predicateObjectList" regex="{ttl:match-predicate-object-list()}">
+		
+			<!--<xsl:analyze-string select="$predicateObjectList" regex="{ttl:match-predicate-object-list()}">-->
+			<xsl:analyze-string select="$predicateObjectList" regex="{concat('(', ttl:match-verb(), ')', ttl:match-ws('*'), ttl:match-object-list())}">
 				<xsl:matching-substring>
-					<predicate><xsl:value-of select="regex-group(1)"/></predicate>
-					<xsl:call-template name="ttl:parse-object-list">
-						<xsl:with-param name="objectList" select="regex-group(11)"/>
-					</xsl:call-template>
+					<predicate-object-list>
+						<predicate><xsl:value-of select="regex-group(1)"/></predicate>
+						<xsl:call-template name="ttl:parse-object-list">
+							<xsl:with-param name="objectList" select="regex-group(11)"/>
+						</xsl:call-template>
+					</predicate-object-list>
 				</xsl:matching-substring>
 				<xsl:non-matching-substring/>
 			</xsl:analyze-string>
-		</predicate-object-list>
 		<!--<xsl:value-of select="ttl:match-predicate-object-list()"/>-->
 	</xsl:template>
 	
@@ -176,7 +178,6 @@
 		<xsl:param name="objectList" as="xs:string"/>
 		
 		<object-list>
-			<!--<xsl:analyze-string select="$objectList" regex="(&quot;([A-Za-z0-9-.,']|\s)*&quot;)">-->
 			<xsl:analyze-string select="$objectList" regex="{ttl:match-object()}">
 				<xsl:matching-substring>
 					<object><xsl:value-of select="regex-group(1)"/></object>
@@ -246,7 +247,8 @@
 	
 	<!--  -->
 	<xsl:function name="ttl:match-object" as="xs:string">
-		<xsl:value-of select="concat('(&quot;.*&quot;)', '')"/>
+		<!--<xsl:value-of select="concat('(&quot;.*&quot;)', '')"/>-->
+		<xsl:value-of select="'&quot;(([A-Za-z0-9-_.]|\s)*)&quot;'"/>
 	</xsl:function>
 	
 	
