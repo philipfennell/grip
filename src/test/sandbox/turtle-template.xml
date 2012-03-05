@@ -5,7 +5,7 @@
 
 @prefix :          <http://example.org/book/> .
 <http://example.org/book/book1> <http://purl.org/dc/elements/1.1/title> "Harry Potter and the Philosopher s Stone" .
-<http://example.org/book/book2> <http://purl.org/dc/elements/1.1/title> "Harry Potter and the Chamber of Secrets","Harry Potter and the Chamber of Secrets" .
+<http://example.org/book/book2> <http://purl.org/dc/elements/1.1/title> "Harry Potter and the Chamber of Secrets" , "Harry Potter and the Chamber of Secrets" .
 :book3 dc:title "Harry Potter and the Prisoner Of Azkaban" .
 :book7 dc:title "Harry Potter and the Deathly Hallows" ;
        dc:creator  "J.K. Rowling" .]]></ttl:RDF>

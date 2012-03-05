@@ -31,16 +31,21 @@
 	<!--  -->
 	<xsl:template match="ttl:RDF">
 		<turtle-doc>
-			<xsl:call-template name="ttl:parse-statements"/>
+			<xsl:call-template name="ttl:parse-statements">
+				<xsl:with-param name="turtleDoc" as="xs:string" select="."/>
+			</xsl:call-template>
 		</turtle-doc>
 	</xsl:template>
 	
 	
 	<!--  -->
 	<xsl:template name="ttl:parse-statements">
+		<xsl:param name="turtleDoc" as="xs:string"/>
 		<!-- Directives: -->
 		<!-- Prefixes. -->
-		<xsl:analyze-string select="string(.)" regex="{concat(ttl:match-prefix-id(), ttl:match-ws('*'), '\.', ttl:match-ws('*'))}">
+		
+		<xsl:message>[XSLT] turtleDoc: &#10;<xsl:value-of select="$turtleDoc"/>&#10;</xsl:message>
+		<xsl:analyze-string select="$turtleDoc" regex="{concat(ttl:match-prefix-id(), ttl:match-ws('*'), '\.', ttl:match-ws('*'))}">
 			<xsl:matching-substring>
 				<statement>
 					<directive>
@@ -59,7 +64,9 @@
 					</xsl:matching-substring>
 					<xsl:non-matching-substring>
 						<!-- Triples. -->
-						<xsl:call-template name="ttl:parse-triples"/>
+						<xsl:call-template name="ttl:parse-triples">
+							<xsl:with-param name="triples" as="xs:string" select="."/>
+						</xsl:call-template>
 					</xsl:non-matching-substring>
 				</xsl:analyze-string>
 			</xsl:non-matching-substring>
@@ -69,7 +76,10 @@
 	
 	<!--  -->
 	<xsl:template name="ttl:parse-triples">
-		<xsl:analyze-string select="string(.)" regex="{ttl:match-triples()}">
+		<xsl:param name="triples" as="xs:string"/>
+		
+		<xsl:message>[XSLT] triples: &#10;<xsl:value-of select="$triples"/>&#10;</xsl:message>
+		<xsl:analyze-string select="$triples" regex="{ttl:match-triples()}">
 			<xsl:matching-substring>
 				<statement>
 					<triple>
@@ -92,16 +102,25 @@
 	<xsl:template name="ttl:parse-subject">
 		<xsl:param name="subject" as="xs:string"/>
 		
-		<xsl:analyze-string select="$subject" regex="{ttl:match-subject()}">
-			<xsl:matching-substring>
-				<subject>
+		<xsl:message>[XSLT] subject: &#10;<xsl:value-of select="$subject"/>&#10;</xsl:message>
+		<subject>
+			<xsl:analyze-string select="$subject" regex="{ttl:match-subject()}">
+				<xsl:matching-substring>
 					<xsl:call-template name="ttl:parse-resource">
 						<xsl:with-param name="resource" select="regex-group(0)"/>
 					</xsl:call-template>
-				</subject>
-			</xsl:matching-substring>
-			<xsl:non-matching-substring/>
-		</xsl:analyze-string>
+				</xsl:matching-substring>
+				<xsl:non-matching-substring/>
+			</xsl:analyze-string>
+			<xsl:analyze-string select="$subject" regex="{ttl:match-blank()}">
+				<xsl:matching-substring>
+					<xsl:call-template name="ttl:parse-blank">
+						<xsl:with-param name="blank" select="regex-group(0)"/>
+					</xsl:call-template>
+				</xsl:matching-substring>
+				<xsl:non-matching-substring/>
+			</xsl:analyze-string>
+		</subject>
 	</xsl:template>
 	
 	
@@ -109,6 +128,7 @@
 	<xsl:template name="ttl:parse-resource">
 		<xsl:param name="resource" as="xs:string"/>
 		
+		<xsl:message>[XSLT] resource: &#10;<xsl:value-of select="$resource"/>&#10;</xsl:message>
 		<xsl:analyze-string select="$resource" regex="{ttl:match-resource()}">
 			<xsl:matching-substring>
 				<resource>
@@ -136,9 +156,19 @@
 	
 	
 	<!--  -->
+	<xsl:template name="ttl:parse-blank">
+		<xsl:param name="blank" as="xs:string"/>
+		<xsl:message>[XSLT] resource: &#10;<xsl:value-of select="$blank"/>&#10;</xsl:message>
+		
+		<blank></blank>
+	</xsl:template>
+	
+	
+	<!--  -->
 	<xsl:template name="ttl:parse-qname">
 		<xsl:param name="qname" as="xs:string"/>
 		
+		<xsl:message>[XSLT] qname: &#10;<xsl:value-of select="$qname"/>&#10;</xsl:message>
 		<xsl:analyze-string select="$qname" regex="{ttl:match-qname()}">
 			<xsl:matching-substring>
 				<prefix-name><xsl:value-of select="ttl:get-prefix-name(regex-group(1))"/></prefix-name>
@@ -157,26 +187,58 @@
 	<!--  -->
 	<xsl:template name="ttl:parse-predicate-object-list">
 		<xsl:param name="predicateObjectList" as="xs:string"/>
-		
-			<!--<xsl:analyze-string select="$predicateObjectList" regex="{ttl:match-predicate-object-list()}">-->
+
+			<xsl:message>[XSLT] predicateObjectList: &#10;<xsl:value-of select="$predicateObjectList"/>&#10;</xsl:message>
 			<xsl:analyze-string select="$predicateObjectList" regex="{concat('(', ttl:match-verb(), ')', ttl:match-ws('*'), ttl:match-object-list())}">
+			<xsl:matching-substring>
+				<predicate-object-list>
+					<xsl:call-template name="ttl:parse-verb">
+						<xsl:with-param name="verb" select="regex-group(1)"/>
+					</xsl:call-template>
+					<!--<predicate>
+						<xsl:value-of select="regex-group(3)"/>
+					</predicate>-->
+					<xsl:call-template name="ttl:parse-object-list">
+						<xsl:with-param name="objectList" select="regex-group(11)"/>
+					</xsl:call-template>
+				</predicate-object-list>
+			</xsl:matching-substring>
+			<xsl:non-matching-substring/>
+		</xsl:analyze-string>
+		<!--<xsl:value-of select="ttl:match-predicate-object-list()"/>-->
+	</xsl:template>
+	
+	
+	<!--  -->
+	<xsl:template name="ttl:parse-verb">
+		<xsl:param name="verb" as="xs:string"/>
+		
+		<xsl:message>[XSLT] verb: &#10;<xsl:value-of select="$verb"/>&#10;</xsl:message>
+		<verb>
+			<xsl:analyze-string select="$verb" regex="{ttl:match-resource()}">
 				<xsl:matching-substring>
-					<predicate-object-list>
-						<predicate><xsl:value-of select="regex-group(1)"/></predicate>
-						<xsl:call-template name="ttl:parse-object-list">
-							<xsl:with-param name="objectList" select="regex-group(11)"/>
-						</xsl:call-template>
-					</predicate-object-list>
+					<xsl:call-template name="ttl:parse-resource">
+						<xsl:with-param name="resource" as="xs:string" select="regex-group(0)"/>
+					</xsl:call-template>
 				</xsl:matching-substring>
 				<xsl:non-matching-substring/>
 			</xsl:analyze-string>
-		<!--<xsl:value-of select="ttl:match-predicate-object-list()"/>-->
+			<xsl:analyze-string select="$verb" regex="a">
+				<xsl:matching-substring>
+					<rdf:type/>
+				</xsl:matching-substring>
+				<xsl:non-matching-substring/>
+			</xsl:analyze-string>
+		</verb>
+		<!--<xsl:value-of select="ttl:match-verb()"/>-->
 	</xsl:template>
+	
 	
 	<!--  -->
 	<xsl:template name="ttl:parse-object-list">
 		<xsl:param name="objectList" as="xs:string"/>
 		
+		<xsl:message>[XSLT] objectList: &#10;<xsl:value-of select="$objectList"/>&#10;</xsl:message>
 		<object-list>
 			<xsl:analyze-string select="$objectList" regex="{ttl:match-object()}">
 				<xsl:matching-substring>
@@ -264,8 +326,20 @@
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Blank node. -->
 	<xsl:function name="ttl:match-blank" as="xs:string">
+		<xsl:value-of select="concat(ttl:match-node-id(), '|', '\[\]', '|', '\[', ttl:match-predicate-object-list(), '\]' (:, '|', ttl:match-collection() :))"/>
+	</xsl:function>
+	
+	
+	<!-- RDF nodeID -->
+	<xsl:function name="ttl:match-node-id" as="xs:string">
+		<xsl:value-of select="concat('_:', ttl:match-name())"/>
+	</xsl:function>
+	
+	
+	<!-- Collection -->
+	<xsl:function name="ttl:match-collection" as="xs:string">
 		<xsl:value-of select="''"/>
 	</xsl:function>
 	
@@ -340,10 +414,11 @@
 	
 	
 	<!-- Returns the prefix name or '_' if none is provided. -->
-	<xsl:function name="ttl:get-prefix-name" as="xs:string">
+	<xsl:function name="ttl:get-prefix-name" as="xs:string?">
 		<xsl:param name="name" as="xs:string?"/>
 		
-		<xsl:value-of select="if (string-length($name) gt 0) then $name else '_'"/>
+		<!--<xsl:value-of select="if (string-length($name) gt 0) then $name else '_'"/>-->
+		<xsl:value-of select="$name"/>
 	</xsl:function>
 	
 </xsl:transform>
