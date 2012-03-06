@@ -87,10 +87,10 @@
 							<xsl:with-param name="subject" select="regex-group(1)"/>
 						</xsl:call-template>
 						<xsl:call-template name="ttl:parse-predicate-object-list">
-							<xsl:with-param name="predicateObjectList" as="xs:string" select="regex-group(11)"/>
+							<xsl:with-param name="predicateObjectList" as="xs:string" select="regex-group(58)"/>
 						</xsl:call-template>
 					</triple>
-					<!--<xsl:value-of select="ttl:match-triples()" disable-output-escaping="no"/>-->
+					<!--<xsl:value-of select="$triples" disable-output-escaping="no"/>-->
 				</statement>
 			</xsl:matching-substring>
 			<xsl:non-matching-substring/>
@@ -158,7 +158,7 @@
 	<!--  -->
 	<xsl:template name="ttl:parse-blank">
 		<xsl:param name="blank" as="xs:string"/>
-		<xsl:message>[XSLT] resource: &#10;<xsl:value-of select="$blank"/>&#10;</xsl:message>
+		<xsl:message>[XSLT] blank: &#10;<xsl:value-of select="$blank"/>&#10;</xsl:message>
 		
 		<blank></blank>
 	</xsl:template>
@@ -195,17 +195,15 @@
 					<xsl:call-template name="ttl:parse-verb">
 						<xsl:with-param name="verb" select="regex-group(1)"/>
 					</xsl:call-template>
-					<!--<predicate>
-						<xsl:value-of select="regex-group(3)"/>
-					</predicate>-->
 					<xsl:call-template name="ttl:parse-object-list">
-						<xsl:with-param name="objectList" select="regex-group(11)"/>
+						<xsl:with-param name="objectList" select="regex-group(13)"/>
 					</xsl:call-template>
 				</predicate-object-list>
 			</xsl:matching-substring>
 			<xsl:non-matching-substring/>
 		</xsl:analyze-string>
-		<!--<xsl:value-of select="ttl:match-predicate-object-list()"/>-->
+<!--		<xsl:value-of select="ttl:match-predicate-object-list()"/>-->
+		<!--<xsl:value-of select="concat('(', ttl:match-verb(), ')', ttl:match-ws('*'), ttl:match-object-list())"/>-->
 	</xsl:template>
 	
 	
@@ -221,13 +219,14 @@
 						<xsl:with-param name="resource" as="xs:string" select="regex-group(0)"/>
 					</xsl:call-template>
 				</xsl:matching-substring>
-				<xsl:non-matching-substring/>
-			</xsl:analyze-string>
-			<xsl:analyze-string select="$verb" regex="a">
-				<xsl:matching-substring>
-					<rdf:type/>
-				</xsl:matching-substring>
-				<xsl:non-matching-substring/>
+				<xsl:non-matching-substring>
+					<xsl:analyze-string select="$verb" regex="a">
+						<xsl:matching-substring>
+							<rdf:type/>
+						</xsl:matching-substring>
+						<xsl:non-matching-substring/>
+					</xsl:analyze-string>
+				</xsl:non-matching-substring>
 			</xsl:analyze-string>
 		</verb>
 		<!--<xsl:value-of select="ttl:match-verb()"/>-->
@@ -285,7 +284,7 @@
 	<!--  -->
 	<xsl:function name="ttl:match-subject" as="xs:string">
 		<!--<xsl:value-of select="concat(ttl:match-resource(), '|', ttl:match-blank())"/>-->
-		<xsl:value-of select="ttl:match-resource()"/>
+		<xsl:value-of select="concat(ttl:match-resource(), '|', ttl:match-blank())"/>
 	</xsl:function>
 	
 	
@@ -297,7 +296,7 @@
 	
 	<!--  -->
 	<xsl:function name="ttl:match-verb" as="xs:string">
-		<xsl:value-of select="concat(ttl:match-resource(), '|', 'a')"/>
+		<xsl:value-of select="concat(ttl:match-resource(), '|', '(', ttl:match-ws('+'), 'a', ')')"/>
 	</xsl:function>
 	
 	
