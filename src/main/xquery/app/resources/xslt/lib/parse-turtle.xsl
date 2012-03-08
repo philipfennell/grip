@@ -87,11 +87,12 @@
 							<xsl:with-param name="subject" select="regex-group(1)"/>
 						</xsl:call-template>
 						<xsl:call-template name="ttl:parse-predicate-object-list">
-							<xsl:with-param name="predicateObjectList" as="xs:string" select="regex-group(58)"/>
+							<xsl:with-param name="predicateObjectList" as="xs:string" select="regex-group(94)"/>
 						</xsl:call-template>
 					</triple>
 					<!--<xsl:value-of select="$triples" disable-output-escaping="no"/>-->
 				</statement>
+				<xsl:value-of select="ttl:match-blank()"/>
 			</xsl:matching-substring>
 			<xsl:non-matching-substring/>
 		</xsl:analyze-string>
@@ -241,7 +242,7 @@
 		<object-list>
 			<xsl:analyze-string select="$objectList" regex="{ttl:match-object()}">
 				<xsl:matching-substring>
-					<object><xsl:value-of select="regex-group(1)"/></object>
+					<object><xsl:value-of select="regex-group(0)"/></object>
 				</xsl:matching-substring>
 			</xsl:analyze-string>
 		</object-list>
@@ -308,8 +309,7 @@
 	
 	<!--  -->
 	<xsl:function name="ttl:match-object" as="xs:string">
-		<!--<xsl:value-of select="concat('(&quot;.*&quot;)', '')"/>-->
-		<xsl:value-of select="'&quot;(([A-Za-z0-9-_.]|\s)*)&quot;'"/>
+		<xsl:value-of select="concat(ttl:match-resource(), '|', (: ttl:match-blank(), '|',:) '(&quot;(([A-Za-z0-9-_.'']|\s)*)&quot;)')"/>
 	</xsl:function>
 	
 	
