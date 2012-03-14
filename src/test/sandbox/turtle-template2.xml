@@ -1,3 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ttl:RDF xmlns:ttl="http://www.w3.org/ns/formats/Turtle"><![CDATA[
-[] <http://example.org/book/title> "foo".]]></ttl:RDF>
+<http://example.org/book/book1> <http://purl.org/dc/elements/1.1/title> "Harry Potter and the Philosopher's Stone" .
+<http://example.org/book/book2> <http://purl.org/dc/elements/1.1/title> "Harry Potter and the Chamber of Secrets" , "Harry Potter and the game of shove ha'penny" .]]></ttl:RDF>
