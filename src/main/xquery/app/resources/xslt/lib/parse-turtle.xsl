@@ -35,6 +35,7 @@
 				<xsl:with-param name="turtleDoc" as="xs:string" select="."/>
 			</xsl:call-template>
 		</turtle-doc>
+		<!--<xsl:value-of select="ttl:match-turtle-doc()" disable-output-escaping="yes"/>-->
 	</xsl:template>
 	
 	
@@ -87,11 +88,11 @@
 							<xsl:with-param name="subject" select="regex-group(1)"/>
 						</xsl:call-template>
 						<xsl:call-template name="ttl:parse-predicate-object-list">
-							<xsl:with-param name="predicateObjectList" as="xs:string" select="regex-group(94)"/>
+							<xsl:with-param name="predicateObjectList" as="xs:string" select="regex-group(438)"/>
 						</xsl:call-template>
 					</triple>
+					<!--<xsl:value-of select="ttl:match-triples()" disable-output-escaping="yes"/>-->
 				</statement>
-				<!--<xsl:value-of select="ttl:match-triples()" disable-output-escaping="yes"/>-->
 			</xsl:matching-substring>
 			<xsl:non-matching-substring/>
 		</xsl:analyze-string>
@@ -190,7 +191,7 @@
 		<xsl:param name="predicateObjectList" as="xs:string"/>
 
 			<xsl:message>[XSLT] predicateObjectList: &#10;<xsl:value-of select="$predicateObjectList"/>&#10;</xsl:message>
-			<xsl:analyze-string select="$predicateObjectList" regex="{concat('(', ttl:match-verb(), ')', ttl:match-ws('*'), ttl:match-object-list())}">
+			<xsl:analyze-string select="$predicateObjectList" regex="{ttl:match-predicate-object-list()}">
 			<xsl:matching-substring>
 				<predicate-object-list>
 					<xsl:call-template name="ttl:parse-verb">
@@ -203,8 +204,7 @@
 			</xsl:matching-substring>
 			<xsl:non-matching-substring/>
 		</xsl:analyze-string>
-<!--		<xsl:value-of select="ttl:match-predicate-object-list()"/>-->
-		<!--<xsl:value-of select="concat('(', ttl:match-verb(), ')', ttl:match-ws('*'), ttl:match-object-list())"/>-->
+		<!--<xsl:value-of select="ttl:match-predicate-object-list()" disable-output-escaping="no"/>-->
 	</xsl:template>
 	
 	
@@ -242,7 +242,9 @@
 		<object-list>
 			<xsl:analyze-string select="$objectList" regex="{ttl:match-object()}">
 				<xsl:matching-substring>
-					<object><xsl:value-of select="regex-group(0)"/></object>
+					<xsl:call-template name="ttl:parse-object">
+						<xsl:with-param name="object" as="xs:string" select="regex-group(0)"/>
+					</xsl:call-template>
 				</xsl:matching-substring>
 			</xsl:analyze-string>
 		</object-list>
@@ -250,100 +252,176 @@
 	</xsl:template>
 	
 	
+	<!--  -->
+	<xsl:template name="ttl:parse-object">
+		<xsl:param name="object" as="xs:string"/>
+		
+		<xsl:message>[XSLT] object: &#10;<xsl:value-of select="$object"/>&#10;</xsl:message>
+		<object>
+			<xsl:analyze-string select="$object" regex="{ttl:match-literal()}">
+				<xsl:matching-substring>
+					<literal>
+						<xsl:call-template name="ttl:parse-quoted-string">
+							<xsl:with-param name="quotedString" as="xs:string" select="regex-group(0)"/>
+						</xsl:call-template>
+					</literal>
+				</xsl:matching-substring>
+			</xsl:analyze-string>
+		</object>
+		<!--<xsl:value-of select="ttl:match-object()" disable-output-escaping="yes"/>-->
+	</xsl:template>
 	
 	
 	<!--  -->
+	<xsl:template name="ttl:parse-quoted-string">
+		<xsl:param name="quotedString" as="xs:string"/>
+		
+		<xsl:message>[XSLT] quotedString: &#10;<xsl:value-of select="$quotedString"/>&#10;</xsl:message>
+		<xsl:analyze-string select="$quotedString" regex="{concat(ttl:match-quoted-string(), '(@(', ttl:match-language(), '))?')}">
+			<xsl:matching-substring>
+				<quoted-string>
+					<string>
+						<xsl:value-of select="regex-group(1)"/>
+					</string>
+					<xsl:if test="regex-group(4)">
+						<language>
+							<xsl:value-of select="regex-group(4)"/>
+						</language>
+					</xsl:if>
+				</quoted-string>
+			</xsl:matching-substring>
+			<xsl:non-matching-substring/>
+		</xsl:analyze-string>
+		<!--<xsl:value-of select="concat(ttl:match-quoted-string(), '(@(', ttl:match-language(), '))?')"/>-->
+	</xsl:template>
+	
+	
+	
+	
+	<!-- === Pattern Matching Expressions. ================================= -->
+	
+	<!-- Turtle Documents. -->
 	<xsl:function name="ttl:match-turtle-doc" as="xs:string">
 		<xsl:value-of select="concat('(', ttl:match-statement(), ')*')"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Statements. -->
 	<xsl:function name="ttl:match-statement" as="xs:string">
 		<xsl:value-of select="concat(ttl:match-directive(), '\.|', ttl:match-triples(), '\.|', ttl:match-ws('+'))"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Directives. -->
 	<xsl:function name="ttl:match-directive" as="xs:string">
 		<xsl:value-of select="concat(ttl:match-prefix-id(), '|', ttl:match-base())"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Base URI Declarations. -->
 	<xsl:function name="ttl:match-base" as="xs:string">
 		<xsl:value-of select="concat('@base', ttl:match-ws('+'), ttl:match-uriref())"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Triples. -->
 	<xsl:function name="ttl:match-triples" as="xs:string">
 		<xsl:value-of select="concat('(', ttl:match-subject(), ')', ttl:match-ws('*'), '(', ttl:match-predicate-object-list(), ')')"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Subjects. -->
 	<xsl:function name="ttl:match-subject" as="xs:string">
 		<!--<xsl:value-of select="concat(ttl:match-resource(), '|', ttl:match-blank())"/>-->
 		<xsl:value-of select="concat(ttl:match-resource(), '|', ttl:match-blank())"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Predicate Object Lists. -->
 	<xsl:function name="ttl:match-predicate-object-list" as="xs:string">
-		<xsl:value-of select="concat('(', ttl:match-verb(), ')', ttl:match-ws('*'), ttl:match-object-list(), ttl:match-ws('*'), '(', ';', ttl:match-ws('*'), '(', ttl:match-verb(), ')', ttl:match-ws('*'), ttl:match-object-list(), ')*', ttl:match-ws('*'), '(', ';', ')?', ttl:match-ws('*'))"/>
+			<xsl:value-of select="concat('(', ttl:match-verb(), ')', ttl:match-ws('+'), ttl:match-object-list(), '(', ttl:match-ws('*'), ';', ttl:match-ws('*'), '(', ttl:match-verb(), ')', ttl:match-ws('+'), ttl:match-object-list(), ')*', '(', ttl:match-ws('*'), ';', ')?', ttl:match-ws('*'))"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Verbs. -->
 	<xsl:function name="ttl:match-verb" as="xs:string">
 		<xsl:value-of select="concat(ttl:match-resource(), '|', '(', ttl:match-ws('+'), 'a', ')')"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Object Lists. -->
 	<xsl:function name="ttl:match-object-list" as="xs:string">
 		<xsl:value-of select="concat('(', ttl:match-object(), ttl:match-ws('*'), '(,', ttl:match-ws('*'), ttl:match-object(), ')*)')"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Objects -->
 	<xsl:function name="ttl:match-object" as="xs:string">
-		<xsl:value-of select="concat('(', ttl:match-resource(), '|', (: ttl:match-blank(), '|',:) '(&quot;([A-Za-z0-9-_.''\s])*&quot;))')"/>
+		<xsl:value-of select="concat('(', ttl:match-resource(), '|', '(_:[A-Za-z_]([A-Za-z_\-0-9])*|\[\]|\[((&lt;(.*)&gt;)|((([A-Za-z_]([A-Za-z_\-0-9])*)?):([A-Za-z_]([A-Za-z_\-0-9])*))|((\t|\n|\r|\s)+a))(\t|\n|\r|\s)*(((&lt;(.*)&gt;)|((([A-Za-z_]([A-Za-z_\-0-9])*)?):([A-Za-z_]([A-Za-z_\-0-9])*))|(&quot;([A-Za-z0-9-_.''\s])*&quot;))(\t|\n|\r|\s)*(,(\t|\n|\r|\s)*((&lt;(.*)&gt;)|((([A-Za-z_]([A-Za-z_\-0-9])*)?):([A-Za-z_]([A-Za-z_\-0-9])*))|(&quot;([A-Za-z0-9-_.''\s])*&quot;)))*)(\t|\n|\r|\s)*(;(\t|\n|\r|\s)*((&lt;(.*)&gt;)|((([A-Za-z_]([A-Za-z_\-0-9])*)?):([A-Za-z_]([A-Za-z_\-0-9])*))|((\t|\n|\r|\s)+a))(\t|\n|\r|\s)*(((&lt;(.*)&gt;)|((([A-Za-z_]([A-Za-z_\-0-9])*)?):([A-Za-z_]([A-Za-z_\-0-9])*))|(&quot;([A-Za-z0-9-_.''\s])*&quot;))(\t|\n|\r|\s)*(,(\t|\n|\r|\s)*((&lt;(.*)&gt;)|((([A-Za-z_]([A-Za-z_\-0-9])*)?):([A-Za-z_]([A-Za-z_\-0-9])*))|(&quot;([A-Za-z0-9-_.''\s])*&quot;)))*))*(\t|\n|\r|\s)*(;)?(\t|\n|\r|\s)*\])', '|', ttl:match-literal(), ')')"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Literals. -->
+	<xsl:function name="ttl:match-literal" as="xs:string">
+		<xsl:value-of select="concat(ttl:match-quoted-string(), '(@', ttl:match-language(), ')?')"/>
+	</xsl:function>
+	
+	
+	<!-- ISO Language Codes -->
+	<xsl:function name="ttl:match-language" as="xs:string">
+		<xsl:value-of select="'[a-z]+(-[a-z0-9]+)*'"/>
+	</xsl:function>
+	
+	
+	<!-- Literals. -->
+	<xsl:function name="ttl:match-quoted-string" as="xs:string">
+		<xsl:value-of select="concat(ttl:match-string(), '' (: , '|', ttl:match-long-string() :))"/>
+	</xsl:function>
+	
+	
+	<!-- Literals. -->
+	<xsl:function name="ttl:match-string" as="xs:string">
+		<xsl:value-of select="'(&quot;([A-Za-z0-9-_.''\s])*&quot;)'"/>
+	</xsl:function>
+	
+	
+	<!-- Literals. -->
+	<xsl:function name="ttl:match-long-string" as="xs:string">
+		<xsl:value-of select="''"/>
+	</xsl:function>
+	
+	
+	<!-- Predicates. -->
 	<xsl:function name="ttl:match-predicate" as="xs:string">
 		<xsl:value-of select="ttl:match-resource()"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- Resources. -->
 	<xsl:function name="ttl:match-resource" as="xs:string">
 		<xsl:value-of select="concat(ttl:match-uriref(), '|', '(', ttl:match-qname(), ')')"/>
 	</xsl:function>
 	
 	
-	<!--  -->
+	<!-- QNames. -->
 	<xsl:function name="ttl:match-qname" as="xs:string">
 		<xsl:value-of select="concat('((', ttl:match-prefix-name(), ')?)', ':', '(', ttl:match-name(), ')')"/>
 	</xsl:function>
 	
 	
-	<!-- Blank node. -->
+	<!-- Blank nodes. -->
 	<xsl:function name="ttl:match-blank" as="xs:string">
 		<xsl:value-of select="concat(ttl:match-node-id(), '|', '\[\]', '|', '\[', ttl:match-predicate-object-list(), '\]' (:, '|', ttl:match-collection() :))"/>
 	</xsl:function>
 	
 	
-	<!-- RDF nodeID -->
+	<!-- RDF nodeIDs. -->
 	<xsl:function name="ttl:match-node-id" as="xs:string">
 		<xsl:value-of select="concat('_:', ttl:match-name())"/>
 	</xsl:function>
 	
 	
-	<!-- Collection -->
+	<!-- Collections. -->
 	<xsl:function name="ttl:match-collection" as="xs:string">
 		<xsl:value-of select="''"/>
 	</xsl:function>
@@ -404,11 +482,9 @@
 	</xsl:function>
 	
 	
-	<!--  -->
-	<xsl:function name="ttl:match-string" as="xs:string">
-		<xsl:value-of select='".*"'/>
-	</xsl:function>
 	
+	
+	<!-- === Other Functions. ============================================== -->
 	
 	<!-- Extracts the URI from its start/end tags. -->
 	<xsl:function name="ttl:get-uri" as="xs:string">

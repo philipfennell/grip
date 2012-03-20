@@ -2,10 +2,10 @@
 <ttl:RDF xmlns:ttl="http://www.w3.org/ns/formats/Turtle"><![CDATA[@prefix dc:        <http://purl.org/dc/elements/1.1/> .
 @prefix vcard:     <http://www.w3.org/2001/vcard-rdf/3.0#> .
 @prefix ns:        <http://example.org/ns#> .
-
 @prefix :          <http://example.org/book/> .
 <http://example.org/book/book1> <http://purl.org/dc/elements/1.1/title> "Harry Potter and the Philosopher s Stone" .
-<http://example.org/book/book2> <http://purl.org/dc/elements/1.1/title> "Harry Potter and the Chamber of Secrets" , "Harry Potter and the Chamber of Secrets" .
+<http://example.org/book/book2> <http://purl.org/dc/elements/1.1/title> "Harry Potter and the Chamber of Secrets" , "Harry Potter and the ha'penny chew" .
 :book3 dc:title "Harry Potter and the Prisoner Of Azkaban" .
 :book7 dc:title "Harry Potter and the Deathly Hallows" ;
-       dc:creator  "J.K. Rowling" .]]></ttl:RDF>
+       dc:creator  "J.K. Rowling" .
+]]></ttl:RDF>
