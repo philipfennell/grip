@@ -33,9 +33,9 @@
 		<xsl:variable name="root" as="element()" select="current()"/>
 		
 		<trix>
-			<!-- Insert the namespace declarations into the RDF/XML serialisation. -->
-			<xsl:for-each select="$NAMESPACES/gsp:namespace">
-				<xsl:namespace name="{@prefix}"><xsl:value-of select="@uri"/></xsl:namespace>
+			<!-- Insert the namespace declarations. -->
+			<xsl:for-each select="namespace::*">
+				<xsl:namespace name="{name(.)}"><xsl:value-of select="."/></xsl:namespace>
 			</xsl:for-each>
 			
 			<graph>

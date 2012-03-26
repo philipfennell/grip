@@ -408,6 +408,7 @@ let $serviceDescription as element(rdf:RDF) :=
 			<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#Service"/>
 			<sd:inputFormat rdf:resource="http://www.w3.org/ns/formats/N-Triples"/>
 			<sd:inputFormat rdf:resource="http://www.w3.org/ns/formats/RDF_XML"/>
+			<sd:inputFormat rdf:resource="http://www.w3.org/ns/formats/Turtle"/>
 			<sd:endpoint rdf:resource="{$serviceURI}"/>
 			<sd:availableGraphs rdf:nodeID="AG1"/>
 		</rdf:Description>,

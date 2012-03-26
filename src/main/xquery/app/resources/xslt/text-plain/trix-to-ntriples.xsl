@@ -24,11 +24,11 @@
 	
 	
 	<xsl:template match="/">
-		<xsl:apply-templates select="*"/>
+		<xsl:apply-templates select="*" mode="ntriples"/>
 	</xsl:template>
 	
 	
-	<xsl:template match="trix/graph">
+	<xsl:template match="trix/graph" mode="ntriples">
 		<xsl:for-each-group select="triple" group-by="rdf:subject(.)">
 			<xsl:apply-templates select="current-group()" mode="ntriples"/>
 		</xsl:for-each-group>
