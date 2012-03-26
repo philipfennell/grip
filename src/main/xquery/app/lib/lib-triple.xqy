@@ -16,6 +16,9 @@ xquery version "1.0-ml" encoding "utf-8";
 
 (:~
  : Function library that implements the W3C's RDF Interface: Triple.
+ : The Triple interface represents an RDF Triple. The stringification of a 
+ : Triple results in an N-Triples representation as defined in: 
+ : <http://www.w3.org/TR/2004/REC-rdf-testcases-20040210/#ntriples>
  : @see http://www.w3.org/TR/rdf-interfaces
  : @author	Philip A. R. Fennell
  : @version 0.1
@@ -28,16 +31,7 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
 
-(: WebIDL
-[NoInterfaceObject]
-interface Triple {
-    readonly attribute RDFNode subject;
-    readonly attribute RDFNode predicate;
-    readonly attribute RDFNode object;
-    stringifier DOMString toString ();
-    boolean               equals (Triple otherTriple);
-};
-:)
+
 
 
 (:~
@@ -48,7 +42,7 @@ interface Triple {
 declare function triple:subject($triple as element(trix:triple)) 
 	as element() 
 {
-	<uri xmlns="http://www.w3.org/2004/03/trix/trix-1/"/>
+	$triple/*[1]
 };
 
 
@@ -60,7 +54,7 @@ declare function triple:subject($triple as element(trix:triple))
 declare function triple:predicate($triple as element(trix:triple)) 
 	as element() 
 {
-	<uri xmlns="http://www.w3.org/2004/03/trix/trix-1/"/>
+	$triple/*[2]
 };
 
 
@@ -72,7 +66,7 @@ declare function triple:predicate($triple as element(trix:triple))
 declare function triple:object($triple as element(trix:triple)) 
 	as element() 
 {
-	<uri xmlns="http://www.w3.org/2004/03/trix/trix-1/"/>
+	$triple/*[3]
 };
 
 
@@ -81,7 +75,7 @@ declare function triple:object($triple as element(trix:triple))
  : @param $triple
  : @return xs:string.
  :)
-declare function triple:string($triple as element(trix:triple)) 
+declare function triple:to-string($triple as element(trix:triple)) 
 	as xs:string
 {
 	xdmp:xslt-invoke('/resources/xslt/text-plain/trix-to-ntriples.xsl', document {$triple})
@@ -89,7 +83,7 @@ declare function triple:string($triple as element(trix:triple))
 
 
 (:~
- : Returns true if otherTriple is equivalent to this triple.
+ : Returns true() if otherTriple is equivalent to this triple.
  : @param 
  : @return xs:boolean
  :)
@@ -97,5 +91,9 @@ declare function triple:equals($triple as element(trix:triple),
 		$otherTriple as element(trix:triple)) 
 	as xs:boolean 
 {
-	false()
+	(: 
+	 : This is probably NOT a good way to compare triples as no account is taken 
+	 : of blank nodes. But it'll have to do for now.
+	 :)
+	deep-equal($triple, $otherTriple)	
 };
