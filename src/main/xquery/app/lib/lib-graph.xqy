@@ -60,16 +60,15 @@ declare function graph:add($contextGraph as element(trix:graph),
 		$triple as element(trix:triple)) 
 	as element(trix:graph)
 {
-	let $graphURI as xs:string := string($contextGraph/trix:uri)
 	let $subject as xs:string := graph:parse-content(triple:subject($triple))
 	let $predicate as xs:string := triple:predicate($triple)
 	let $object as item()* := graph:parse-content(triple:object($triple))
 	let $permissions as xs:string* := ()
-	let $collections as xs:string* := ($graphURI)
+	let $collections as xs:string* := (graph:uri($contextGraph))
 	let $add := 
 		xdmp:document-insert(
-			sem:uri-for-tuple($subject, $predicate, 
-					graph:object-to-string($object), $graphURI),
+			graph:uri-for-quad($subject, $predicate, 
+					graph:object-to-string($object), graph:uri($contextGraph)),
 			element t {
 				( element s {
 					( typeswitch ($triple/*[1])
@@ -87,12 +86,14 @@ declare function graph:add($contextGraph as element(trix:graph),
 					 :)
 					( typeswitch ($triple/*[3]) 
 						case element(trix:uri) 
-							return ( attribute datatype {'http://www.w3.org/2001/XMLSchema#anyURI'}, $object )
+							return ( attribute datatype 
+									{'http://www.w3.org/2001/XMLSchema#anyURI'}, 
+											$object )
 						case element(trix:id) 
 							return $object
 						default 
 							return ( $triple/*[3]/@datatype, $object ) ) )},
-				element c {$graphURI} )
+				element c {graph:uri($contextGraph)} )
 	    	},
 	    	$permissions,
 	    	$collections
@@ -188,7 +189,7 @@ declare function graph:every($contextGraph as element(trix:graph),
  :)
 declare function graph:filter($contextGraph as element(trix:graph), 
 		$filter as item()) 
-	as element()
+	as element(trix:graph)
 {
 	let $filteredTiples as element(trix:triple)* := 
 		for $triple in graph:to-array($contextGraph)
@@ -196,7 +197,7 @@ declare function graph:filter($contextGraph as element(trix:graph),
 		return
 			$triple
 	return
-		element {name($contextGraph)} {
+		element {QName('http://www.w3.org/2004/03/trix/trix-1/', name($contextGraph))} {
 			$contextGraph/namespace::*,
 			$contextGraph/@*,
 			<uri xmlns="http://www.w3.org/2004/03/trix/trix-1/"/>,
@@ -229,7 +230,7 @@ declare function graph:for-each($contextGraph as element(trix:graph),
 declare function graph:length($contextGraph as element(trix:graph)) 
 	as xs:unsignedLong 
 {
-	xdmp:estimate(collection(string($contextGraph/trix:uri)))
+	xdmp:estimate(collection(graph:uri($contextGraph)))
 }; 
 
 
@@ -263,7 +264,22 @@ declare function graph:match($contextGraph as element(trix:graph),
 				$limit as xs:unsignedLong) 
 	as element(trix:graph)
 {
-	$contextGraph
+	let $size as xs:unsignedLong := 
+		if ($limit eq 0) then graph:length($contextGraph) else $limit
+	let $matchedTriples as element(trix:triple)* := 
+		for $triple in graph:to-array($contextGraph)[1 to $size]
+		where ( (if (exists($subject)) then deep-equal($subject, triple:subject($triple)) else true()) and 
+				(if (exists($predicate)) then deep-equal($predicate, triple:predicate($triple)) else true()) and 
+					(if (exists($object)) then deep-equal($object, triple:object($triple)) else true()) )
+		return
+			$triple
+	return
+		element {QName('http://www.w3.org/2004/03/trix/trix-1/', name($contextGraph))} {
+			$contextGraph/namespace::*,
+			$contextGraph/@*,
+			<uri xmlns="http://www.w3.org/2004/03/trix/trix-1/"/>,
+			$matchedTriples
+		}
 };
 
 
@@ -280,7 +296,7 @@ declare function graph:match($contextGraph as element(trix:graph),
 		$subject as item()?, $predicate as item()?, $object as item()?) 
 	as element(trix:graph)
 {
-	$contextGraph
+	graph:match($contextGraph, $subject, $predicate, $object, 0)
 };
 
 
@@ -309,7 +325,13 @@ declare function graph:remove($contextGraph as element(trix:graph),
 		$triple as element(trix:triple)) 
 	as element(trix:graph)
 {
-	$contextGraph
+	let $subject as xs:string := graph:parse-content(triple:subject($triple))
+	let $predicate as xs:string := triple:predicate($triple)
+	let $object as item()* := graph:parse-content(triple:object($triple))
+	let $remove := xdmp:document-delete(graph:uri-for-quad($subject, $predicate, 
+			graph:object-to-string($object), graph:uri($contextGraph)))
+	return
+		$contextGraph
 };
 
 
@@ -332,7 +354,13 @@ declare function graph:remove-matches($contextGraph as element(trix:graph),
 		$subject as item()?, $predicate as item()?, $object as item()?)
 	as element(trix:graph)
 {
-	$contextGraph
+	let $removeMatches := 
+		for $triple in graph:match($contextGraph, $subject, $predicate, $object)/trix:triple
+		return
+			graph:remove($contextGraph, $triple)
+	return
+		(: Need to add new namespaces that don't exist in the graph document. :)
+		$contextGraph
 };
 
 
@@ -363,8 +391,8 @@ declare function graph:to-array($contextGraph as element(trix:graph))
 	let $graph as element() := 
 		<graph xmlns="">{
 			$contextGraph/namespace::*,
-			<uri>{string($contextGraph/trix:uri)}</uri>,
-			collection(string($contextGraph/trix:uri))/*
+			<uri>{graph:uri($contextGraph)}</uri>,
+			collection(graph:uri($contextGraph))/*
 		}</graph>
 	return
 		xdmp:xslt-invoke('/resources/xslt/lib/ml-tuples-to-trix.xsl', 
@@ -439,5 +467,35 @@ declare private function graph:parse-content($object as element())
  	default 
  	return 
  		string($object)
+};
+
+
+(:~
+ : Build a deterministic uri for a quad. 
+ : @param $subject 
+ : @param $predicate 
+ : @param $object 
+ : @param $context
+ : @return a URI string.
+ :)
+declare private function graph:uri-for-quad($subject as xs:string, 
+		$predicate as xs:string, $object as xs:string, $context as xs:string?)
+	as xs:string
+{
+  xdmp:integer-to-hex(
+    xdmp:hash64(
+      string-join(($subject, $predicate, $object, $context), '|') ) )
+};
+
+
+(:~
+ : Returns the context graph's URI.
+ : @param $contextGraph 
+ : @return xs:string.
+ :)
+declare private function graph:uri($contextGraph as element(trix:graph)) 
+	as xs:string
+{
+	string($contextGraph/trix:uri)
 };
 
