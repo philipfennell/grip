@@ -18,8 +18,8 @@ let $graph as element() :=
 let $triple as element() := 
 <triple>
 	<uri>http://example.org/book/book8</uri>
-	<uri>http://purl.org/dc/elements/1.1/title</uri>
-	<plainLiteral>Harry Potter and the ha'penny chews</plainLiteral>
+	<uri>http://purl.org/dc/elements/1.1/creator</uri>
+	<id>A0</id>
 </triple>
 return
 	graph:add($graph, $triple)

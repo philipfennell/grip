@@ -17,9 +17,9 @@ let $graph as element() :=
 </graph>
 let $triple as element() := 
 <triple>
-	<uri>http://example.org/book/book8</uri>
-	<uri>http://purl.org/dc/elements/1.1/title</uri>
-	<plainLiteral>Harry Potter and the ha'penny chews</plainLiteral>
+	<id>A0</id>
+	<uri>http://www.w3.org/2001/vcard-rdf/3.0#FN</uri>
+	<plainLiteral>P. A. R. Fennell</plainLiteral>
 </triple>
 return
 	graph:add($graph, $triple)

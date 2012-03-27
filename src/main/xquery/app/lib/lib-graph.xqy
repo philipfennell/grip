@@ -56,16 +56,20 @@ declare function graph:actions($contextGraph as element(trix:graph))
  : @param $triple 
  : @return the graph instance it was called on.
  :)
-declare function graph:add($contextGraph as element(trix:graph), $triple as element(trix:triple)) 
+declare function graph:add($contextGraph as element(trix:graph), 
+		$triple as element(trix:triple)) 
 	as element(trix:graph)
 {
 	let $graphURI as xs:string := string($contextGraph/trix:uri)
-	let $subject as xs:string := triple:subject($triple)
+	let $subject as xs:string := graph:parse-content(triple:subject($triple))
 	let $predicate as xs:string := triple:predicate($triple)
-	let $object as item()* := triple:object($triple)
-	let $insert := 
+	let $object as item()* := graph:parse-content(triple:object($triple))
+	let $permissions as xs:string* := ()
+	let $collections as xs:string* := ($graphURI)
+	let $add := 
 		xdmp:document-insert(
-			sem:uri-for-tuple($subject, $predicate, graph:object-to-string($object), $graphURI),
+			sem:uri-for-tuple($subject, $predicate, 
+					graph:object-to-string($object), $graphURI),
 			element t {
 				( element s {
 					( typeswitch ($triple/*[1])
@@ -90,26 +94,13 @@ declare function graph:add($contextGraph as element(trix:graph), $triple as elem
 							return ( $triple/*[3]/@datatype, $object ) ) )},
 				element c {$graphURI} )
 	    	},
-	    	(),
-	    	($graphURI)
+	    	$permissions,
+	    	$collections
 	    )
 	return
-		(: Need to add any new naspaces that don't allready exist in the graph document. :)
+		(: Need to add new namespaces that don't exist in the graph document. :)
 		$contextGraph
 };
-
-
-(:~
- : Takes a possible sequence of nodes (element and text()) and serialises them
- : to a string.
- : @param $items items to be serialised as a string.
- : @return xs:string
- :)
-declare private function graph:object-to-string($items as item()*) 
-	as xs:string 
-{
-	xdmp:quote(<item>{$items}</item>)
-}; 
 
 
 (:~
@@ -118,10 +109,17 @@ declare private function graph:object-to-string($items as item()*)
  : @param $graph 
  : @return the graph instance it was called on.
  :)
-declare function graph:add-all($contextGraph as element(trix:graph), $graph as element(trix:graph)) 
+declare function graph:add-all($contextGraph as element(trix:graph), 
+		$graph as element(trix:graph)) 
 	as element(trix:graph)
 {
-	$contextGraph
+	let $addAll := 
+		for $triple in $graph/trix:triple
+		return
+			graph:add($contextGraph, $triple)
+	return
+		(: Need to add new namespaces that don't exist in the graph document. :)
+		$contextGraph
 };
 
 
@@ -134,7 +132,8 @@ declare function graph:add-all($contextGraph as element(trix:graph), $graph as e
  : @param $run  
  : @return the graph instance it was called on.
  :)
-declare function graph:add-action($contextGraph as element(trix:graph), $action as item(), $run as xs:boolean) 
+declare function graph:add-action($contextGraph as element(trix:graph), 
+		$action as item(), $run as xs:boolean) 
 	as element(trix:graph)
 {
 	$contextGraph
@@ -149,7 +148,8 @@ declare function graph:add-action($contextGraph as element(trix:graph), $action 
  : @param $action 
  : @return the graph instance it was called on.
  :)
-declare function graph:add-action($contextGraph as element(trix:graph), $action as item()) 
+declare function graph:add-action($contextGraph as element(trix:graph), 
+		$action as item()) 
 	as element(trix:graph)
 {
 	graph:add-action($contextGraph, $action, false())
@@ -163,7 +163,8 @@ declare function graph:add-action($contextGraph as element(trix:graph), $action 
  : @param $callback the TripleFilter to test each Triple in the Graph against. 
  : @return false() when the first Triple is found that does not pass the test.
  :)
-declare function graph:every($contextGraph as element(trix:graph), $callback as item()) 
+declare function graph:every($contextGraph as element(trix:graph), 
+		$callback as item()) 
 	as xs:boolean
 {
 	(: This'll test all triples before returning.
@@ -185,7 +186,8 @@ declare function graph:every($contextGraph as element(trix:graph), $callback as 
  : @param $filter the TripleFilter to test each Triple in the Graph against. 
  : @return false() when the first Triple is found that does not pass the test.
  :)
-declare function graph:filter($contextGraph as element(trix:graph), $filter as item()) 
+declare function graph:filter($contextGraph as element(trix:graph), 
+		$filter as item()) 
 	as element()
 {
 	let $filteredTiples as element(trix:triple)* := 
@@ -209,7 +211,8 @@ declare function graph:filter($contextGraph as element(trix:graph), $filter as i
  : @param $callback the TripleCallback to execute for each Triple. 
  : @return an empty sequence
  :)
-declare function graph:for-each($contextGraph as element(trix:graph), $callback as item()) 
+declare function graph:for-each($contextGraph as element(trix:graph), 
+		$callback as item()) 
 	as empty-sequence()
 {
 	for $triple in graph:to-array($contextGraph)
@@ -282,12 +285,14 @@ declare function graph:match($contextGraph as element(trix:graph),
 
 
 (:~
- : Returns a new Graph which is a concatenation of this graph and the graph given as an argument.
+ : Returns a new Graph which is a concatenation of this graph and the graph 
+ : given as an argument.
  : @param $contextGraph 
  : @param $graph 
  : @return the graph instance it was called on.
  :)
-declare function graph:merge($contextGraph as element(trix:graph), $graph as element(trix:graph)) 
+declare function graph:merge($contextGraph as element(trix:graph), 
+		$graph as element(trix:graph)) 
 	as element(trix:graph)
 {
 	$contextGraph
@@ -300,7 +305,8 @@ declare function graph:merge($contextGraph as element(trix:graph), $graph as ele
  : @param $triple 
  : @return the graph instance it was called on.
  :)
-declare function graph:remove($contextGraph as element(trix:graph), $triple as element(trix:triple)) 
+declare function graph:remove($contextGraph as element(trix:graph), 
+		$triple as element(trix:triple)) 
 	as element(trix:graph)
 {
 	$contextGraph
@@ -337,7 +343,8 @@ declare function graph:remove-matches($contextGraph as element(trix:graph),
  : @param $callback the TripleFilter to test each Triple in the Graph against. 
  : @return true() when the first Triple is found that passes the test.
  :)
-declare function graph:some($contextGraph as element(trix:graph), $callback as item()) 
+declare function graph:some($contextGraph as element(trix:graph), 
+		$callback as item()) 
 	as xs:boolean 
 {
 	graph:assert(graph:to-array($contextGraph), $callback, true())
@@ -360,7 +367,8 @@ declare function graph:to-array($contextGraph as element(trix:graph))
 			collection(string($contextGraph/trix:uri))/*
 		}</graph>
 	return
-		xdmp:xslt-invoke('/resources/xslt/lib/ml-tuples-to-trix.xsl', $graph, ())//trix:triple
+		xdmp:xslt-invoke('/resources/xslt/lib/ml-tuples-to-trix.xsl', 
+				$graph, ())//trix:triple
 };
 
 
@@ -372,7 +380,8 @@ declare function graph:to-array($contextGraph as element(trix:graph))
  : stop processing the sequence.
  : @return if the callback function returns false(), else returns true()
  :)
-declare private function graph:assert($triples as element(trix:triple)*, $callback as item(), $condition as xs:boolean)
+declare private function graph:assert($triples as element(trix:triple)*, 
+		$callback as item(), $condition as xs:boolean)
 	as xs:boolean
 {
 	let $head as element()? := subsequence($triples, 1, 1)
@@ -386,3 +395,49 @@ declare private function graph:assert($triples as element(trix:triple)*, $callba
 		else 
 			not($condition)
 };
+
+
+(:~
+ : Takes a possible sequence of nodes (element and text()) and serialises them
+ : to a string.
+ : @param $items items to be serialised as a string.
+ : @return xs:string
+ :)
+declare private function graph:object-to-string($items as item()*) 
+	as xs:string 
+{
+	xdmp:quote(<item>{$items}</item>)
+}; 
+
+
+(:~
+ : Takes a reference (uri or id) and returns either the URI as-is or a nodeID 
+ : with '_:' prepended on the front to uniquiely identify the value as a nodeID
+ : in that context.
+ : @param $obj the object.
+ : @return xs:string
+ :)
+declare private function graph:parse-content($object as element()) 
+		as item()*
+{
+	typeswitch ($object) 
+  	case element(trix:id) 
+  	return 
+  		if (starts-with(string($object), '_:')) then 
+  			string($object) 
+  		else 
+  			concat('_:', if (matches(string($object), '^[a-zA-Z]')) then '' 
+  					else 'A', string($object))
+  	case element(trix:typedLiteral) 
+	return 
+		(: If an XML Literal... copy the children... :)
+		if (ends-with(string($object/@datatype), '#XMLLiteral')) then
+			$object/(* | text())
+		(: ...otherwise, take the string value. :)
+		else
+			string($object)
+ 	default 
+ 	return 
+ 		string($object)
+};
+
