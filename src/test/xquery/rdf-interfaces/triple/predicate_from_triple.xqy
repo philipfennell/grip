@@ -15,4 +15,4 @@ let $triple as element() :=
 </triple>
 
 return
-	deep-equal(triple:predicate($triple), <uri>http://purl.org/dc/elements/1.1/title</uri>)
+	deep-equal(triple:get-predicate($triple), <uri>http://purl.org/dc/elements/1.1/title</uri>)

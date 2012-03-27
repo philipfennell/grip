@@ -15,4 +15,4 @@ let $triple as element() :=
 </triple>
 
 return
-	deep-equal(triple:subject($triple), <uri>http://example.org/book/book3</uri>)
+	deep-equal(triple:get-subject($triple), <uri>http://example.org/book/book3</uri>)

@@ -15,4 +15,4 @@ let $triple as element() :=
 </triple>
 
 return
-	deep-equal(triple:subject($triple), <id>A0</id>)
+	deep-equal(triple:get-subject($triple), <id>A0</id>)

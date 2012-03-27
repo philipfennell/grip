@@ -39,7 +39,7 @@ declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
  : @param $triple
  : @return subject of type RDFNode
  :)
-declare function triple:subject($triple as element(trix:triple)) 
+declare function triple:get-subject($triple as element(trix:triple)) 
 	as element() 
 {
 	$triple/*[1]
@@ -51,7 +51,7 @@ declare function triple:subject($triple as element(trix:triple))
  : @param $triple
  : @return predicate of type RDFNode
  :)
-declare function triple:predicate($triple as element(trix:triple)) 
+declare function triple:get-predicate($triple as element(trix:triple)) 
 	as element() 
 {
 	$triple/*[2]
@@ -63,7 +63,7 @@ declare function triple:predicate($triple as element(trix:triple))
  : @param $triple
  : @return object of type RDFNode
  :)
-declare function triple:object($triple as element(trix:triple)) 
+declare function triple:get-object($triple as element(trix:triple)) 
 	as element() 
 {
 	$triple/*[3]
@@ -78,7 +78,8 @@ declare function triple:object($triple as element(trix:triple))
 declare function triple:to-string($triple as element(trix:triple)) 
 	as xs:string
 {
-	xdmp:xslt-invoke('/resources/xslt/text-plain/trix-to-ntriples.xsl', document {$triple})
+	xdmp:xslt-invoke('/resources/xslt/text-plain/trix-to-ntriples.xsl', 
+			document {$triple})
 };
 
 

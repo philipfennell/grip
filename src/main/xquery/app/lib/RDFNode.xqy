@@ -16,9 +16,9 @@ xquery version "1.0-ml" encoding "utf-8";
 
 (:~
  : Function library that implements the W3C's RDF Interface: RDFNode.
- : The Triple interface represents an RDF Triple. The stringification of a 
- : Triple results in an N-Triples representation as defined in: 
- : <http://www.w3.org/TR/2004/REC-rdf-testcases-20040210/#ntriples>
+ : RDFNode is the base class of NamedNode, BlankNode, and Literal. Not that 
+ : XQuery has the concept of classes, but the methods/properties it defines are 
+ : useful functions to have.
  : @see http://www.w3.org/TR/rdf-interfaces
  : @author	Philip A. R. Fennell
  : @version 0.1
@@ -32,6 +32,19 @@ declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
 
 
+
+
+(:~
+ : The nominalValue of an RDFNode is refined by each interface which extends 
+ : RDFNode.
+ : @param $contextRDFNode 
+ : @return item()
+ :)
+declare function rdfnode:get-nominal-value($contextRDFNode as element()) 
+	as item() 
+{
+	error(xs:QName('NOT_IMPLEMENTED'), 'The function ''rdfnode:get-nominal-value'' is not implemented.')
+}; 
 
 
 (:~

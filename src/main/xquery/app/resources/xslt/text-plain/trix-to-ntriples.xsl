@@ -160,7 +160,7 @@
 		
 		<xsl:choose>
 			<xsl:when test="matches($ref, '[A-Za-z][A-Za-z0-9]*')">
-				<xsl:value-of select="concat('_:A', $ref)"/>
+				<xsl:value-of select="concat('_:', if (matches($ref, '^[A-Za-z]')) then '' else 'A', $ref)"/>
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:copy-of select="error(xs:QName('err:NT001'), concat('Invalid nodeID: ''', $ref, ''''))"/>

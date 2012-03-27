@@ -15,4 +15,4 @@ let $triple as element() :=
 </triple>
 
 return
-	deep-equal(triple:object($triple), <plainLiteral>Harry Potter and the Prisoner Of Azkaban</plainLiteral>)
+	deep-equal(triple:get-object($triple), <plainLiteral>Harry Potter and the Prisoner Of Azkaban</plainLiteral>)

@@ -15,4 +15,4 @@ let $triple as element() :=
 </triple>
 
 return
-	deep-equal(triple:object($triple), <typedLiteral datatype="http://www.w3.org/2001/XMLSchema#date">2001-07-21</typedLiteral>)
+	deep-equal(triple:get-object($triple), <typedLiteral datatype="http://www.w3.org/2001/XMLSchema#date">2001-07-21</typedLiteral>)

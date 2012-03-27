@@ -26,8 +26,8 @@ module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph";
 import module namespace triple = "http://www.w3.org/TR/rdf-interfaces/Triple"
 	at "/lib/Triple.xqy";
 
-import module namespace sem = "http://marklogic.com/semantic"
-	at "/lib/semantic.xqy";
+import module namespace rdfnode = "http://www.w3.org/TR/rdf-interfaces/RDFNode"
+	at "/lib/RDFNode.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
@@ -43,10 +43,10 @@ declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
  : @param $contextGraph 
  : @return 
  :)
-declare function graph:actions($contextGraph as element(trix:graph)) 
+declare function graph:get-actions($contextGraph as element(trix:graph)) 
 	as item()*
 {
-	()
+	error(xs:QName('NOT_IMPLEMENTED'), 'The function ''graph:get-actions'' is not implemented.')
 }; 
 
 
@@ -60,15 +60,15 @@ declare function graph:add($contextGraph as element(trix:graph),
 		$triple as element(trix:triple)) 
 	as element(trix:graph)
 {
-	let $subject as xs:string := graph:parse-content(triple:subject($triple))
-	let $predicate as xs:string := triple:predicate($triple)
-	let $object as item()* := graph:parse-content(triple:object($triple))
+	let $subject as xs:string := rdfnode:to-string(triple:get-subject($triple))
+	let $predicate as xs:string := rdfnode:to-string(triple:get-predicate($triple))
+	let $object as item()* := rdfnode:to-string(triple:get-object($triple))
 	let $permissions as xs:string* := ()
 	let $collections as xs:string* := (graph:uri($contextGraph))
 	let $add := 
 		xdmp:document-insert(
-			graph:uri-for-quad($subject, $predicate, 
-					graph:object-to-string($object), graph:uri($contextGraph)),
+			graph:uri-for-quad($subject, $predicate, $object, 
+					graph:uri($contextGraph)),
 			element t {
 				( element s {
 					( typeswitch ($triple/*[1])
@@ -137,7 +137,7 @@ declare function graph:add-action($contextGraph as element(trix:graph),
 		$action as item(), $run as xs:boolean) 
 	as element(trix:graph)
 {
-	$contextGraph
+	error(xs:QName('NOT_IMPLEMENTED'), 'The function ''graph:add-actions'' is not implemented.')
 };
 
 
@@ -227,7 +227,7 @@ declare function graph:for-each($contextGraph as element(trix:graph),
  : @param $contextGraph 
  : @return unsigned long
  :)
-declare function graph:length($contextGraph as element(trix:graph)) 
+declare function graph:get-length($contextGraph as element(trix:graph)) 
 	as xs:unsignedLong 
 {
 	xdmp:estimate(collection(graph:uri($contextGraph)))
@@ -265,12 +265,12 @@ declare function graph:match($contextGraph as element(trix:graph),
 	as element(trix:graph)
 {
 	let $size as xs:unsignedLong := 
-		if ($limit eq 0) then graph:length($contextGraph) else $limit
+		if ($limit eq 0) then graph:get-length($contextGraph) else $limit
 	let $matchedTriples as element(trix:triple)* := 
 		for $triple in graph:to-array($contextGraph)[1 to $size]
-		where ( (if (exists($subject)) then deep-equal($subject, triple:subject($triple)) else true()) and 
-				(if (exists($predicate)) then deep-equal($predicate, triple:predicate($triple)) else true()) and 
-					(if (exists($object)) then deep-equal($object, triple:object($triple)) else true()) )
+		where ( (if (exists($subject)) then deep-equal($subject, triple:get-subject($triple)) else true()) and 
+				(if (exists($predicate)) then deep-equal($predicate, triple:get-predicate($triple)) else true()) and 
+					(if (exists($object)) then deep-equal($object, triple:get-object($triple)) else true()) )
 		return
 			$triple
 	return
@@ -325,11 +325,11 @@ declare function graph:remove($contextGraph as element(trix:graph),
 		$triple as element(trix:triple)) 
 	as element(trix:graph)
 {
-	let $subject as xs:string := graph:parse-content(triple:subject($triple))
-	let $predicate as xs:string := triple:predicate($triple)
-	let $object as item()* := graph:parse-content(triple:object($triple))
+	let $subject as xs:string := rdfnode:to-string(triple:get-subject($triple))
+	let $predicate as xs:string := rdfnode:to-string(triple:get-predicate($triple))
+	let $object as item()* := rdfnode:to-string(triple:get-object($triple))
 	let $remove := xdmp:document-delete(graph:uri-for-quad($subject, $predicate, 
-			graph:object-to-string($object), graph:uri($contextGraph)))
+			$object, graph:uri($contextGraph)))
 	return
 		$contextGraph
 };
@@ -422,51 +422,6 @@ declare private function graph:assert($triples as element(trix:triple)*,
 				$condition
 		else 
 			not($condition)
-};
-
-
-(:~
- : Takes a possible sequence of nodes (element and text()) and serialises them
- : to a string.
- : @param $items items to be serialised as a string.
- : @return xs:string
- :)
-declare private function graph:object-to-string($items as item()*) 
-	as xs:string 
-{
-	xdmp:quote(<item>{$items}</item>)
-}; 
-
-
-(:~
- : Takes a reference (uri or id) and returns either the URI as-is or a nodeID 
- : with '_:' prepended on the front to uniquiely identify the value as a nodeID
- : in that context.
- : @param $obj the object.
- : @return xs:string
- :)
-declare private function graph:parse-content($object as element()) 
-		as item()*
-{
-	typeswitch ($object) 
-  	case element(trix:id) 
-  	return 
-  		if (starts-with(string($object), '_:')) then 
-  			string($object) 
-  		else 
-  			concat('_:', if (matches(string($object), '^[a-zA-Z]')) then '' 
-  					else 'A', string($object))
-  	case element(trix:typedLiteral) 
-	return 
-		(: If an XML Literal... copy the children... :)
-		if (ends-with(string($object/@datatype), '#XMLLiteral')) then
-			$object/(* | text())
-		(: ...otherwise, take the string value. :)
-		else
-			string($object)
- 	default 
- 	return 
- 		string($object)
 };
 
 

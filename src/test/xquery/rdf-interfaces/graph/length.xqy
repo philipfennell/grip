@@ -13,4 +13,4 @@ let $graph as element() :=
 	</graph>
 
 return
-	graph:length($graph)
+	graph:get-length($graph)
