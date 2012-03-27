@@ -6,7 +6,7 @@ declare default element namespace "http://www.w3.org/2004/03/trix/trix-1/";
 declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
 
 import module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"
-	at "/lib/lib-graph.xqy";
+	at "/lib/Graph.xqy";
 
 
 let $graph as element() := 

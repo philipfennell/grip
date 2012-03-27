@@ -5,7 +5,7 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/2004/03/trix/trix-1/";
 
 import module namespace triple = "http://www.w3.org/TR/rdf-interfaces/Triple"
-	at "/lib/lib-triple.xqy";
+	at "/lib/Triple.xqy";
 
 let $triple as element() := 
 <triple>

@@ -24,7 +24,7 @@ xquery version "1.0-ml" encoding "utf-8";
 module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"; 
 
 import module namespace triple = "http://www.w3.org/TR/rdf-interfaces/Triple"
-	at "/lib/lib-triple.xqy";
+	at "/lib/Triple.xqy";
 
 import module namespace sem = "http://marklogic.com/semantic"
 	at "/lib/semantic.xqy";
@@ -305,7 +305,7 @@ declare function graph:match($contextGraph as element(trix:graph),
  : given as an argument.
  : @param $contextGraph 
  : @param $graph 
- : @return the graph instance it was called on.
+ : @return a new graph.
  :)
 declare function graph:merge($contextGraph as element(trix:graph), 
 		$graph as element(trix:graph)) 
