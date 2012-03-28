@@ -142,3 +142,43 @@ declare function prefixmap:add-all($contextPrefixMap as item(),
 	prefixmap:add-all($contextPrefixMap, $prefixes, false())
 };
 
+
+(:~
+ : Get the IRI from the passed prefix.
+ : @param $contextPrefixMap
+ : @param $prefix
+ : @return xs:string
+ :)
+declare function prefixmap:get($contextPrefixMap as item(), $prefix as xs:string) 
+	as xs:string?
+{
+	map:get($contextPrefixMap, $prefix)
+};
+
+
+(:~
+ : Set the IRI from the passed prefix.
+ : @param $contextPrefixMap
+ : @param $prefix The prefix must not contain any whitespace.
+ : @param $iri An IRI.
+ : @return xs:string
+ :)
+declare function prefixmap:set($contextPrefixMap as item(), 
+		$prefix as xs:string, $iri as xs:string) 
+	as empty-sequence()
+{
+	map:put($contextPrefixMap, $prefix, $iri)
+};
+
+
+(:~
+ : Remove the prefix/IRI from the context PrefixMap.
+ : @param $contextPrefixMap
+ : @param $prefix
+ : @return xs:string
+ :)
+declare function prefixmap:remove($contextPrefixMap as item(), $prefix as xs:string) 
+	as empty-sequence()
+{
+	map:delete($contextPrefixMap, $prefix)
+};
