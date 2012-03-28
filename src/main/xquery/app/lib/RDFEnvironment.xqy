@@ -32,6 +32,9 @@ import module namespace triple = "http://www.w3.org/TR/rdf-interfaces/Triple"
 import module namespace rdfnode = "http://www.w3.org/TR/rdf-interfaces/RDFNode"
 	at "/lib/RDFNode.xqy";
 
+import module namespace prefixmap = "http://www.w3.org/TR/rdf-interfaces/PrefixMap"
+	at "/lib/PrefixMap.xqy";
+
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/2004/03/trix/trix-1/";
 
@@ -81,7 +84,8 @@ declare function rdfenv:create-triple($subject as element(),
 
 
 (:~
- : Creates a Literal given a value, an optional language or an optional datatype.
+ : Creates a Literal given a value, an optional language and/or an optional 
+ : datatype.
  : @param $value The value to be represented by the Literal, the value must be 
  : a lexical representation of the value.
  : @param $language The language that is associated with the Literal.
@@ -102,21 +106,60 @@ declare private function rdfenv:create-literal($value as item(),
 		<plainLiteral>{$value}</plainLiteral>
 };
 
+
+(:~
+ : Creates a plain Literal given a value
+ : @param $value The value to be represented by the Literal, the value must be 
+ : a lexical representation of the value.
+ : @return a new Literal.
+ :)
 declare function rdfenv:create-literal($value as item()) 
 	as element()
 {
 	rdfenv:create-literal($value, (), ())
 };
 
-declare function rdfenv:create-literal($value as item(), $param as item()) 
+
+(:~
+ : Creates a Literal given a value, and a language or datatype. the language 
+ : and datatype arguments are mutually exclusive.
+ : @param $value The value to be represented by the Literal, the value must be 
+ : a lexical representation of the value.
+ : @param $arg
+ : @return a new Literal.
+ :)
+declare function rdfenv:create-literal($value as item(), $arg as item()) 
 	as element()
 {
-	typeswitch ($param) 
+	typeswitch ($arg) 
   	case element(trix:uri) 
   	return 
-		rdfenv:create-literal($value, (), $param)
+		rdfenv:create-literal($value, (), $arg)
 	default
 	return
-		rdfenv:create-literal($value, $param, ())
+		rdfenv:create-literal($value, $arg, ())
+};
+
+
+(:~
+ : Creates a NamedNode identified by the given IRI.
+ : @param $value An IRI, CURIE or TERM.
+ : @return a new NamedNode.
+ :)
+declare function rdfenv:create-named-node($value as item()) 
+	as element(trix:uri)
+{
+	<uri>{$value}</uri>
+};
+
+
+(:~
+ : Creates a new BlankNode.
+ : @return a new BlankNode.
+ :)
+declare function rdfenv:create-blank-node() 
+	as element(trix:id)
+{
+	<id/>
 };
 
