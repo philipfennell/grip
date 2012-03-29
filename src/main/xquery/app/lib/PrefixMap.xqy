@@ -161,7 +161,7 @@ declare function prefixmap:get($contextPrefixMap as item(), $prefix as xs:string
  : @param $contextPrefixMap
  : @param $prefix The prefix must not contain any whitespace.
  : @param $iri An IRI.
- : @return xs:string
+ : @return empty sequence.
  :)
 declare function prefixmap:set($contextPrefixMap as item(), 
 		$prefix as xs:string, $iri as xs:string) 
@@ -174,11 +174,12 @@ declare function prefixmap:set($contextPrefixMap as item(),
 (:~
  : Remove the prefix/IRI from the context PrefixMap.
  : @param $contextPrefixMap
- : @param $prefix
- : @return xs:string
+ : @param $prefix 
+ : @return empty sequence.
  :)
 declare function prefixmap:remove($contextPrefixMap as item(), $prefix as xs:string) 
 	as empty-sequence()
 {
 	map:delete($contextPrefixMap, $prefix)
 };
+

@@ -8,7 +8,7 @@ import module namespace profile = "http://www.w3.org/TR/rdf-interfaces/Profile"
 	at "/lib/Profile.xqy";
 
 
-let $prefixMap as item() := profile:get-prefixes(map:map())
-let $test := profile:set-default-prefix(map:map(), 'http://www.example.com/default/namespace#')
+let $termMap as item() := profile:get-terms(map:map())
+let $test := profile:set-default-vocabulary(map:map(), 'http://www.example.com/default/namespace#')
 return
-	map:get($prefixMap, '') eq 'http://www.example.com/default/namespace#'
+	map:get($termMap, '') eq 'http://www.example.com/default/namespace#'

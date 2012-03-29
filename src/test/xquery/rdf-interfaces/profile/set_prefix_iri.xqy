@@ -4,11 +4,13 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare default element namespace "http://www.w3.org/2004/03/trix/trix-1/";
 
+declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
+
 import module namespace profile = "http://www.w3.org/TR/rdf-interfaces/Profile"
 	at "/lib/Profile.xqy";
 
-
-let $prefixMap as item() := profile:get-prefixes(map:map())
-let $test := profile:set-default-prefix(map:map(), 'http://www.example.com/default/namespace#')
+let $profile as item() := map:map()
+let $test := profile:set-term($profile, 'test', 'http://www.example.com/test/one#')
 return
-	map:get($prefixMap, '') eq 'http://www.example.com/default/namespace#'
+	map:get(profile:get-terms($profile), 'test') eq 'http://www.example.com/test/one#'
+	

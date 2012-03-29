@@ -20,6 +20,9 @@ xquery version "1.0-ml" encoding "utf-8";
  : @author	Philip A. R. Fennell
  : @version 0.1
  :)
+ 
+
+
 
 module namespace profile = "http://www.w3.org/TR/rdf-interfaces/Profile";
 
@@ -36,6 +39,7 @@ declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
 
 
+(:~ Required Prefix Map. :)
 declare private variable $profile:PREFIX_MAP as item() := 
 	map:map(
 		<map:map xmlns:map="http://marklogic.com/xdmp/map" 
@@ -76,6 +80,8 @@ declare private variable $profile:PREFIX_MAP as item() :=
 		</map:map>
 	);
 
+
+(:~ XML Schema Term Map. :)
 declare private variable $profile:TERM_MAP as item() := 
 	map:map(
 		<map:map xmlns:map="http://marklogic.com/xdmp/map" 
@@ -181,9 +187,10 @@ declare private variable $profile:TERM_MAP as item() :=
 
 (:~
  : Gets the Profile's PrefixMap.
+ : @param $contextProfile 
  : @return PrefixMap
  :)
-declare function profile:get-prefixes() 
+declare function profile:get-prefixes($contextProfile as item()) 
 	as item() 
 {
 	$profile:PREFIX_MAP
@@ -192,9 +199,10 @@ declare function profile:get-prefixes()
 
 (:~
  : Gets the Profile's PrefixMap.
+ : @param $contextProfile 
  : @return PrefixMap
  :)
-declare function profile:get-terms() 
+declare function profile:get-terms($contextProfile as item()) 
 	as item() 
 {
 	$profile:TERM_MAP
@@ -215,9 +223,9 @@ declare function profile:resolve($contextProfile as item(),
 	as xs:string?
 {
 	if (contains($toResolve, ':')) then 
-		prefixmap:resolve(profile:get-prefixes(), $toResolve)
+		prefixmap:resolve(profile:get-prefixes($contextProfile), $toResolve)
 	else
-		termmap:resolve(profile:get-terms(), $toResolve)
+		termmap:resolve(profile:get-terms($contextProfile), $toResolve)
 };
 
 
@@ -226,11 +234,59 @@ declare function profile:resolve($contextProfile as item(),
  : prefix, for example ":me", it is identical to calling the setDefault method 
  : on prefixes.
  : @param $contextProfile 
- : @param $iri
+ : @param $iri The IRI to use as the default prefix.
  : @return empty sequence.
  :)
 declare function profile:set-default-prefix($contextProfile as item(), $iri as xs:string) 
 	as empty-sequence() 
 {
-	prefixmap:set-default(profile:get-prefixes(), $iri)
+	prefixmap:set-default(profile:get-prefixes($contextProfile), $iri)
 };
+
+
+(:~
+ : This method sets the default vocabulary for use when resolving unknown terms, 
+ : it is identical to calling the setDefault method on terms.
+ : @param $contextProfile 
+ : @param $iri The IRI to use as the default vocabulary.
+ : @return empty sequence.
+ :)
+declare function profile:set-default-vocabulary($contextProfile as item(), $iri as xs:string) 
+	as empty-sequence() 
+{
+	termmap:set-default(profile:get-terms($contextProfile), $iri)
+};
+
+
+(:~
+ : This method associates an IRI with a prefix, it is identical to calling the 
+ : set method on prefixes.
+ : @param $contextProfile
+ : @param $prefix The prefix must not contain any whitespace.
+ : @param $iri The IRI to associate with the prefix.
+ : @return empty sequence.
+ :)
+declare function profile:set-prefix($contextProfile as item(), 
+		$prefix as xs:string, $iri as xs:string) 
+	as empty-sequence()
+{
+	prefixmap:set(profile:get-prefixes($contextProfile), $prefix, $iri)
+};
+
+
+(:~
+ : This method associates an IRI with a term, it is identical to calling the 
+ : set method on term.
+ : @param $contextProfile
+ : @param $term The term to set, must not contain any whitespace or the : 
+ : (single-colon) character
+ : @param $iri The IRI to associate with the term.
+ : @return empty sequence.
+ :)
+declare function profile:set-term($contextProfile as item(), 
+		$term as xs:string, $iri as xs:string) 
+	as empty-sequence()
+{
+	termmap:set(profile:get-terms($contextProfile), $term, $iri)
+};
+
