@@ -35,6 +35,9 @@ import module namespace rdfnode = "http://www.w3.org/TR/rdf-interfaces/RDFNode"
 import module namespace prefixmap = "http://www.w3.org/TR/rdf-interfaces/PrefixMap"
 	at "/lib/PrefixMap.xqy";
 
+import module namespace termmap = "http://www.w3.org/TR/rdf-interfaces/TermMap"
+	at "/lib/TermMap.xqy";
+
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/2004/03/trix/trix-1/";
 
@@ -161,5 +164,35 @@ declare function rdfenv:create-blank-node()
 	as element(trix:id)
 {
 	<id/>
+};
+
+
+(:~
+ : Create a new PrefixMap.
+ : @param $empty
+ : @return a new PrefixMap.
+ :)
+declare function rdfenv:create-prefixmap($empty as xs:boolean) 
+	as item() 
+{
+	if ($empty) then 
+		map:map()
+	else
+		map:map()
+};
+
+
+(:~
+ : Create a new TermMap.
+ : @param $empty
+ : @return a new TermMap.
+ :)
+declare function rdfenv:create-termmap($empty as xs:boolean) 
+	as item() 
+{
+	if ($empty) then 
+		map:map()
+	else
+		map:map()
 };
 
