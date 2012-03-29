@@ -16,6 +16,8 @@ xquery version "1.0-ml" encoding "utf-8";
 
 (:~
  : Function library that implements the W3C's RDF Interface: RDFEnvironment.
+ : The RDF Environment is an interface which exposes a high level API for 
+ : working with RDF in a programming environment.
  : @see http://www.w3.org/TR/rdf-interfaces
  : @author	Philip A. R. Fennell
  : @version 0.1
@@ -37,6 +39,9 @@ import module namespace prefixmap = "http://www.w3.org/TR/rdf-interfaces/PrefixM
 
 import module namespace termmap = "http://www.w3.org/TR/rdf-interfaces/TermMap"
 	at "/lib/TermMap.xqy";
+
+import module namespace profile = "http://www.w3.org/TR/rdf-interfaces/Profile"
+	at "/lib/Profile.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/2004/03/trix/trix-1/";
@@ -66,6 +71,17 @@ declare function rdfenv:create-graph($triples as element(trix:triple)*)
 			<uri/>,
 			$triples
 		}</graph>
+};
+
+
+(:~
+ : Creates a new Graph.
+ : @return a new Graph.
+ :)
+declare function rdfenv:create-graph() 
+	as element(trix:graph) 
+{
+	rdfenv:create-graph(())
 };
 
 
@@ -169,10 +185,42 @@ declare function rdfenv:create-blank-node()
 
 (:~
  : Create a new PrefixMap.
- : @param $empty
+ : @param $empty If true is specified then an empty PrefixMap will be returned, 
+ : by default the PrefixMap returned will be populated with prefixes 
+ : replicating those of the current RDF environment.
  : @return a new PrefixMap.
  :)
-declare function rdfenv:create-prefixmap($empty as xs:boolean) 
+declare function rdfenv:create-prefix-map($empty as xs:boolean) 
+	as item() 
+{
+	if ($empty) then 
+		map:map()
+	else
+		map:map()
+};
+
+
+(:~
+ : Create a new PrefixMap.
+ : PrefixMap returned will be populated with prefixes replicating those of the 
+ : current RDF environment.
+ : @return a new PrefixMap.
+ :)
+declare function rdfenv:create-prefix-map() 
+	as item() 
+{
+	map:map()
+};
+
+
+(:~
+ : Create a new TermMap.
+ : @param $empty If true is specified then an empty TermMap will be returned, 
+ : by default the TermMap returned will be populated with terms replicating 
+ : those of the current RDF environment.
+ : @return a new TermMap.
+ :)
+declare function rdfenv:create-term-map($empty as xs:boolean) 
 	as item() 
 {
 	if ($empty) then 
@@ -184,15 +232,28 @@ declare function rdfenv:create-prefixmap($empty as xs:boolean)
 
 (:~
  : Create a new TermMap.
- : @param $empty
+ : TermMap returned will be populated with terms replicating those of the 
+ : current RDF environment.
  : @return a new TermMap.
  :)
-declare function rdfenv:create-termmap($empty as xs:boolean) 
+declare function rdfenv:create-term-map() 
 	as item() 
 {
-	if ($empty) then 
-		map:map()
-	else
-		map:map()
+	map:map()
+};
+
+
+(:~
+ : Create a new Profile.
+ : @param $empty If true is specified then a profile with an empty TermMap and 
+ : PrefixMap will be returned, by default the Profile returned will contain 
+ : populated term and prefix maps replicating those of the current RDF 
+ : environment.
+ : @return a new Profile.
+ :)
+declare function rdfenv:create-profile($empty as xs:boolean) 
+	as empty-sequence()
+{
+	()
 };
 
