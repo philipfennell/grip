@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf-environment xmlns="http://www.w3.org/TR/rdf-interfaces">
+	<prefix-map>
+		<entry xml:id="owl">http://www.w3.org/2002/07/owl#</entry>
+		<entry xml:id="rdf">http://www.w3.org/1999/02/22-rdf-syntax-ns#</entry>
+		<entry xml:id="rdfs">http://www.w3.org/2000/01/rdf-schema#</entry>
+		<entry xml:id="rdfa">http://www.w3.org/ns/rdfa#</entry>
+		<entry xml:id="xhv">http://www.w3.org/1999/xhtml/vocab#</entry>
+		<entry xml:id="xml">http://www.w3.org/XML/1998/namespace</entry>
+		<entry xml:id="xsd">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="xs">http://www.w3.org/2001/XMLSchema#</entry>
+	</prefix-map>
+	<term-map>
+		<entry xml:id="string">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="boolean">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="dateTime">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="date">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="time">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="int">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="double">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="float">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="decimal">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="positiveInteger">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="integer">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="nonPositiveInteger">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="negativeInteger">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="long">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="int">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="short">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="byte">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="nonNegativeInteger">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="unsignedLong">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="unsignedInt">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="unsignedShort">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="unsignedByte">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="positiveInteger">http://www.w3.org/2001/XMLSchema#</entry>
+	</term-map>
+</rdf-environment>

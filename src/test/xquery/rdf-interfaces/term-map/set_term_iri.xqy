@@ -2,14 +2,14 @@ xquery version "1.0-ml" encoding "utf-8";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
-declare default element namespace "http://www.w3.org/2004/03/trix/trix-1/";
+declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
-declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
+declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 
 import module namespace termmap = "http://www.w3.org/TR/rdf-interfaces/TermMap"
-	at "/lib/TermMap.xqy";
+	at "/lib/rdf-interfaces/TermMap.xqy";
 
-let $termMap as item() := map:map()
-let $test := termmap:set($termMap, 'test', 'http://www.example.com/test/one#')
+let $termMap as element(term-map) := <term-map/>
+let $test := termmap:set($termMap, 'string', 'http://www.w3.org/2001/XMLSchema#')
 return
-	map:get($termMap, 'test') eq 'http://www.example.com/test/one#'
+	termmap:get($test, 'string') eq 'http://www.w3.org/2001/XMLSchema#'

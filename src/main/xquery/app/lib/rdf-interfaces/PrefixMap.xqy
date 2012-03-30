@@ -26,6 +26,7 @@ xquery version "1.0-ml" encoding "utf-8";
 module namespace prefixmap = "http://www.w3.org/TR/rdf-interfaces/PrefixMap"; 
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
+declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 	
 declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
@@ -46,7 +47,7 @@ declare function prefixmap:resolve($contextPrefixMap as item(), $curie as xs:str
 {
 	let $prefix as xs:string? := substring-before($curie, ':')
 	let $term as xs:string := substring-after($curie, ':')
-	let $namespaceIRI as xs:string? := map:get($contextPrefixMap, $prefix)
+	let $namespaceIRI as xs:string? := prefixmap:get($contextPrefixMap, $prefix)
 	return
 		if (string-length($namespaceIRI) gt 0) then 
 			concat($namespaceIRI, $term)
@@ -64,7 +65,8 @@ declare function prefixmap:resolve($contextPrefixMap as item(), $curie as xs:str
  : @param $iri The IRI to shrink to a CURIE.
  : @return a CURIE as an xs:string.
  :)
-declare function prefixmap:shrink($contextPrefixMap as item(), $iri as xs:string) 
+declare function prefixmap:shrink($contextPrefixMap as element(prefix-map), 
+		$iri as xs:string) 
 	as xs:string
 {
 	let $namespaceIRI as xs:string := 
@@ -73,10 +75,10 @@ declare function prefixmap:shrink($contextPrefixMap as item(), $iri as xs:string
 		else
 			string-join((reverse(subsequence(reverse(tokenize($iri, '/')), 2)), ''), '/')
 	let $prefix as xs:string? := 
-		for $key in map:keys($contextPrefixMap)
-		where map:get($contextPrefixMap, $key) eq $namespaceIRI
+		for $id in $contextPrefixMap/entry/@xml:id
+		where prefixmap:get($contextPrefixMap, string($id)) eq $namespaceIRI
 		return
-			$key
+			$id
 	let $term as xs:string := 
 		( substring-after($iri, $namespaceIRI), 
 				substring-after($iri, concat($namespaceIRI, '/')) )[1]
@@ -95,13 +97,11 @@ declare function prefixmap:shrink($contextPrefixMap as item(), $iri as xs:string
  : for example ":this".
  : @return 
  :)
-declare function prefixmap:set-default($contextPrefixMap as item(), 
+declare function prefixmap:set-default($contextPrefixMap as element(prefix-map), 
 		$iri as xs:string) 
-	as empty-sequence()
+	as element(prefix-map)
 {
-	let $_put := map:put($contextPrefixMap, '', $iri)
-	return
-		()
+	prefixmap:set($contextPrefixMap, '_', $iri)
 };
 
 
@@ -110,22 +110,25 @@ declare function prefixmap:set-default($contextPrefixMap as item(),
  : @param $contextPrefixMap 
  : @param $prefixes 
  : @param $override 
- : @return 
+ : @return PrefixMap
  :)
-declare function prefixmap:add-all($contextPrefixMap as item(), 
-		$prefixes as item(), $override as xs:boolean) 
-	as item()
+declare function prefixmap:add-all($contextPrefixMap as element(prefix-map), 
+		$prefixes as element(prefix-map), $override as xs:boolean) 
+	as element(prefix-map)
 {
-	let $addAll := 
-		for $key in map:keys($prefixes)
+	element {xs:QName(name($contextPrefixMap))} {
+		( $contextPrefixMap/@*,
+		(:( for $entry in $prefixes/entry
 		where if ($override eq true()) then 
 				true() 
 			else 
-				not($key = map:keys($contextPrefixMap))
+				not($entry/@xml:id = $contextPrefixMap/entry/@xml:id)
 		return
-			map:put($contextPrefixMap, $key, map:get($prefixes, $key))
-	return
-		$contextPrefixMap
+			$entry ),
+		$contextPrefixMap/entry ):)
+		
+		
+	}
 };
 
 
@@ -133,11 +136,11 @@ declare function prefixmap:add-all($contextPrefixMap as item(),
  : Import a PrefixMap into the context PrefixMap.
  : @param $contextPrefixMap 
  : @param $prefixes 
- : @return 
+ : @return PrefixMap
  :)
-declare function prefixmap:add-all($contextPrefixMap as item(), 
+declare function prefixmap:add-all($contextPrefixMap element(prefix-map), 
 		$prefixes as item()) 
-	as item()
+	as element(prefix-map)
 {
 	prefixmap:add-all($contextPrefixMap, $prefixes, false())
 };
@@ -149,10 +152,11 @@ declare function prefixmap:add-all($contextPrefixMap as item(),
  : @param $prefix
  : @return xs:string
  :)
-declare function prefixmap:get($contextPrefixMap as item(), $prefix as xs:string) 
+declare function prefixmap:get($contextPrefixMap as element(prefix-map), 
+		$prefix as xs:string) 
 	as xs:string?
 {
-	map:get($contextPrefixMap, $prefix)
+	id((if ($prefix eq '') then '_' else $prefix), document {$contextPrefixMap})
 };
 
 
@@ -163,11 +167,18 @@ declare function prefixmap:get($contextPrefixMap as item(), $prefix as xs:string
  : @param $iri An IRI.
  : @return empty sequence.
  :)
-declare function prefixmap:set($contextPrefixMap as item(), 
+declare function prefixmap:set($contextPrefixMap as element(prefix-map), 
 		$prefix as xs:string, $iri as xs:string) 
-	as empty-sequence()
+	as element(prefix-map)
 {
-	map:put($contextPrefixMap, $prefix, $iri)
+	element {xs:QName(name($contextPrefixMap))} {
+		( $contextPrefixMap/@*,
+		<entry xml:id="{$prefix}">{$iri}</entry>,
+		( for $entry in $contextPrefixMap/entry
+		where not(string($entry/@xml:id) eq $prefix)
+		return
+			$entry ) )
+	}
 };
 
 
@@ -178,8 +189,16 @@ declare function prefixmap:set($contextPrefixMap as item(),
  : @return empty sequence.
  :)
 declare function prefixmap:remove($contextPrefixMap as item(), $prefix as xs:string) 
-	as empty-sequence()
+	as element(prefix-map)
 {
-	map:delete($contextPrefixMap, $prefix)
+	let $thisId as xs:string := if ($prefix eq '') then '_' else $prefix
+	return
+		element {xs:QName(name($contextPrefixMap))} {
+			( $contextPrefixMap/@*,
+			for $entry in $contextPrefixMap/entry
+			where not(string($entry/@xml:id) eq $thisId)
+			return
+				$entry )
+		}
 };
 

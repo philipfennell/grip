@@ -29,7 +29,7 @@ module namespace rdfnode = "http://www.w3.org/TR/rdf-interfaces/RDFNode";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
+declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 
 
 
@@ -57,16 +57,16 @@ declare function rdfnode:get-interface-name($contextRDFNode as element())
 	as xs:string
 {
 	typeswitch ($contextRDFNode) 
-  	case element(trix:id) 
+  	case element(rdfi:id) 
   	return 
   		'BlankNode'
-  	case element(trix:uri) 
+  	case element(rdfi:uri) 
   	return
   		'NamedNode'
-  	case element(trix:plainLiteral) 
+  	case element(rdfi:plainLiteral) 
   	return 
   		'Literal'
-  	case element(trix:typedLiteral) 
+  	case element(rdfi:typedLiteral) 
   	return 
   		'Literal'
   	default
@@ -119,14 +119,14 @@ declare function rdfnode:to-string($contextRDFNode as element())
 	as xs:string
 {
 	typeswitch ($contextRDFNode) 
-  	case element(trix:id) 
+  	case element(rdfi:id) 
   	return 
   		if (starts-with(string($contextRDFNode), '_:')) then 
   			string($contextRDFNode) 
   		else 
   			concat('_:', if (matches(string($contextRDFNode), '^[a-zA-Z]')) then '' 
   					else 'A', string($contextRDFNode))
-  	case element(trix:typedLiteral) 
+  	case element(rdfi:typedLiteral) 
 	return 
 		(: If an XML Literal, copy the children and serialize as a string... :)
 		if (ends-with(string($contextRDFNode/@datatype), '#XMLLiteral')) then
@@ -153,16 +153,16 @@ declare function rdfnode:value-of($contextRDFNode as element())
 	let $namespace as xs:string := substring-before($contextRDFNode/@datatype, '#')
 	return
 		typeswitch ($contextRDFNode) 
-	  	case element(trix:id) 
+	  	case element(rdfi:id) 
 	  	return 
 	  		xs:string($value)
-	  	case element(trix:uri) 
+	  	case element(rdfi:uri) 
 	  	return
 	  		xs:string($value)
-	  	case element(trix:plainLiteral) 
+	  	case element(rdfi:plainLiteral) 
 	  	return 
 	  		xs:string($value)
-	  	case element(trix:typedLiteral) 
+	  	case element(rdfi:typedLiteral) 
 	  	return 
 	  		try {
 	  			xdmp:apply(xdmp:function(QName($namespace, $type)), ($value))

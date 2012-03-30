@@ -2,13 +2,18 @@ xquery version "1.0-ml" encoding "utf-8";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
-declare default element namespace "http://www.w3.org/2004/03/trix/trix-1/";
+declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
-declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
+declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 
 import module namespace rdfenv = "http://www.w3.org/TR/rdf-interfaces/RDFEnvironment"
-	at "/lib/RDFEnvironment.xqy";
+	at "/lib/rdf-interfaces/RDFEnvironment.xqy";
 
+let $rdfEnvironment as element(rdf-environment) := 
+<rdf-environment>
+	<prefix-map/>
+	<term-map/>
+</rdf-environment>
 let $graph as element() := 
 <graph xmlns:dc="http://purl.org/dc/elements/1.1/"
 		xmlns:xs="http://www.w3.org/2001/XMLSchema#">
@@ -36,5 +41,5 @@ let $graph as element() :=
 </graph>
 
 return
-	rdfenv:create-graph($graph/trix:triple)
+	rdfenv:create-graph($rdfEnvironment, $graph/rdfi:triple)
 

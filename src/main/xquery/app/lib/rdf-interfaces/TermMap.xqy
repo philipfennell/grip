@@ -26,6 +26,7 @@ xquery version "1.0-ml" encoding "utf-8";
 module namespace termmap = "http://www.w3.org/TR/rdf-interfaces/TermMap"; 
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
+declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 	
 declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
@@ -43,11 +44,11 @@ declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
  : @param $term The term to resolve.
  : @return an IRI as an xs:string.
  :)
-declare function termmap:resolve($contextTermMap as item(), $term as xs:string) 
+declare function termmap:resolve($contextTermMap as element(term-map), $term as xs:string) 
 	as xs:string?
 {
 	let $resolvedIRI as xs:string? := 
-		(map:get($contextTermMap, $term), map:get($contextTermMap, ''))[1]
+		(termmap:get($contextTermMap, $term), termmap:get($contextTermMap, ''))[1]
 	return
 		if (string-length($resolvedIRI) gt 0) then 
 			concat($resolvedIRI, $term)
@@ -65,7 +66,8 @@ declare function termmap:resolve($contextTermMap as item(), $term as xs:string)
  : @param $iri The IRI to shrink to a CURIE.
  : @return a CURIE as an xs:string.
  :)
-declare function termmap:shrink($contextTermMap as item(), $iri as xs:string) 
+declare function termmap:shrink($contextTermMap as element(term-map), 
+		$iri as xs:string) 
 	as xs:string
 {
 	let $namespaceIRI as xs:string := 
@@ -74,10 +76,10 @@ declare function termmap:shrink($contextTermMap as item(), $iri as xs:string)
 		else
 			string-join((reverse(subsequence(reverse(tokenize($iri, '/')), 2)), ''), '/')
 	let $term as xs:string? := 
-		for $key in map:keys($contextTermMap)
-		where concat(map:get($contextTermMap, $key), $key) eq $iri
+		for $id in $contextTermMap/entry/@xml:id
+		where concat(termmap:get($contextTermMap, $id), $id) eq $iri
 		return
-			$key
+			$id
 	return
 		if ($term) then 
 			$term
@@ -92,15 +94,13 @@ declare function termmap:shrink($contextTermMap as item(), $iri as xs:string)
  : @param $iri The default iri to be used when an term cannot be resolved, the 
  : resulting IRI is obtained by concatenating this iri with the term being 
  : resolved.
- : @return empty-sequence()
+ : @return TermMap
  :)
-declare function termmap:set-default($contextTermMap as item(), 
+declare function termmap:set-default($contextTermMap as element(term-map), 
 		$iri as xs:string) 
-	as empty-sequence()
+	as element(term-map)
 {
-	let $_put := map:put($contextTermMap, '', $iri)
-	return
-		()
+	termmap:set($contextTermMap, '_', $iri)
 };
 
 
@@ -113,7 +113,7 @@ declare function termmap:set-default($contextTermMap as item(),
  : the existing set.
  : @return the TermMap instance on which it was called.
  :)
-declare function termmap:add-all($contextTermMap as item(), 
+declare function termmap:add-all($contextTermMap as element(term-map), 
 		$terms as item(), $override as xs:boolean) 
 	as item()
 {
@@ -150,10 +150,11 @@ declare function termmap:add-all($contextTermMap as item(),
  : @param $term
  : @return xs:string
  :)
-declare function termmap:get($contextTermMap as item(), $term as xs:string) 
+declare function termmap:get($contextTermMap as element(term-map), 
+		$term as xs:string) 
 	as xs:string?
 {
-	map:get($contextTermMap, $term)
+	id((if ($term eq '') then '_' else $term), document {$contextTermMap})
 };
 
 
@@ -162,13 +163,20 @@ declare function termmap:get($contextTermMap as item(), $term as xs:string)
  : @param $contextTermMap
  : @param $term The term must not contain any whitespace.
  : @param $iri An IRI.
- : @return xs:string
+ : @return element(term-map)
  :)
-declare function termmap:set($contextTermMap as item(), 
+declare function termmap:set($contextTermMap as element(term-map), 
 		$term as xs:string, $iri as xs:string) 
-	as empty-sequence()
+	as element(term-map)
 {
-	map:put($contextTermMap, $term, $iri)
+	element {xs:QName(name($contextTermMap))} {
+		( $contextTermMap/@*,
+		<entry xml:id="{$term}">{$iri}</entry>,
+		( for $entry in $contextTermMap/entry
+		where not(string($entry/@xml:id) eq $term)
+		return
+			$entry ) )
+	}
 };
 
 
@@ -176,10 +184,20 @@ declare function termmap:set($contextTermMap as item(),
  : Remove the term/IRI from the context TermMap.
  : @param $contextTermMap
  : @param $term
- : @return xs:string
+ : @return element(term-map)
  :)
-declare function termmap:remove($contextTermMap as item(), $term as xs:string) 
-	as empty-sequence()
+declare function termmap:remove($contextTermMap as element(term-map), 
+		$term as xs:string) 
+	as element(term-map)
 {
-	map:delete($contextTermMap, $term)
+	let $thisId as xs:string := if ($term eq '') then '_' else $term
+	return
+		element {xs:QName(name($contextTermMap))} {
+			( $contextTermMap/@*,
+			for $entry in $contextTermMap/entry
+			where not(string($entry/@xml:id) eq $thisId)
+			return
+				$entry )
+		}
 };
+

@@ -27,160 +27,16 @@ xquery version "1.0-ml" encoding "utf-8";
 module namespace profile = "http://www.w3.org/TR/rdf-interfaces/Profile";
 
 import module namespace prefixmap = "http://www.w3.org/TR/rdf-interfaces/PrefixMap"
-	at "/lib/PrefixMap.xqy";
+	at "/lib/rdf-interfaces/PrefixMap.xqy";
 
 import module namespace termmap = "http://www.w3.org/TR/rdf-interfaces/TermMap"
-	at "/lib/TermMap.xqy";
+	at "/lib/rdf-interfaces/TermMap.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
-declare default element namespace "http://www.w3.org/2004/03/trix/trix-1/";
+declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
 declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
-
-
-(:~ Required Prefix Map. :)
-declare private variable $profile:PREFIX_MAP as item() := 
-	map:map(
-		<map:map xmlns:map="http://marklogic.com/xdmp/map" 
-				xmlns:xs="http://www.w3.org/2001/XMLSchema"
-				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-			<map:entry>
-				<map:key>owl</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2002/07/owl#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>rdf</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/1999/02/22-rdf-syntax-ns#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>rdfs</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2000/01/rdf-schema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>rdfa</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/ns/rdfa#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>xhv</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/1999/xhtml/vocab#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>xml</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/XML/1998/namespace</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>xsd</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>xs</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-		</map:map>
-	);
-
-
-(:~ XML Schema Term Map. :)
-declare private variable $profile:TERM_MAP as item() := 
-	map:map(
-		<map:map xmlns:map="http://marklogic.com/xdmp/map" 
-				xmlns:xs="http://www.w3.org/2001/XMLSchema"
-				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-			<map:entry>
-				<map:key>string</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>boolean</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>dateTime</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>date</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>time</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>int</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>double</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>float</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>decimal</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>positiveInteger</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>integer</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>nonPositiveInteger</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>negativeInteger</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>long</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>int</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>short</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>byte</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>nonNegativeInteger</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>unsignedLong</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>unsignedInt</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>unsignedShort</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>unsignedByte</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-			<map:entry>
-				<map:key>positiveInteger</map:key>
-				<map:value xsi:type="xs:string">http://www.w3.org/2001/XMLSchema#</map:value>
-			</map:entry>
-		</map:map>
-	);
+declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 
 
 
@@ -190,22 +46,22 @@ declare private variable $profile:TERM_MAP as item() :=
  : @param $contextProfile 
  : @return PrefixMap
  :)
-declare function profile:get-prefixes($contextProfile as item()) 
-	as item() 
+declare function profile:get-prefixes($contextProfile as element(profile)) 
+	as element(prefix-map)
 {
-	$profile:PREFIX_MAP
+	$contextProfile/prefix-map
 };
 
 
 (:~
- : Gets the Profile's PrefixMap.
+ : Gets the Profile's TermMap.
  : @param $contextProfile 
- : @return PrefixMap
+ : @return TermMap
  :)
-declare function profile:get-terms($contextProfile as item()) 
+declare function profile:get-terms($contextProfile as element(profile)) 
 	as item() 
 {
-	$profile:TERM_MAP
+	$contextProfile/term-map
 };
 
 

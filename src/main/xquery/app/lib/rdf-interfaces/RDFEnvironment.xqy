@@ -26,28 +26,28 @@ xquery version "1.0-ml" encoding "utf-8";
 module namespace rdfenv = "http://www.w3.org/TR/rdf-interfaces/RDFEnvironment";  
 
 import module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"
-	at "/lib/Graph.xqy";
+	at "/lib/rdf-interfaces/Graph.xqy";
 
 import module namespace triple = "http://www.w3.org/TR/rdf-interfaces/Triple"
-	at "/lib/Triple.xqy";
+	at "/lib/rdf-interfaces/Triple.xqy";
 
 import module namespace rdfnode = "http://www.w3.org/TR/rdf-interfaces/RDFNode"
-	at "/lib/RDFNode.xqy";
+	at "/lib/rdf-interfaces/RDFNode.xqy";
 
 import module namespace prefixmap = "http://www.w3.org/TR/rdf-interfaces/PrefixMap"
-	at "/lib/PrefixMap.xqy";
+	at "/lib/rdf-interfaces/PrefixMap.xqy";
 
 import module namespace termmap = "http://www.w3.org/TR/rdf-interfaces/TermMap"
-	at "/lib/TermMap.xqy";
+	at "/lib/rdf-interfaces/TermMap.xqy";
 
 import module namespace profile = "http://www.w3.org/TR/rdf-interfaces/Profile"
-	at "/lib/Profile.xqy";
+	at "/lib/rdf-interfaces/Profile.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
-declare default element namespace "http://www.w3.org/2004/03/trix/trix-1/";
+declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
 declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
+declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 
 
 
@@ -57,29 +57,31 @@ declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
  : graph may be specified, this allows easy transition between native sequences 
  : and Graphs and is the counterpart for the to-array method of the Graph 
  : interface.
+ : @param $contextRDFEnvironment
  : @param $triples
  : @return a new Graph.
  :)
-declare function rdfenv:create-graph($triples as element(trix:triple)*) 
-	as element(trix:graph) 
+declare function rdfenv:create-graph(
+		$contextRDFEnvironment as element(rdf-environment), 
+				$triples as element(rdfi:triple)*) 
+	as element(rdfi:graph) 
 {
-	let $namespaces as item()* := 
-			for $triple in $triples return $triple/namespace::*
-	return
-		<graph>{
-			$namespaces,
-			<uri/>,
-			$triples
-		}</graph>
+	<graph>{
+		<uri/>,
+		<actions/>,
+		$triples
+	}</graph>
 };
 
 
 (:~
- : Creates a new Graph.
+ : Creates a new, but empty, Graph.
+ : @param $contextRDFEnvironment
  : @return a new Graph.
  :)
-declare function rdfenv:create-graph() 
-	as element(trix:graph) 
+declare function rdfenv:create-graph(
+		$contextRDFEnvironment as element(rdf-environment)) 
+	as element(rdfi:graph) 
 {
 	rdfenv:create-graph(())
 };
@@ -89,14 +91,17 @@ declare function rdfenv:create-graph()
  : Creates a Triple given a subject, predicate and object. If any incoming 
  : value does not match the requirements listed below, a Null value must be 
  : returned by this method.
+ : @param $contextRDFEnvironment
  : @param $subject
  : @param $predicate
  : @param $object
  : @return a new Triple.
  :)
-declare function rdfenv:create-triple($subject as element(), 
-		$predicate as element(), $object as element()) 
-	as element(trix:triple)? 
+declare function rdfenv:create-triple(
+		$contextRDFEnvironment as element(rdf-environment), 
+				$subject as element(), $predicate as element(), 
+						$object as element()) 
+	as element(rdfi:triple)? 
 {
 	<triple>{$subject, $predicate, $object}</triple>
 };
@@ -105,14 +110,16 @@ declare function rdfenv:create-triple($subject as element(),
 (:~
  : Creates a Literal given a value, an optional language and/or an optional 
  : datatype.
+ : @param $contextRDFEnvironment
  : @param $value The value to be represented by the Literal, the value must be 
  : a lexical representation of the value.
  : @param $language The language that is associated with the Literal.
  : @param $datatype The datatype of the Literal.
  : @return a new Literal.
  :)
-declare private function rdfenv:create-literal($value as item(), 
-		$language as xs:string?, $datatype as element()?) 
+declare private function rdfenv:create-literal(
+		$contextRDFEnvironment as element(rdf-environment), $value as item(), 
+				$language as xs:string?, $datatype as element()?) 
 	as element()
 {
 	if (string-length($language) gt 0) then 
@@ -130,12 +137,14 @@ declare private function rdfenv:create-literal($value as item(),
  : Creates a plain Literal given a value
  : @param $value The value to be represented by the Literal, the value must be 
  : a lexical representation of the value.
+ : @param $contextRDFEnvironment
  : @return a new Literal.
  :)
-declare function rdfenv:create-literal($value as item()) 
+declare function rdfenv:create-literal(
+		$contextRDFEnvironment as element(rdf-environment), $value as item()) 
 	as element()
 {
-	rdfenv:create-literal($value, (), ())
+	rdfenv:create-literal($contextRDFEnvironment, $value, (), ())
 };
 
 
@@ -144,29 +153,34 @@ declare function rdfenv:create-literal($value as item())
  : and datatype arguments are mutually exclusive.
  : @param $value The value to be represented by the Literal, the value must be 
  : a lexical representation of the value.
+ : @param $contextRDFEnvironment
  : @param $arg
  : @return a new Literal.
  :)
-declare function rdfenv:create-literal($value as item(), $arg as item()) 
+declare function rdfenv:create-literal(
+		$contextRDFEnvironment as element(rdf-environment), $value as item(), 
+				$arg as item()) 
 	as element()
 {
 	typeswitch ($arg) 
-  	case element(trix:uri) 
+  	case element(rdfi:uri) 
   	return 
-		rdfenv:create-literal($value, (), $arg)
+		rdfenv:create-literal($contextRDFEnvironment, $value, (), $arg)
 	default
 	return
-		rdfenv:create-literal($value, $arg, ())
+		rdfenv:create-literal($contextRDFEnvironment, $value, $arg, ())
 };
 
 
 (:~
  : Creates a NamedNode identified by the given IRI.
+ : @param $contextRDFEnvironment
  : @param $value An IRI, CURIE or TERM.
  : @return a new NamedNode.
  :)
-declare function rdfenv:create-named-node($value as item()) 
-	as element(trix:uri)
+declare function rdfenv:create-named-node(
+		$contextRDFEnvironment as element(rdf-environment), $value as item()) 
+	as element(rdfi:uri)
 {
 	<uri>{$value}</uri>
 };
@@ -174,10 +188,12 @@ declare function rdfenv:create-named-node($value as item())
 
 (:~
  : Creates a new BlankNode.
+ : @param $contextRDFEnvironment
  : @return a new BlankNode.
  :)
-declare function rdfenv:create-blank-node() 
-	as element(trix:id)
+declare function rdfenv:create-blank-node(
+		$contextRDFEnvironment as element(rdf-environment)) 
+	as element(rdfi:id)
 {
 	<id/>
 };
@@ -188,15 +204,18 @@ declare function rdfenv:create-blank-node()
  : @param $empty If true is specified then an empty PrefixMap will be returned, 
  : by default the PrefixMap returned will be populated with prefixes 
  : replicating those of the current RDF environment.
+ : @param $contextRDFEnvironment
  : @return a new PrefixMap.
  :)
-declare function rdfenv:create-prefix-map($empty as xs:boolean) 
-	as item() 
+declare function rdfenv:create-prefix-map(
+		$contextRDFEnvironment as element(rdf-environment), 
+				$empty as xs:boolean) 
+	as element(prefix-map) 
 {
 	if ($empty) then 
-		map:map()
+		<prefix-map/>
 	else
-		map:map()
+		$contextRDFEnvironment/prefix-map
 };
 
 
@@ -204,12 +223,14 @@ declare function rdfenv:create-prefix-map($empty as xs:boolean)
  : Create a new PrefixMap.
  : PrefixMap returned will be populated with prefixes replicating those of the 
  : current RDF environment.
+ : @param $contextRDFEnvironment
  : @return a new PrefixMap.
  :)
-declare function rdfenv:create-prefix-map() 
-	as item() 
+declare function rdfenv:create-prefix-map(
+		$contextRDFEnvironment as element(rdf-environment)) 
+	as element(prefix-map) 
 {
-	map:map()
+	rdfenv:create-prefix-map($contextRDFEnvironment, false())
 };
 
 
@@ -218,15 +239,18 @@ declare function rdfenv:create-prefix-map()
  : @param $empty If true is specified then an empty TermMap will be returned, 
  : by default the TermMap returned will be populated with terms replicating 
  : those of the current RDF environment.
+ : @param $contextRDFEnvironment
  : @return a new TermMap.
  :)
-declare function rdfenv:create-term-map($empty as xs:boolean) 
-	as item() 
+declare function rdfenv:create-term-map(
+		$contextRDFEnvironment as element(rdf-environment), 
+				$empty as xs:boolean) 
+	as element(term-map) 
 {
 	if ($empty) then 
-		map:map()
+		<term-map/>
 	else
-		map:map()
+		$contextRDFEnvironment/term-map
 };
 
 
@@ -234,12 +258,14 @@ declare function rdfenv:create-term-map($empty as xs:boolean)
  : Create a new TermMap.
  : TermMap returned will be populated with terms replicating those of the 
  : current RDF environment.
+ : @param $contextRDFEnvironment
  : @return a new TermMap.
  :)
-declare function rdfenv:create-term-map() 
-	as item() 
+declare function rdfenv:create-term-map(
+		$contextRDFEnvironment as element(rdf-environment)) 
+	as element(term-map) 
 {
-	map:map()
+	rdfenv:create-term-map($contextRDFEnvironment, false())
 };
 
 
@@ -249,11 +275,32 @@ declare function rdfenv:create-term-map()
  : PrefixMap will be returned, by default the Profile returned will contain 
  : populated term and prefix maps replicating those of the current RDF 
  : environment.
+ : @param $contextRDFEnvironment
  : @return a new Profile.
  :)
-declare function rdfenv:create-profile($empty as xs:boolean) 
-	as empty-sequence()
+declare function rdfenv:create-profile(
+		$contextRDFEnvironment as element(rdf-environment), $empty as xs:boolean) 
+	as element(rdfi:profile)
 {
-	()
+	<profile>{
+		if ($empty) then 
+			( <prefix-map/>,
+			<term-map/> )
+		else
+			($contextRDFEnvironment/prefix-map, $contextRDFEnvironment/term-map)
+	}</profile>
+};
+
+
+(:~
+ : Create a new Profile.
+ : @param $contextRDFEnvironment
+ : @return a new Profile.
+ :)
+declare function rdfenv:create-profile(
+		$contextRDFEnvironment as element(rdf-environment)) 
+	as element(rdfi:profile)
+{
+	rdfenv:create-profile($contextRDFEnvironment, false())
 };
 

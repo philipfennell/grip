@@ -27,10 +27,10 @@ module namespace literal = "http://www.w3.org/TR/rdf-interfaces/Literal";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 import module namespace rdfnode = "http://www.w3.org/TR/rdf-interfaces/RDFNode"
-	at "/lib/RDFNode.xqy";
+	at "/lib/rdf-interfaces/RDFNode.xqy";
 	
 declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
+declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 
 
 
@@ -81,6 +81,6 @@ declare function literal:get-language($contextLiteral as element())
 declare function literal:get-datatype($contextLiteral as element()) 
 	as element()?
 {
-	<uri xmlns="http://www.w3.org/2004/03/trix/trix-1/">{string($contextLiteral/@datatype)}</uri>
+	<uri xmlns="http://www.w3.org/TR/rdf-interfaces">{string($contextLiteral/@datatype)}</uri>
 };
 

@@ -24,15 +24,15 @@ xquery version "1.0-ml" encoding "utf-8";
 module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"; 
 
 import module namespace triple = "http://www.w3.org/TR/rdf-interfaces/Triple"
-	at "/lib/Triple.xqy";
+	at "/lib/rdf-interfaces/Triple.xqy";
 
 import module namespace rdfnode = "http://www.w3.org/TR/rdf-interfaces/RDFNode"
-	at "/lib/RDFNode.xqy";
+	at "/lib/rdf-interfaces/RDFNode.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
+declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 
 
 
@@ -43,7 +43,7 @@ declare namespace trix = "http://www.w3.org/2004/03/trix/trix-1/";
  : @param $contextGraph 
  : @return 
  :)
-declare function graph:get-actions($contextGraph as element(trix:graph)) 
+declare function graph:get-actions($contextGraph as element(rdfi:graph)) 
 	as item()*
 {
 	error(xs:QName('NOT_IMPLEMENTED'), 'The function ''graph:get-actions'' is not implemented.')
@@ -56,51 +56,20 @@ declare function graph:get-actions($contextGraph as element(trix:graph))
  : @param $triple 
  : @return the graph instance it was called on.
  :)
-declare function graph:add($contextGraph as element(trix:graph), 
-		$triple as element(trix:triple)) 
-	as element(trix:graph)
+declare function graph:add($contextGraph as element(rdfi:graph), 
+		$triple as element(rdfi:triple)) 
+	as element(rdfi:graph)
 {
 	let $subject as xs:string := rdfnode:to-string(triple:get-subject($triple))
 	let $predicate as xs:string := rdfnode:to-string(triple:get-predicate($triple))
 	let $object as item()* := rdfnode:to-string(triple:get-object($triple))
 	let $permissions as xs:string* := ()
 	let $collections as xs:string* := (graph:uri($contextGraph))
-	let $add := 
-		xdmp:document-insert(
-			graph:uri-for-quad($subject, $predicate, $object, 
-					graph:uri($contextGraph)),
-			element t {
-				( element s {
-					( typeswitch ($triple/*[1])
-						case $sub as element(trix:id) 
-							return $subject
-						default 
-							return $subject ) },
-				element p {$predicate},
-				element o {
-					(: Add the language annotation if present. :)
-					( $triple/*[3]/@xml:lang,
-					(: 
-					 : When the subject is a URI reference mark it as such with 
-					 : xs:anyURI, otherwise copy the datatype, if any.
-					 :)
-					( typeswitch ($triple/*[3]) 
-						case element(trix:uri) 
-							return ( attribute datatype 
-									{'http://www.w3.org/2001/XMLSchema#anyURI'}, 
-											$object )
-						case element(trix:id) 
-							return $object
-						default 
-							return ( $triple/*[3]/@datatype, $object ) ) )},
-				element c {graph:uri($contextGraph)} )
-	    	},
-	    	$permissions,
-	    	$collections
-	    )
+	let $add := xdmp:invoke('/lib/rdf-interfaces/TransientGraph.xqy', 
+			(xs:QName('GRAPH'), $contextGraph, xs:QName('TRIPLE'), $triple))
 	return
 		(: Need to add new namespaces that don't exist in the graph document. :)
-		$contextGraph
+		$add
 };
 
 
@@ -110,12 +79,12 @@ declare function graph:add($contextGraph as element(trix:graph),
  : @param $graph 
  : @return the graph instance it was called on.
  :)
-declare function graph:add-all($contextGraph as element(trix:graph), 
-		$graph as element(trix:graph)) 
-	as element(trix:graph)
+declare function graph:add-all($contextGraph as element(rdfi:graph), 
+		$graph as element(rdfi:graph)) 
+	as element(rdfi:graph)
 {
 	let $addAll := 
-		for $triple in $graph/trix:triple
+		for $triple in $graph/rdfi:triple
 		return
 			graph:add($contextGraph, $triple)
 	return
@@ -133,9 +102,9 @@ declare function graph:add-all($contextGraph as element(trix:graph),
  : @param $run  
  : @return the graph instance it was called on.
  :)
-declare function graph:add-action($contextGraph as element(trix:graph), 
+declare function graph:add-action($contextGraph as element(rdfi:graph), 
 		$action as item(), $run as xs:boolean) 
-	as element(trix:graph)
+	as element(rdfi:graph)
 {
 	error(xs:QName('NOT_IMPLEMENTED'), 'The function ''graph:add-actions'' is not implemented.')
 };
@@ -149,9 +118,9 @@ declare function graph:add-action($contextGraph as element(trix:graph),
  : @param $action 
  : @return the graph instance it was called on.
  :)
-declare function graph:add-action($contextGraph as element(trix:graph), 
+declare function graph:add-action($contextGraph as element(rdfi:graph), 
 		$action as item()) 
-	as element(trix:graph)
+	as element(rdfi:graph)
 {
 	graph:add-action($contextGraph, $action, false())
 };
@@ -164,7 +133,7 @@ declare function graph:add-action($contextGraph as element(trix:graph),
  : @param $callback the TripleFilter to test each Triple in the Graph against. 
  : @return false() when the first Triple is found that does not pass the test.
  :)
-declare function graph:every($contextGraph as element(trix:graph), 
+declare function graph:every($contextGraph as element(rdfi:graph), 
 		$callback as item()) 
 	as xs:boolean
 {
@@ -187,20 +156,20 @@ declare function graph:every($contextGraph as element(trix:graph),
  : @param $filter the TripleFilter to test each Triple in the Graph against. 
  : @return false() when the first Triple is found that does not pass the test.
  :)
-declare function graph:filter($contextGraph as element(trix:graph), 
+declare function graph:filter($contextGraph as element(rdfi:graph), 
 		$filter as item()) 
-	as element(trix:graph)
+	as element(rdfi:graph)
 {
-	let $filteredTiples as element(trix:triple)* := 
+	let $filteredTiples as element(rdfi:triple)* := 
 		for $triple in graph:to-array($contextGraph)
 		where xdmp:apply($filter, ($triple))
 		return
 			$triple
 	return
-		element {QName('http://www.w3.org/2004/03/trix/trix-1/', name($contextGraph))} {
+		element {QName('http://www.w3.org/TR/rdf-interfaces', name($contextGraph))} {
 			$contextGraph/namespace::*,
 			$contextGraph/@*,
-			<uri xmlns="http://www.w3.org/2004/03/trix/trix-1/"/>,
+			<uri xmlns="http://www.w3.org/TR/rdf-interfaces"/>,
 			$filteredTiples
 		}
 };
@@ -212,7 +181,7 @@ declare function graph:filter($contextGraph as element(trix:graph),
  : @param $callback the TripleCallback to execute for each Triple. 
  : @return an empty sequence
  :)
-declare function graph:for-each($contextGraph as element(trix:graph), 
+declare function graph:for-each($contextGraph as element(rdfi:graph), 
 		$callback as item()) 
 	as empty-sequence()
 {
@@ -227,7 +196,7 @@ declare function graph:for-each($contextGraph as element(trix:graph),
  : @param $contextGraph 
  : @return unsigned long
  :)
-declare function graph:get-length($contextGraph as element(trix:graph)) 
+declare function graph:get-length($contextGraph as element(rdfi:graph)) 
 	as xs:unsignedLong 
 {
 	xdmp:estimate(collection(graph:uri($contextGraph)))
@@ -259,14 +228,14 @@ declare function graph:get-length($contextGraph as element(trix:graph))
  :               will be contained in the resulting graph.
  : @return a new Graph.
  :)
-declare function graph:match($contextGraph as element(trix:graph), 
+declare function graph:match($contextGraph as element(rdfi:graph), 
 		$subject as item()?, $predicate as item()?, $object as item()?, 
 				$limit as xs:unsignedLong) 
-	as element(trix:graph)
+	as element(rdfi:graph)
 {
 	let $size as xs:unsignedLong := 
 		if ($limit eq 0) then graph:get-length($contextGraph) else $limit
-	let $matchedTriples as element(trix:triple)* := 
+	let $matchedTriples as element(rdfi:triple)* := 
 		for $triple in graph:to-array($contextGraph)[1 to $size]
 		where ( (if (exists($subject)) then deep-equal($subject, triple:get-subject($triple)) else true()) and 
 				(if (exists($predicate)) then deep-equal($predicate, triple:get-predicate($triple)) else true()) and 
@@ -274,10 +243,10 @@ declare function graph:match($contextGraph as element(trix:graph),
 		return
 			$triple
 	return
-		element {QName('http://www.w3.org/2004/03/trix/trix-1/', name($contextGraph))} {
+		element {QName('http://www.w3.org/TR/rdf-interfaces', name($contextGraph))} {
 			$contextGraph/namespace::*,
 			$contextGraph/@*,
-			<uri xmlns="http://www.w3.org/2004/03/trix/trix-1/"/>,
+			<uri xmlns="http://www.w3.org/TR/rdf-interfaces"/>,
 			$matchedTriples
 		}
 };
@@ -292,9 +261,9 @@ declare function graph:match($contextGraph as element(trix:graph),
  : @param $object The object value to match against, may be null.
  : @return a new Graph.
  :)
-declare function graph:match($contextGraph as element(trix:graph), 
+declare function graph:match($contextGraph as element(rdfi:graph), 
 		$subject as item()?, $predicate as item()?, $object as item()?) 
-	as element(trix:graph)
+	as element(rdfi:graph)
 {
 	graph:match($contextGraph, $subject, $predicate, $object, 0)
 };
@@ -307,9 +276,9 @@ declare function graph:match($contextGraph as element(trix:graph),
  : @param $graph 
  : @return a new graph.
  :)
-declare function graph:merge($contextGraph as element(trix:graph), 
-		$graph as element(trix:graph)) 
-	as element(trix:graph)
+declare function graph:merge($contextGraph as element(rdfi:graph), 
+		$graph as element(rdfi:graph)) 
+	as element(rdfi:graph)
 {
 	$contextGraph
 };
@@ -321,9 +290,9 @@ declare function graph:merge($contextGraph as element(trix:graph),
  : @param $triple 
  : @return the graph instance it was called on.
  :)
-declare function graph:remove($contextGraph as element(trix:graph), 
-		$triple as element(trix:triple)) 
-	as element(trix:graph)
+declare function graph:remove($contextGraph as element(rdfi:graph), 
+		$triple as element(rdfi:triple)) 
+	as element(rdfi:graph)
 {
 	let $subject as xs:string := rdfnode:to-string(triple:get-subject($triple))
 	let $predicate as xs:string := rdfnode:to-string(triple:get-predicate($triple))
@@ -350,12 +319,12 @@ declare function graph:remove($contextGraph as element(trix:graph),
  : @param $object The object value to match against, may be null.
  : @return a new Graph.
  :)
-declare function graph:remove-matches($contextGraph as element(trix:graph), 
+declare function graph:remove-matches($contextGraph as element(rdfi:graph), 
 		$subject as item()?, $predicate as item()?, $object as item()?)
-	as element(trix:graph)
+	as element(rdfi:graph)
 {
 	let $removeMatches := 
-		for $triple in graph:match($contextGraph, $subject, $predicate, $object)/trix:triple
+		for $triple in graph:match($contextGraph, $subject, $predicate, $object)/rdfi:triple
 		return
 			graph:remove($contextGraph, $triple)
 	return
@@ -371,7 +340,7 @@ declare function graph:remove-matches($contextGraph as element(trix:graph),
  : @param $callback the TripleFilter to test each Triple in the Graph against. 
  : @return true() when the first Triple is found that passes the test.
  :)
-declare function graph:some($contextGraph as element(trix:graph), 
+declare function graph:some($contextGraph as element(rdfi:graph), 
 		$callback as item()) 
 	as xs:boolean 
 {
@@ -383,10 +352,10 @@ declare function graph:some($contextGraph as element(trix:graph),
  : Returns the set of Triples within the Graph as a host language native 
  : sequence, for example an XPath 2.0 sequence.
  : @param $contextGraph 
- : @return sequence of trix:triple elements.
+ : @return sequence of rdfi:triple elements.
  :)
-declare function graph:to-array($contextGraph as element(trix:graph)) 
-	as element(trix:triple)*
+declare function graph:to-array($contextGraph as element(rdfi:graph)) 
+	as element(rdfi:triple)*
 {
 	let $graph as element() := 
 		<graph xmlns="">{
@@ -396,7 +365,7 @@ declare function graph:to-array($contextGraph as element(trix:graph))
 		}</graph>
 	return
 		xdmp:xslt-invoke('/resources/xslt/lib/ml-tuples-to-trix.xsl', 
-				$graph, ())//trix:triple
+				$graph, ())//rdfi:triple
 };
 
 
@@ -408,7 +377,7 @@ declare function graph:to-array($contextGraph as element(trix:graph))
  : stop processing the sequence.
  : @return if the callback function returns false(), else returns true()
  :)
-declare private function graph:assert($triples as element(trix:triple)*, 
+declare private function graph:assert($triples as element(rdfi:triple)*, 
 		$callback as item(), $condition as xs:boolean)
 	as xs:boolean
 {
@@ -448,9 +417,9 @@ declare private function graph:uri-for-quad($subject as xs:string,
  : @param $contextGraph 
  : @return xs:string.
  :)
-declare private function graph:uri($contextGraph as element(trix:graph)) 
+declare private function graph:uri($contextGraph as element(rdfi:graph)) 
 	as xs:string
 {
-	string($contextGraph/trix:uri)
+	string($contextGraph/rdfi:uri)
 };
 
