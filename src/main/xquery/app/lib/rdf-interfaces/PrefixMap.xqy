@@ -25,6 +25,9 @@ xquery version "1.0-ml" encoding "utf-8";
 
 module namespace prefixmap = "http://www.w3.org/TR/rdf-interfaces/PrefixMap"; 
 
+import module namespace common = "http://www.w3.org/TR/rdf-interfaces/Common"
+	at "/lib/rdf-interfaces/Common.xqy";
+
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 	
@@ -118,39 +121,7 @@ declare function prefixmap:add-all($contextPrefixMap as element(prefix-map),
 		$prefixes as element(prefix-map), $override as xs:boolean) 
 	as element(prefix-map)
 {
-	prefixmap:add($contextPrefixMap, $prefixes/entry, $override)
-};
-
-
-(:~
- : Recursively inserts prefixes into the context PrefixMap. If override is 
- : true() then replace entries with new ones with the same prefix. 
- : @param $contextPrefixMap
- : @param $prefixes A sequence of prefix entries.
- : @param $override If true() then conflicting prefixes will be overridden by 
- : those specified on the PrefixMap being imported, by default imported 
- : prefixes augment the existing set.
- : @return PrefixMap.
- :)
-declare private function prefixmap:add($contextPrefixMap as element(prefix-map), 
-		$prefixes as element(entry)*, $override as xs:boolean) 
-	as element(prefix-map)
-{
-	let $head as element(entry)? := subsequence($prefixes, 1, 1)
-	let $tail as element(entry)* := subsequence($prefixes, 2)
-	return
-		if (exists($head)) then 
-			prefixmap:add(
-				( if ($head/@xml:id = $contextPrefixMap/entry/@xml:id) then 
-					if ($override eq true()) then 
-						prefixmap:set($contextPrefixMap, string($head/@xml:id), string($head))
-					else
-						$contextPrefixMap
-				else
-					prefixmap:set($contextPrefixMap, string($head/@xml:id), string($head)) ), 
-				$tail, $override)
-		else
-			$contextPrefixMap
+	common:map-add($contextPrefixMap, $prefixes/entry, $override)
 };
 
 
@@ -178,7 +149,7 @@ declare function prefixmap:get($contextPrefixMap as element(prefix-map),
 		$prefix as xs:string) 
 	as xs:string?
 {
-	id((if ($prefix eq '') then '_' else $prefix), document {$contextPrefixMap})
+	common:map-get($contextPrefixMap, $prefix)
 };
 
 
@@ -193,14 +164,7 @@ declare function prefixmap:set($contextPrefixMap as element(prefix-map),
 		$prefix as xs:string, $iri as xs:string) 
 	as element(prefix-map)
 {
-	element {xs:QName(name($contextPrefixMap))} {
-		( $contextPrefixMap/@*,
-		<entry xml:id="{$prefix}">{$iri}</entry>,
-		( for $entry in $contextPrefixMap/entry
-		where not(string($entry/@xml:id) eq $prefix)
-		return
-			$entry ) )
-	}
+	common:map-set($contextPrefixMap, $prefix, $iri)
 };
 
 

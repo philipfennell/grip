@@ -23,7 +23,10 @@ xquery version "1.0-ml" encoding "utf-8";
  : @version 0.1
  :)
 
-module namespace termmap = "http://www.w3.org/TR/rdf-interfaces/TermMap"; 
+module namespace termmap = "http://www.w3.org/TR/rdf-interfaces/TermMap";
+
+import module namespace common = "http://www.w3.org/TR/rdf-interfaces/Common"
+	at "/lib/rdf-interfaces/Common.xqy";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
@@ -117,7 +120,7 @@ declare function termmap:add-all($contextTermMap as element(term-map),
 		$terms as element(term-map), $override as xs:boolean) 
 	as element(term-map)
 {
-	termmap:add($contextTermMap, $terms/entry, $override)
+	common:map-add($contextTermMap, $terms/entry, $override)
 };
 
 
@@ -177,7 +180,7 @@ declare function termmap:get($contextTermMap as element(term-map),
 		$term as xs:string) 
 	as xs:string?
 {
-	id((if ($term eq '') then '_' else $term), document {$contextTermMap})
+	common:map-get($contextTermMap, $term)
 };
 
 
@@ -192,14 +195,7 @@ declare function termmap:set($contextTermMap as element(term-map),
 		$term as xs:string, $iri as xs:string) 
 	as element(term-map)
 {
-	element {xs:QName(name($contextTermMap))} {
-		( $contextTermMap/@*,
-		<entry xml:id="{$term}">{$iri}</entry>,
-		( for $entry in $contextTermMap/entry
-		where not(string($entry/@xml:id) eq $term)
-		return
-			$entry ) )
-	}
+	common:map-set($contextTermMap, $term, $iri)
 };
 
 
