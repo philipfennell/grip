@@ -64,10 +64,9 @@ declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 declare function rdfenv:create-graph(
 		$contextRDFEnvironment as element(rdf-environment), 
 				$triples as element(rdfi:triple)*) 
-	as element(rdfi:graph) 
+	as element(graph) 
 {
 	<graph>{
-		<uri/>,
 		<actions/>,
 		$triples
 	}</graph>
@@ -81,9 +80,9 @@ declare function rdfenv:create-graph(
  :)
 declare function rdfenv:create-graph(
 		$contextRDFEnvironment as element(rdf-environment)) 
-	as element(rdfi:graph) 
+	as element(graph) 
 {
-	rdfenv:create-graph(())
+	rdfenv:create-graph($contextRDFEnvironment, ())
 };
 
 

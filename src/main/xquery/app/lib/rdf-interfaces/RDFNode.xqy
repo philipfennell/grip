@@ -101,7 +101,7 @@ declare function rdfnode:equals($contextRDFNode as element(),
 declare function rdfnode:to-nt($contextRDFNode as element()) 
 	as xs:string
 {
-	xdmp:xslt-invoke('/resources/xslt/text-plain/trix-to-ntriples.xsl', 
+	xdmp:xslt-invoke('xslt/graph-to-ntriples.xsl', 
 			document {$contextRDFNode})
 };
 

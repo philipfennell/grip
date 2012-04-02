@@ -10,7 +10,22 @@ import module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"
 let $graph as element() := 
 	<graph>
 		<uri>http://localhost:8005/graphs?default=</uri>
+		<triple>
+			<uri>http://example.org/book/book3</uri>
+			<uri>http://purl.org/dc/elements/1.1/title</uri>
+			<plainLiteral>Harry Potter and the Prisoner Of Azkaban</plainLiteral>
+		</triple>
+		<triple>
+			<uri>http://example.org/book/book3</uri>
+			<uri>http://purl.org/dc/elements/1.1/creator</uri>
+			<id>A0</id>
+		</triple>
+		<triple>
+			<uri>http://example.org/book/book3</uri>
+			<uri>http://purl.org/dc/elements/1.1/publisher</uri>
+			<uri>http://live.dbpedia.org/page/Bloomsbury_Publishing</uri>
+		</triple>
 	</graph>
 
 return
-	graph:get-length($graph)
+	graph:get-length($graph) eq 3

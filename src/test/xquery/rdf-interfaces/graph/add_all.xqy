@@ -14,17 +14,17 @@ let $graph as element() :=
 		xmlns:dc="http://purl.org/dc/elements/1.1/" 
 		xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#">
 	<uri>http://localhost:8005/graphs?default=</uri>
+	<triple>
+		<uri>http://example.org/book/book3</uri>
+		<uri>http://purl.org/dc/elements/1.1/title</uri>
+		<plainLiteral>Harry Potter and the Prisoner Of Azkaban</plainLiteral>
+	</triple>
 </graph>
 let $newGraph as element() := 
 <graph xmlns="http://www.w3.org/TR/rdf-interfaces" 
 		xmlns:dc="http://purl.org/dc/elements/1.1/" 
 		xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#"><uri>#default</uri>
 	<uri>#default</uri>
-	<triple>
-		<uri>http://example.org/book/book3</uri>
-		<uri>http://purl.org/dc/elements/1.1/title</uri>
-		<plainLiteral>Harry Potter and the Prisoner Of Azkaban</plainLiteral>
-	</triple>
 	<triple>
 		<uri>http://example.org/book/book3</uri>
 		<uri>http://purl.org/dc/elements/1.1/creator</uri>
@@ -177,5 +177,5 @@ let $newGraph as element() :=
 	</triple>
 </graph>
 return
-	graph:add-all($graph, $newGraph)
+	count(graph:add-all($graph, $newGraph)/triple) eq 31
 

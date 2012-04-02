@@ -22,5 +22,5 @@ let $triple as element() :=
 	<typedLiteral datatype="http://www.w3.org/2001/XMLSchema#date">2012-03-26</typedLiteral>
 </triple>
 return
-	graph:add($graph, $triple)
+	graph:add($graph, $triple) instance of element(graph)
 

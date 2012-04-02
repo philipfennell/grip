@@ -22,5 +22,5 @@ let $triple as element() :=
 	<plainLiteral>P. A. R. Fennell</plainLiteral>
 </triple>
 return
-	graph:add($graph, $triple)
+	graph:add($graph, $triple) instance of element(graph)
 

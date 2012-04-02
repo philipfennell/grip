@@ -22,5 +22,5 @@ let $triple as element() :=
 	<plainLiteral>Harry Potter and the ha'penny chews</plainLiteral>
 </triple>
 return
-	graph:add($graph, $triple)
+	graph:add($graph, $triple) instance of element(graph)
 

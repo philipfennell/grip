@@ -22,5 +22,5 @@ let $triple as element() :=
 	<uri>http://live.dbpedia.org/page/What_To_Do_Publications</uri>
 </triple>
 return
-	graph:add($graph, $triple)
+	graph:add($graph, $triple) instance of element(graph)
 

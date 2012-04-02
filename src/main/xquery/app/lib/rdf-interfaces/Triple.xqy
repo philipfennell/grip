@@ -78,7 +78,7 @@ declare function triple:get-object($triple as element(rdfi:triple))
 declare function triple:to-string($triple as element(rdfi:triple)) 
 	as xs:string
 {
-	xdmp:xslt-invoke('/resources/xslt/text-plain/trix-to-ntriples.xsl', 
+	xdmp:xslt-invoke('xslt/graph-to-ntriples.xsl', 
 			document {$triple})
 };
 

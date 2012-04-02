@@ -16,4 +16,9 @@ let $triple as element() :=
 let $expectedResult as xs:string := '"2001-11-04"^^<http://www.w3.org/2001/XMLSchema#date>'
 
 return
-	rdfnode:get-nominal-value(<plainLiteral>Harry Potter and the Order of the Phoenix</plainLiteral>)
+	try {
+		rdfnode:get-nominal-value(<plainLiteral>Harry Potter and the Order of the Phoenix</plainLiteral>)
+	} catch($e) {
+		true()
+	}
+	

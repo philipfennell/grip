@@ -22,5 +22,5 @@ let $triple as element() :=
 	<id>A0</id>
 </triple>
 return
-	graph:add($graph, $triple)
+	graph:add($graph, $triple) instance of element(graph)
 

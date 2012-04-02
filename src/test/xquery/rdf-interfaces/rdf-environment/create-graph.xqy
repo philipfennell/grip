@@ -41,5 +41,5 @@ let $graph as element() :=
 </graph>
 
 return
-	rdfenv:create-graph($rdfEnvironment, $graph/rdfi:triple)
+	rdfenv:create-graph($rdfEnvironment, $graph/rdfi:triple) instance of element(graph)
 
