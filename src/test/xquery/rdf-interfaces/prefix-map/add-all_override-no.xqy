@@ -11,11 +11,13 @@ import module namespace prefixmap = "http://www.w3.org/TR/rdf-interfaces/PrefixM
 
 let $prefixMap as element(prefix-map) := 
 	<prefix-map>
-		<entry xml:id="test">http://www.example.com/test/one#</entry>
+		<entry xml:id="first">http://www.example.com/test/one#</entry>
+		<entry xml:id="last">http://www.example.com/test/three#</entry>
 	</prefix-map>
 let $prefixes as element(prefix-map) := 
 	<prefix-map>
-		<entry xml:id="test">http://www.example.com/test/two#</entry>
+		<entry xml:id="first">http://www.example.com/test/two#</entry>
+		<entry xml:id="middle">http://www.example.com/test/four#</entry>
 	</prefix-map>
 return
-	prefixmap:get(prefixmap:add-all($prefixMap, $prefixes, false()), 'test') eq 'http://www.example.com/test/one#'
+	prefixmap:get(prefixmap:add-all($prefixMap, $prefixes, false()), 'first') eq 'http://www.example.com/test/one#'

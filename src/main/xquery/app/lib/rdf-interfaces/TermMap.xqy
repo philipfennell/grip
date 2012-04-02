@@ -114,19 +114,42 @@ declare function termmap:set-default($contextTermMap as element(term-map),
  : @return the TermMap instance on which it was called.
  :)
 declare function termmap:add-all($contextTermMap as element(term-map), 
-		$terms as item(), $override as xs:boolean) 
-	as item()
+		$terms as element(term-map), $override as xs:boolean) 
+	as element(term-map)
 {
-	let $addAll := 
-		for $key in map:keys($terms)
-		where if ($override eq true()) then 
-				true() 
-			else 
-				not($key = map:keys($contextTermMap))
-		return
-			map:put($contextTermMap, $key, map:get($terms, $key))
+	termmap:add($contextTermMap, $terms/entry, $override)
+};
+
+
+(:~
+ : Recursively inserts terms into the context TermMap. If override is 
+ : true() then replace entries with new ones with the same term. 
+ : @param $contextTermMap
+ : @param $prefixes A sequence of terms entries.
+ : @param $override If true() then conflicting terms will be overridden by 
+ : those specified on the TermMap being imported, by default imported 
+ : terms augment the existing set.
+ : @return PrefixMap.
+ :)
+declare private function termmap:add($contextTermMap as element(term-map), 
+		$terms as element(entry)*, $override as xs:boolean) 
+	as element(term-map)
+{
+	let $head as element(entry)? := subsequence($terms, 1, 1)
+	let $tail as element(entry)* := subsequence($terms, 2)
 	return
-		$contextTermMap
+		if (exists($head)) then 
+			termmap:add(
+				( if ($head/@xml:id = $contextTermMap/entry/@xml:id) then 
+					if ($override eq true()) then 
+						termmap:set($contextTermMap, string($head/@xml:id), string($head))
+					else
+						$contextTermMap
+				else
+					termmap:set($contextTermMap, string($head/@xml:id), string($head)) ), 
+				$tail, $override)
+		else
+			$contextTermMap
 };
 
 
@@ -136,9 +159,9 @@ declare function termmap:add-all($contextTermMap as element(term-map),
  : @param $terms the TermMap to import.
  : @return the TermMap instance on which it was called.
  :)
-declare function termmap:add-all($contextTermMap as item(), 
-		$terms as item()) 
-	as item()
+declare function termmap:add-all($contextTermMap as element(term-map), 
+		$terms as element(term-map)) 
+	as element(term-map)
 {
 	termmap:add-all($contextTermMap, $terms, false())
 };

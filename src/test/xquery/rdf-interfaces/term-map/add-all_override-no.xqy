@@ -6,12 +6,18 @@ declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
 declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 
-import module namespace prefixmap = "http://www.w3.org/TR/rdf-interfaces/TermMap"
+import module namespace termmap = "http://www.w3.org/TR/rdf-interfaces/TermMap"
 	at "/lib/rdf-interfaces/TermMap.xqy";
 
-let $termMap as item() := map:map()
-let $_put := map:put($termMap, 'integer', 'http://www.w3.org/2001/XMLSchema#')
-let $terms as item() := map:map()
-let $_put := map:put($terms, 'integer', 'http://www.w3.org/2012/XMLSchema#')
+let $termMap as element(term-map) := 
+	<term-map>
+		<entry xml:id="string">http://www.w3.org/2001/XMLSchema#</entry>
+		<entry xml:id="boolean">http://www.w3.org/2001/XMLSchema#</entry>
+	</term-map>
+let $terms as element(term-map) := 
+	<term-map>
+		<entry xml:id="boolean">http://www.w3.org/2012/XMLSchema#</entry>
+		<entry xml:id="dateTime">http://www.w3.org/2001/XMLSchema#</entry>
+	</term-map>
 return
-	map:get(prefixmap:add-all($termMap, $terms, false()), 'integer') eq 'http://www.w3.org/2001/XMLSchema#'
+	termmap:get(termmap:add-all($termMap, $terms, false()), 'boolean') eq 'http://www.w3.org/2001/XMLSchema#'

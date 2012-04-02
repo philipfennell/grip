@@ -108,37 +108,59 @@ declare function prefixmap:set-default($contextPrefixMap as element(prefix-map),
 (:~
  : Import a PrefixMap into the context PrefixMap.
  : @param $contextPrefixMap 
- : @param $prefixes 
- : @param $override 
+ : @param $prefixes The PrefixMap to import.
+ : @param $override If true() then conflicting prefixes will be overridden by 
+ : those specified on the PrefixMap being imported, by default imported 
+ : prefixes augment the existing set.
  : @return PrefixMap
  :)
 declare function prefixmap:add-all($contextPrefixMap as element(prefix-map), 
 		$prefixes as element(prefix-map), $override as xs:boolean) 
 	as element(prefix-map)
 {
-	element {xs:QName(name($contextPrefixMap))} {
-		( $contextPrefixMap/@*,
-		(:( for $entry in $prefixes/entry
-		where if ($override eq true()) then 
-				true() 
-			else 
-				not($entry/@xml:id = $contextPrefixMap/entry/@xml:id)
-		return
-			$entry ),
-		$contextPrefixMap/entry ):)
-		
-		
-	}
+	prefixmap:add($contextPrefixMap, $prefixes/entry, $override)
+};
+
+
+(:~
+ : Recursively inserts prefixes into the context PrefixMap. If override is 
+ : true() then replace entries with new ones with the same prefix. 
+ : @param $contextPrefixMap
+ : @param $prefixes A sequence of prefix entries.
+ : @param $override If true() then conflicting prefixes will be overridden by 
+ : those specified on the PrefixMap being imported, by default imported 
+ : prefixes augment the existing set.
+ : @return PrefixMap.
+ :)
+declare private function prefixmap:add($contextPrefixMap as element(prefix-map), 
+		$prefixes as element(entry)*, $override as xs:boolean) 
+	as element(prefix-map)
+{
+	let $head as element(entry)? := subsequence($prefixes, 1, 1)
+	let $tail as element(entry)* := subsequence($prefixes, 2)
+	return
+		if (exists($head)) then 
+			prefixmap:add(
+				( if ($head/@xml:id = $contextPrefixMap/entry/@xml:id) then 
+					if ($override eq true()) then 
+						prefixmap:set($contextPrefixMap, string($head/@xml:id), string($head))
+					else
+						$contextPrefixMap
+				else
+					prefixmap:set($contextPrefixMap, string($head/@xml:id), string($head)) ), 
+				$tail, $override)
+		else
+			$contextPrefixMap
 };
 
 
 (:~
  : Import a PrefixMap into the context PrefixMap.
  : @param $contextPrefixMap 
- : @param $prefixes 
+ : @param $prefixes The PrefixMap to import.
  : @return PrefixMap
  :)
-declare function prefixmap:add-all($contextPrefixMap element(prefix-map), 
+declare function prefixmap:add-all($contextPrefixMap as element(prefix-map), 
 		$prefixes as item()) 
 	as element(prefix-map)
 {

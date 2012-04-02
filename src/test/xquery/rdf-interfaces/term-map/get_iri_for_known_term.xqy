@@ -14,4 +14,4 @@ let $termMap as element(term-map) :=
 		<entry xml:id="string">http://www.w3.org/2001/XMLSchema#</entry>
 	</term-map>
 return
-	termmap:get($termMap, 'string')
+	termmap:get($termMap, 'string') eq 'http://www.w3.org/2001/XMLSchema#'

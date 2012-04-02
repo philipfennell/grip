@@ -4,9 +4,10 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
+declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
+
 import module namespace profile = "http://www.w3.org/TR/rdf-interfaces/Profile"
 	at "/lib/rdf-interfaces/Profile.xqy";
-
 
 let $profile as element(profile) := 
 <profile>
@@ -37,6 +38,7 @@ let $profile as element(profile) :=
 		<entry xml:id="positiveInteger">http://www.w3.org/2001/XMLSchema#</entry>
 	</term-map>
 </profile>
-let $test := profile:set-default-vocabulary($profile, 'http://www.example.com/default/namespace#')/term-map
+let $test := profile:set-term($profile, 'test', 'http://www.example.com/test/one#')/term-map
 return
-	id('_', document {$test}) eq 'http://www.example.com/default/namespace#'
+	id('test', document {$test}) eq 'http://www.example.com/test/one#'
+	

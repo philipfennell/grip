@@ -47,7 +47,40 @@ declare function graph:get-actions($contextGraph as element(rdfi:graph))
 	as item()*
 {
 	error(xs:QName('NOT_IMPLEMENTED'), 'The function ''graph:get-actions'' is not implemented.')
-}; 
+};
+
+
+(:~
+ : Adds a new TripleAction to the sequence of actions, if the run argument is 
+ : specified as true() then each Triple in the Graph must be passed to the 
+ : TripleAction before this method returns.
+ : @param $contextGraph 
+ : @param $action 
+ : @param $run  
+ : @return the graph instance it was called on.
+ :)
+declare function graph:add-action($contextGraph as element(rdfi:graph), 
+		$action as item(), $run as xs:boolean) 
+	as element(rdfi:graph)
+{
+	error(xs:QName('NOT_IMPLEMENTED'), 'The function ''graph:add-actions'' is not implemented.')
+};
+
+
+(:~
+ : Adds a new TripleAction to the sequence of actions, if the run argument is 
+ : specified as true() then each Triple in the Graph must be passed to the 
+ : TripleAction before this method returns.
+ : @param $contextGraph 
+ : @param $action 
+ : @return the graph instance it was called on.
+ :)
+declare function graph:add-action($contextGraph as element(rdfi:graph), 
+		$action as item()) 
+	as element(rdfi:graph)
+{
+	graph:add-action($contextGraph, $action, false())
+};
 
 
 (:~
@@ -90,39 +123,6 @@ declare function graph:add-all($contextGraph as element(rdfi:graph),
 	return
 		(: Need to add new namespaces that don't exist in the graph document. :)
 		$contextGraph
-};
-
-
-(:~
- : Adds a new TripleAction to the sequence of actions, if the run argument is 
- : specified as true() then each Triple in the Graph must be passed to the 
- : TripleAction before this method returns.
- : @param $contextGraph 
- : @param $action 
- : @param $run  
- : @return the graph instance it was called on.
- :)
-declare function graph:add-action($contextGraph as element(rdfi:graph), 
-		$action as item(), $run as xs:boolean) 
-	as element(rdfi:graph)
-{
-	error(xs:QName('NOT_IMPLEMENTED'), 'The function ''graph:add-actions'' is not implemented.')
-};
-
-
-(:~
- : Adds a new TripleAction to the sequence of actions, if the run argument is 
- : specified as true() then each Triple in the Graph must be passed to the 
- : TripleAction before this method returns.
- : @param $contextGraph 
- : @param $action 
- : @return the graph instance it was called on.
- :)
-declare function graph:add-action($contextGraph as element(rdfi:graph), 
-		$action as item()) 
-	as element(rdfi:graph)
-{
-	graph:add-action($contextGraph, $action, false())
 };
 
 

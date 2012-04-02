@@ -74,7 +74,7 @@ declare function profile:get-terms($contextProfile as element(profile))
  : @param $toResolve A string Term or CURIE.
  : @return an IRI as an xs:string.
  :)
-declare function profile:resolve($contextProfile as item(), 
+declare function profile:resolve($contextProfile as element(profile), 
 		$toResolve as xs:string) 
 	as xs:string?
 {
@@ -93,10 +93,16 @@ declare function profile:resolve($contextProfile as item(),
  : @param $iri The IRI to use as the default prefix.
  : @return empty sequence.
  :)
-declare function profile:set-default-prefix($contextProfile as item(), $iri as xs:string) 
-	as empty-sequence() 
+declare function profile:set-default-prefix($contextProfile as element(profile), 
+		$iri as xs:string) 
+	as element(profile) 
 {
-	prefixmap:set-default(profile:get-prefixes($contextProfile), $iri)
+	element {xs:QName(name($contextProfile))} {
+		( $contextProfile/@*,
+		prefixmap:set-default(profile:get-prefixes($contextProfile), $iri),
+		$contextProfile/term-map )
+	}
+	
 };
 
 
@@ -107,10 +113,15 @@ declare function profile:set-default-prefix($contextProfile as item(), $iri as x
  : @param $iri The IRI to use as the default vocabulary.
  : @return empty sequence.
  :)
-declare function profile:set-default-vocabulary($contextProfile as item(), $iri as xs:string) 
-	as empty-sequence() 
+declare function profile:set-default-vocabulary($contextProfile as element(profile), 
+		$iri as xs:string) 
+	as element(profile)
 {
-	termmap:set-default(profile:get-terms($contextProfile), $iri)
+	element {xs:QName(name($contextProfile))} {
+		( $contextProfile/@*,
+		$contextProfile/prefix-map ),
+		termmap:set-default(profile:get-terms($contextProfile), $iri)
+	}
 };
 
 
@@ -122,11 +133,15 @@ declare function profile:set-default-vocabulary($contextProfile as item(), $iri 
  : @param $iri The IRI to associate with the prefix.
  : @return empty sequence.
  :)
-declare function profile:set-prefix($contextProfile as item(), 
+declare function profile:set-prefix($contextProfile as element(profile), 
 		$prefix as xs:string, $iri as xs:string) 
-	as empty-sequence()
+	as element(profile)
 {
-	prefixmap:set(profile:get-prefixes($contextProfile), $prefix, $iri)
+	element {xs:QName(name($contextProfile))} {
+		( $contextProfile/@*,
+		prefixmap:set(profile:get-prefixes($contextProfile), $prefix, $iri),
+		$contextProfile/term-map )
+	}
 };
 
 
@@ -139,10 +154,14 @@ declare function profile:set-prefix($contextProfile as item(),
  : @param $iri The IRI to associate with the term.
  : @return empty sequence.
  :)
-declare function profile:set-term($contextProfile as item(), 
+declare function profile:set-term($contextProfile as element(profile), 
 		$term as xs:string, $iri as xs:string) 
-	as empty-sequence()
+	as element(profile)
 {
-	termmap:set(profile:get-terms($contextProfile), $term, $iri)
+	element {xs:QName(name($contextProfile))} {
+		( $contextProfile/@*,
+		$contextProfile/prefix-map,
+		termmap:set(profile:get-terms($contextProfile), $term, $iri) )
+	}
 };
 
