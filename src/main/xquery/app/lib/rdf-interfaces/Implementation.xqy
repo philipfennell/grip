@@ -15,7 +15,8 @@ xquery version "1.0-ml" encoding "utf-8";
  :)
 
 (:~
- : Function library that implements the W3C's RDF Interface: Graph.
+ : Function library that provides implementation specific functions for 
+ : persisting RDF Interfaces data in a MarkLogic database.
  : @see http://www.w3.org/TR/rdf-interfaces
  : @author	Philip A. R. Fennell
  : @version 0.1
@@ -137,7 +138,7 @@ declare function impl:remove-triple($contextGraph as element(graph),
 (:~
  : A non-negative integer that specifies the number of Triples in the set.
  : @param $contextGraph
- : @return 
+ : @return Unsigned Long.
  :)
 declare function impl:count-triples($contextGraph as element(graph)) 
 	as xs:unsignedLong
@@ -173,9 +174,9 @@ declare function impl:get-graph-uri($contextGraph as element(graph))
 
 (:~
  : Build a deterministic uri for a quad. 
- : @param $subject 
- : @param $predicate 
- : @param $object 
+ : @param $subject Subject.
+ : @param $predicate Predicate.
+ : @param $object Object.
  : @param $context
  : @return a URI string.
  :)
@@ -220,8 +221,9 @@ declare function impl:map-add($contextMap as element(),
 (:~
  : Set the value for the passed key in the context Map.
  : @param $contextMap
- : @param $key 
+ : @param $key the look-up key of the entry to be set.
  : @param $value 
+ : @return empty sequence.
  :)
 declare function impl:map-set($contextMap as element(), $key as xs:string, 
 		$value as xs:string) 
@@ -238,9 +240,10 @@ declare function impl:map-set($contextMap as element(), $key as xs:string,
 
 
 (:~
- : 
- : @param 
- : @return 
+ : Remove an entry from the context Map.
+ : @param $contextMap 
+ : @param $key the look-up key of the entry to be removed.
+ : @return empty sequence.
  :)
 declare function impl:map-remove($contextMap as item(), $key as xs:string) 
 	as empty-sequence()
