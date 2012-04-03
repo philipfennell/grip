@@ -33,7 +33,6 @@ declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
 declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 
 
 
@@ -366,13 +365,27 @@ declare function graph:some($contextGraph as element(graph),
 (:~
  : Returns the set of Triples within the Graph as a host language native 
  : sequence, for example an XPath 2.0 sequence.
+ : If the context Graph has a Base URI then it is a Persistant Graph and its 
+ : associated tirples can be found in the database, otherwise it is a Transient 
+ : Graph and the triples are child elements of the graph.
  : @param $contextGraph 
  : @return sequence of triple elements.
  :)
 declare function graph:to-array($contextGraph as element(graph)) 
-	as element(triple)*
+	as (:element(triple)*:)item()*
 {
-	$contextGraph/triple
+	if (exists(base-uri($contextGraph))) then 
+	xdmp:xslt-invoke('xslt/ml-tuples-to-graph.xsl', 
+		document { 
+			element {xs:QName(name($contextGraph))} {
+				$contextGraph/@*,
+				$contextGraph/uri,
+				collection(graph:uri($contextGraph))/*
+			}
+		}
+	)//triple
+	else
+		$contextGraph/triple
 };
 
 

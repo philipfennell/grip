@@ -11,7 +11,7 @@ import module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"
 let $graph as element() := 
 <graph xmlns="http://www.w3.org/TR/rdf-interfaces" 
 		xmlns:dc="http://purl.org/dc/elements/1.1/" 
-		xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#"><uri>#default</uri>
+		xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#">
 	<uri>#default</uri>
 	<triple>
 		<uri>http://example.org/book/book3</uri>
