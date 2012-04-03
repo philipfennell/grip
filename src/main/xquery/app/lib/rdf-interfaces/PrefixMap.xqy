@@ -25,6 +25,9 @@ xquery version "1.0-ml" encoding "utf-8";
 
 module namespace prefixmap = "http://www.w3.org/TR/rdf-interfaces/PrefixMap"; 
 
+import module namespace impl = "http://www.w3.org/TR/rdf-interfaces/Implementation"
+	at "/lib/rdf-interfaces/Implementation.xqy";
+
 import module namespace common = "http://www.w3.org/TR/rdf-interfaces/Common"
 	at "/lib/rdf-interfaces/Common.xqy";
 
@@ -119,9 +122,12 @@ declare function prefixmap:set-default($contextPrefixMap as element(prefix-map),
  :)
 declare function prefixmap:add-all($contextPrefixMap as element(prefix-map), 
 		$prefixes as element(prefix-map), $override as xs:boolean) 
-	as element(prefix-map)
+	as element(prefix-map)?
 {
-	common:map-add($contextPrefixMap, $prefixes/entry, $override)
+	if (impl:is-persistent($contextPrefixMap)) then 
+		impl:map-add($contextPrefixMap, $prefixes/entry, $override)
+	else
+		common:map-add($contextPrefixMap, $prefixes/entry, $override)
 };
 
 
@@ -132,7 +138,7 @@ declare function prefixmap:add-all($contextPrefixMap as element(prefix-map),
  : @return PrefixMap
  :)
 declare function prefixmap:add-all($contextPrefixMap as element(prefix-map), 
-		$prefixes as item()) 
+		$prefixes as element(prefix-map)?) 
 	as element(prefix-map)
 {
 	prefixmap:add-all($contextPrefixMap, $prefixes, false())
@@ -162,9 +168,12 @@ declare function prefixmap:get($contextPrefixMap as element(prefix-map),
  :)
 declare function prefixmap:set($contextPrefixMap as element(prefix-map), 
 		$prefix as xs:string, $iri as xs:string) 
-	as element(prefix-map)
+	as element(prefix-map)?
 {
-	common:map-set($contextPrefixMap, $prefix, $iri)
+	if (impl:is-persistent($contextPrefixMap)) then 
+		impl:map-set($contextPrefixMap, $prefix, $iri)
+	else
+		common:map-set($contextPrefixMap, $prefix, $iri)
 };
 
 
@@ -179,12 +188,9 @@ declare function prefixmap:remove($contextPrefixMap as item(), $prefix as xs:str
 {
 	let $thisId as xs:string := if ($prefix eq '') then '_' else $prefix
 	return
-		element {xs:QName(name($contextPrefixMap))} {
-			( $contextPrefixMap/@*,
-			for $entry in $contextPrefixMap/entry
-			where not(string($entry/@xml:id) eq $thisId)
-			return
-				$entry )
-		}
+		if (impl:is-persistent($contextPrefixMap)) then 
+			impl:map-remove($contextPrefixMap, $prefix)
+		else
+			common:map-remove($contextPrefixMap, $prefix)
 };
 

@@ -25,6 +25,9 @@ xquery version "1.0-ml" encoding "utf-8";
 
 module namespace termmap = "http://www.w3.org/TR/rdf-interfaces/TermMap";
 
+import module namespace impl = "http://www.w3.org/TR/rdf-interfaces/Implementation"
+	at "/lib/rdf-interfaces/Implementation.xqy";
+
 import module namespace common = "http://www.w3.org/TR/rdf-interfaces/Common"
 	at "/lib/rdf-interfaces/Common.xqy";
 
@@ -120,7 +123,10 @@ declare function termmap:add-all($contextTermMap as element(term-map),
 		$terms as element(term-map), $override as xs:boolean) 
 	as element(term-map)
 {
-	common:map-add($contextTermMap, $terms/entry, $override)
+	if (impl:is-persistent($contextTermMap)) then 
+		impl:map-add($contextTermMap, $terms/entry, $override)
+	else
+		common:map-add($contextTermMap, $terms/entry, $override)
 };
 
 
@@ -195,7 +201,10 @@ declare function termmap:set($contextTermMap as element(term-map),
 		$term as xs:string, $iri as xs:string) 
 	as element(term-map)
 {
-	common:map-set($contextTermMap, $term, $iri)
+	if (impl:is-persistent($contextTermMap)) then 
+		impl:map-set($contextTermMap, $term, $iri)
+	else
+		common:map-set($contextTermMap, $term, $iri)
 };
 
 
@@ -211,12 +220,9 @@ declare function termmap:remove($contextTermMap as element(term-map),
 {
 	let $thisId as xs:string := if ($term eq '') then '_' else $term
 	return
-		element {xs:QName(name($contextTermMap))} {
-			( $contextTermMap/@*,
-			for $entry in $contextTermMap/entry
-			where not(string($entry/@xml:id) eq $thisId)
-			return
-				$entry )
-		}
+		if (impl:is-persistent($contextTermMap)) then 
+			impl:map-remove($contextTermMap, $term)
+		else
+			common:map-remove($contextTermMap, $term)
 };
 

@@ -23,6 +23,12 @@ xquery version "1.0-ml" encoding "utf-8";
 
 module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"; 
 
+import module namespace impl = "http://www.w3.org/TR/rdf-interfaces/Implemetation"
+	at "/lib/rdf-interfaces/Implemetation.xqy";
+
+import module namespace common = "http://www.w3.org/TR/rdf-interfaces/Common"
+	at "/lib/rdf-interfaces/Common.xqy";
+
 import module namespace triple = "http://www.w3.org/TR/rdf-interfaces/Triple"
 	at "/lib/rdf-interfaces/Triple.xqy";
 
@@ -86,19 +92,21 @@ declare function graph:add-action($contextGraph as element(graph),
 (:~
  : Adds the specified triple to the graph.
  : @param $contextGraph 
- : @param $triple 
+ : @param $triple The Triple to add. Graphs must not contain duplicate triples.
  : @return the graph instance it was called on.
  :)
 declare function graph:add($contextGraph as element(graph), 
 		$triple as element(triple)) 
 	as element(graph)
 {
-	(: Need to add new namespaces that don't exist in the graph document. :)
-	element {xs:QName(name($contextGraph))} {
-		( $contextGraph/@*,
-		$triple,
-		$contextGraph/triple)
-	}
+	if (impl:is-persistent($contextGraph)) then 
+		impl:add-triple($contextGraph, $triple) 
+	else
+		element {xs:QName(name($contextGraph))} {
+			( $contextGraph/@*,
+			$triple,
+			$contextGraph/triple)
+		}
 };
 
 
@@ -148,7 +156,7 @@ declare function graph:every($contextGraph as element(graph),
  : the provided TripleFilter. 
  : @param $contextGraph 
  : @param $filter the TripleFilter to test each Triple in the Graph against. 
- : @return false() when the first Triple is found that does not pass the test.
+ : @return a new Graph
  :)
 declare function graph:filter($contextGraph as element(graph), 
 		$filter as item()) 
@@ -160,10 +168,9 @@ declare function graph:filter($contextGraph as element(graph),
 		return
 			$triple
 	return
-		element {QName('http://www.w3.org/TR/rdf-interfaces', name($contextGraph))} {
+		element {xs:QName(name($contextGraph))} {
 			$contextGraph/namespace::*,
 			$contextGraph/@*,
-			<uri xmlns="http://www.w3.org/TR/rdf-interfaces"/>,
 			$filteredTiples
 		}
 };
@@ -193,8 +200,10 @@ declare function graph:for-each($contextGraph as element(graph),
 declare function graph:get-length($contextGraph as element(graph)) 
 	as xs:unsignedLong 
 {
-	(:xdmp:estimate(collection(graph:uri($contextGraph))):)
-	count($contextGraph/triple)
+	if (impl:is-persistent($contextGraph)) then 
+		impl:count-triples($contextGraph)
+	else
+		count($contextGraph/triple)
 }; 
 
 
@@ -238,10 +247,9 @@ declare function graph:match($contextGraph as element(graph),
 		return
 			$triple
 	return
-		element {QName('http://www.w3.org/TR/rdf-interfaces', name($contextGraph))} {
+		element {xs:QName(name($contextGraph))} {
 			$contextGraph/namespace::*,
 			$contextGraph/@*,
-			<uri xmlns="http://www.w3.org/TR/rdf-interfaces"/>,
 			$matchedTriples
 		}
 };
@@ -275,7 +283,7 @@ declare function graph:merge($contextGraph as element(graph),
 		$graph as element(graph)) 
 	as element(graph)
 {
-	$contextGraph
+	error(xs:QName('NOT_IMPLEMENTED'), 'The function ''graph:merge'' is not implemented.')
 };
 
 
@@ -292,18 +300,21 @@ declare function graph:remove($contextGraph as element(graph),
 	let $subject as xs:string := rdfnode:to-string(triple:get-subject($triple))
 	let $predicate as xs:string := rdfnode:to-string(triple:get-predicate($triple))
 	let $object as item()* := rdfnode:to-string(triple:get-object($triple))
-	let $targetTriple := graph:uri-for-quad($subject, $predicate, $object, ())
+	let $targetTriple as xs:string := impl:uri-for-quad($subject, $predicate, $object, ())
 	return
-		element {xs:QName(name($contextGraph))} {
-			$contextGraph/@*,
-			for $t in $contextGraph/triple
-			let $s as xs:string := rdfnode:to-string(triple:get-subject($t))
-			let $p as xs:string := rdfnode:to-string(triple:get-predicate($t))
-			let $o as item()* := rdfnode:to-string(triple:get-object($t))
-			where not($targetTriple eq graph:uri-for-quad($s, $p, $o, ()))
-			return
-				$t
-		}
+		if (impl:is-persistent($contextGraph)) then 
+			impl:remove-triple($contextGraph, $triple)
+		else
+			element {xs:QName(name($contextGraph))} {
+				$contextGraph/@*,
+				for $t in $contextGraph/triple
+				let $s as xs:string := rdfnode:to-string(triple:get-subject($t))
+				let $p as xs:string := rdfnode:to-string(triple:get-predicate($t))
+				let $o as item()* := rdfnode:to-string(triple:get-object($t))
+				where not($targetTriple eq impl:uri-for-quad($s, $p, $o, ()))
+				return
+					$t
+			}
 };
 
 
@@ -326,24 +337,35 @@ declare function graph:remove-matches($contextGraph as element(graph),
 		$subject as item()?, $predicate as item()?, $object as item()?)
 	as element(graph)
 {
-	let $matchesForRemoval as xs:string* := 
-		for $t in graph:match($contextGraph, $subject, $predicate, $object)/triple
-		let $s as xs:string := rdfnode:to-string(triple:get-subject($t))
-		let $p as xs:string := rdfnode:to-string(triple:get-predicate($t))
-		let $o as item()* := rdfnode:to-string(triple:get-object($t))
-		return
-			graph:uri-for-quad($s, $p, $o, ())
+	let $matches as element(triple)* := 
+		graph:match($contextGraph, $subject, $predicate, $object)/triple
 	return
-		element {xs:QName(name($contextGraph))} {
-			$contextGraph/@*,
-			for $t in $contextGraph/triple
-			let $s as xs:string := rdfnode:to-string(triple:get-subject($t))
-			let $p as xs:string := rdfnode:to-string(triple:get-predicate($t))
-			let $o as item()* := rdfnode:to-string(triple:get-object($t))
-			where not(graph:uri-for-quad($s, $p, $o, ()) = $matchesForRemoval)
+		if (impl:is-persistent($contextGraph)) then 
+			let $remove := 
+				for $triple in $matches 
+				return
+					graph:remove($contextGraph, $triple)
 			return
-				$t
-		}
+				$contextGraph
+		else
+			let $matchesForRemoval as xs:string* := 
+				for $t in $matches
+				let $s as xs:string := rdfnode:to-string(triple:get-subject($t))
+				let $p as xs:string := rdfnode:to-string(triple:get-predicate($t))
+				let $o as item()* := rdfnode:to-string(triple:get-object($t))
+				return
+					impl:uri-for-quad($s, $p, $o, ())
+			return
+				element {xs:QName(name($contextGraph))} {
+					$contextGraph/@*,
+					for $t in $contextGraph/triple
+					let $s as xs:string := rdfnode:to-string(triple:get-subject($t))
+					let $p as xs:string := rdfnode:to-string(triple:get-predicate($t))
+					let $o as item()* := rdfnode:to-string(triple:get-object($t))
+					where not(impl:uri-for-quad($s, $p, $o, ()) = $matchesForRemoval)
+					return
+						$t
+				}
 };
 
 
@@ -374,16 +396,8 @@ declare function graph:some($contextGraph as element(graph),
 declare function graph:to-array($contextGraph as element(graph)) 
 	as (:element(triple)*:)item()*
 {
-	if (exists(base-uri($contextGraph))) then 
-	xdmp:xslt-invoke('xslt/ml-tuples-to-graph.xsl', 
-		document { 
-			element {xs:QName(name($contextGraph))} {
-				$contextGraph/@*,
-				$contextGraph/uri,
-				collection(graph:uri($contextGraph))/*
-			}
-		}
-	)//triple
+	if (impl:is-persistent($contextGraph)) then 
+		impl:get-triples($contextGraph)
 	else
 		$contextGraph/triple
 };
@@ -411,35 +425,5 @@ declare private function graph:assert($triples as element(triple)*,
 				$condition
 		else 
 			not($condition)
-};
-
-
-(:~
- : Build a deterministic uri for a quad. 
- : @param $subject 
- : @param $predicate 
- : @param $object 
- : @param $context
- : @return a URI string.
- :)
-declare private function graph:uri-for-quad($subject as xs:string, 
-		$predicate as xs:string, $object as xs:string, $context as xs:string?)
-	as xs:string
-{
-  xdmp:integer-to-hex(
-    xdmp:hash64(
-      string-join(($subject, $predicate, $object, $context), '|') ) )
-};
-
-
-(:~
- : Returns the context graph's URI.
- : @param $contextGraph 
- : @return xs:string.
- :)
-declare private function graph:uri($contextGraph as element(graph)) 
-	as xs:string
-{
-	string($contextGraph/uri)
 };
 

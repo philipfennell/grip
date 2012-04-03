@@ -63,7 +63,7 @@ declare function common:map-add($contextMap as element(),
 
 
 (:~
- : Set the value from the passed key in the context Map.
+ : Set the value for the passed key in the context Map.
  : @param $contextMap
  : @param $key 
  : @param $value 
@@ -93,6 +93,46 @@ declare function common:map-set($contextMap as element(), $key as xs:string,
 declare function common:map-get($contextMap as element(), $key as xs:string) 
 	as xs:string?
 {
-	id((if ($key eq '') then '_' else $key), document {$contextMap})
+	common:map-get-entry($contextMap, $key)
 };
 
+
+(:~
+ : Get the map entry from the passed key.
+ : @param $contextMap
+ : @param $key
+ : @return element(entry)
+ :)
+declare function common:map-get-entry($contextMap as element(), $key as xs:string) 
+	as element(entry)?
+{
+	let $context := 
+		(: 
+		 : If the context node is not in a document, wrap it in one because the 
+		 : id() function need a document root. 
+		 :)
+		if (exists($contextMap/..)) then $contextMap else document {$contextMap}
+	return
+		subsequence(id((if ($key eq '') then '_' else $key), $context), 1, 1)
+};
+
+
+(:~
+ : Remove the entry from the context Map.
+ : @param $contextMap
+ : @param $key 
+ : @return the passed map.
+ :)
+declare function common:map-remove($contextMap as element(), $key as xs:string) 
+	as element()
+{
+	let $thisId as xs:string := if ($key eq '') then '_' else $key
+	return
+		element {xs:QName(name($contextMap))} {
+			( $contextMap/@*,
+			for $entry in $contextMap/entry
+			where not(string($entry/@xml:id) eq $thisId)
+			return
+				$entry )
+		}
+};
