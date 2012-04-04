@@ -3,8 +3,8 @@ xquery version "1.0-ml" encoding "utf-8";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
-import module namespace ntriples = "http://www.w3.org/TR/rdf-interfaces/NTriplesSerializer"
-	at "/lib/rdf-interfaces/NTriplesSerializer.xqy";
+import module namespace trix = "http://www.w3.org/TR/rdf-interfaces/TriXSerializer"
+	at "/lib/rdf-interfaces/TriXSerializer.xqy";
 
 let $graph as element(graph) := 
 <graph xmlns="http://www.w3.org/TR/rdf-interfaces"
@@ -16,7 +16,7 @@ let $graph as element(graph) :=
 	<triple>
 		<uri>http://example.org/book/book3</uri>
 		<uri>http://purl.org/dc/elements/1.1/title</uri>
-		<plainLiteral>Harry Potter and the Prisoner Of Azkaban</plainLiteral>
+		<plainLiteral xml:lang="en-GB">Harry Potter and the Prisoner Of Azkaban</plainLiteral>
 	</triple>
 	<triple>
 		<uri>http://example.org/book/book3</uri>
@@ -31,7 +31,7 @@ let $graph as element(graph) :=
 	<triple>
 		<uri>http://example.org/book/book3</uri>
 		<uri>http://purl.org/dc/elements/1.1/date</uri>
-		<plainLiteral>1999-07-08</plainLiteral>
+		<plainLiteral datatype="http://www.w3.org/2001/XMLSchema#date">1999-07-08</plainLiteral>
 	</triple>
 	<triple>
 		<id>A0</id>
@@ -40,4 +40,4 @@ let $graph as element(graph) :=
 	</triple>
 </graph>
 return
-	ntriples:serialize($graph)
+	trix:serialize($graph)

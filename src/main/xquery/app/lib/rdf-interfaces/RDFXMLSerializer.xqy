@@ -22,10 +22,11 @@ xquery version "1.0-ml" encoding "utf-8";
  : @version 0.1
  :)
 
-module namespace ntriples = "http://www.w3.org/TR/rdf-interfaces/NTriplesSerializer";
+module namespace rdfxml = "http://www.w3.org/TR/rdf-interfaces/RDFXMLSerializer";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
+declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
 
 
@@ -36,9 +37,9 @@ declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
  : @param $contextGraph
  : @return N-Triples serialization as a string.
  :)
-declare function ntriples:serialize($contextGraph as element(graph)) 
-	as xs:string
+declare function rdfxml:serialize($contextGraph as element(graph)) 
+	as element(rdf:RDF)
 {
-	xdmp:xslt-invoke('xslt/graph-to-ntriples.xsl', document {$contextGraph})
+	xdmp:xslt-invoke('xslt/graph-to-rdf-xml.xsl', document {$contextGraph})/*
 };
 
