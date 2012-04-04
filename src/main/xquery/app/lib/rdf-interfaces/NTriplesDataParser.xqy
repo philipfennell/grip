@@ -24,6 +24,9 @@ xquery version "1.0-ml" encoding "utf-8";
 
 module namespace ntdp = "http://www.w3.org/TR/rdf-interfaces/NTriplesDataParser";
 
+import module namespace rdvenv = "http://www.w3.org/TR/rdf-interfaces/RDFEnvironment"
+	at "/lib/rdf-interfaces/RDFEnvironment.xqy";
+
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 declare namespace nt = "http://www.w3.org/ns/formats/N-Triples";
@@ -50,6 +53,10 @@ declare function ntdp:parse($toParse as xs:string, $callBack as item(),
 		$base as xs:string?, $filter as item()?, $graph as element(graph)?) 
 	as element(graph)
 {
-	xdmp:xslt-invoke('xslt/ntriples-to-graph.xsl', document {<nt:RDF>{$toParse}</nt:RDF>})/*
+	let $tempGraph as element(graph) := 
+			xdmp:xslt-invoke('xslt/ntriples-to-graph.xsl', 
+					document {<nt:RDF>{$toParse}</nt:RDF>})/graph
+	return
+		rdvenv:create-graph(<rdf-environment/>, $tempGraph/triple)
 };
 

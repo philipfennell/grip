@@ -23,8 +23,8 @@ xquery version "1.0-ml" encoding "utf-8";
 
 module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"; 
 
-import module namespace impl = "http://www.w3.org/TR/rdf-interfaces/Implemetation"
-	at "/lib/rdf-interfaces/Implemetation.xqy";
+import module namespace impl = "http://www.w3.org/TR/rdf-interfaces/Implementation"
+	at "/lib/rdf-interfaces/Implementation.xqy";
 
 import module namespace common = "http://www.w3.org/TR/rdf-interfaces/Common"
 	at "/lib/rdf-interfaces/Common.xqy";

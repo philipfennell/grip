@@ -9,14 +9,9 @@ declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 import module namespace rdfenv = "http://www.w3.org/TR/rdf-interfaces/RDFEnvironment"
 	at "/lib/rdf-interfaces/RDFEnvironment.xqy";
 
-let $rdfEnvironment as element(rdf-environment) := 
-<rdf-environment>
-	<prefix-map/>
-	<term-map/>
-</rdf-environment>
+
 let $graph as element() := 
-<graph xmlns:dc="http://purl.org/dc/elements/1.1/"
-		xmlns:xs="http://www.w3.org/2001/XMLSchema#">
+<graph>
 	<uri>#default</uri>
 	<triple>
 		<uri>http://example.org/book/book1</uri>
@@ -41,5 +36,5 @@ let $graph as element() :=
 </graph>
 
 return
-	rdfenv:create-graph($rdfEnvironment, $graph/rdfi:triple) instance of element(graph)
+	rdfenv:create-graph($rdfenv:DEFAULT_ENVIRONMENT, $graph/rdfi:triple) instance of element(graph)
 

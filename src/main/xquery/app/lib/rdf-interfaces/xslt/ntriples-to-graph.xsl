@@ -100,10 +100,10 @@
 								<!-- XML Literals. -->
 								<xsl:when test="ends-with(nt:get-datatype(regex-group(5)), '#XMLLiteral')">
 									<xsl:copy-of use-when="system-property('xsl:product-name') eq 'SAXON'"
-											select="saxon:parse(concat('&lt;rdfi:XMLLiteral xmlns:trix=''http://www.w3.org/2004/03/trix/trix-1/''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/rdfi:XMLLiteral&gt;'))/rdfi:XMLLiteral/(* | text())"
+											select="saxon:parse(concat('&lt;rdfi:XMLLiteral xmlns:rdfi=''http://www.w3.org/TR/rdf-interfaces''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/rdfi:XMLLiteral&gt;'))/rdfi:XMLLiteral/(* | text())"
 											copy-namespaces="no"/>
 									<xsl:copy-of use-when="system-property('xsl:product-name') eq 'MarkLogic Server'"
-											select="xdmp:unquote(concat('&lt;rdfi:XMLLiteral xmlns:trix=''http://www.w3.org/2004/03/trix/trix-1/''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/rdfi:XMLLiteral&gt;'))/rdfi:XMLLiteral/(* | text())"
+											select="xdmp:unquote(concat('&lt;rdfi:XMLLiteral xmlns:rdfi=''http://www.w3.org/TR/rdf-interfaces''&gt;', nt:unescape-string(nt:get-data-value(regex-group(5))), '&lt;/rdfi:XMLLiteral&gt;'))/rdfi:XMLLiteral/(* | text())"
 											copy-namespaces="no"/>
 								</xsl:when>
 								<!-- Other Typed Literals. -->
@@ -154,7 +154,7 @@
 	
 	<!-- Match language code. -->
 	<xsl:function name="nt:match-lang-code" as="xs:string">
-		<xsl:value-of select="'@[a-z]+(-[A-Z0-9]+)*'"/>
+		<xsl:value-of select="'@[a-z]+(-[a-zA-Z0-9]+)*'"/>
 	</xsl:function>
 	
 	
