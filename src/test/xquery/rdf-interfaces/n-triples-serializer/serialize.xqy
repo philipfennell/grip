@@ -16,7 +16,7 @@ let $graph as element(graph) :=
 	<triple>
 		<uri>http://example.org/book/book3</uri>
 		<uri>http://purl.org/dc/elements/1.1/title</uri>
-		<plainLiteral>Harry Potter and the Prisoner Of Azkaban</plainLiteral>
+		<plainLiteral xml:lang="en-gb">Harry Potter and the Prisoner Of Azkaban</plainLiteral>
 	</triple>
 	<triple>
 		<uri>http://example.org/book/book3</uri>
@@ -31,7 +31,7 @@ let $graph as element(graph) :=
 	<triple>
 		<uri>http://example.org/book/book3</uri>
 		<uri>http://purl.org/dc/elements/1.1/date</uri>
-		<plainLiteral>1999-07-08</plainLiteral>
+		<typedLiteral datatype="http://www.w3.org/2001/XMLSchema#date">1999-07-08</typedLiteral>
 	</triple>
 	<triple>
 		<id>A0</id>

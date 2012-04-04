@@ -22,7 +22,7 @@ xquery version "1.0-ml" encoding "utf-8";
  : @version 0.1
  :)
 
-module namespace ntdp = "http://www.w3.org/TR/rdf-interfaces/NTriplesParser";
+module namespace ntdp = "http://www.w3.org/TR/rdf-interfaces/NTriplesDataParser";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
