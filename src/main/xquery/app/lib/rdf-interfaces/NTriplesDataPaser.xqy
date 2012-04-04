@@ -26,19 +26,30 @@ module namespace ntdp = "http://www.w3.org/TR/rdf-interfaces/NTriplesParser";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
-
+declare namespace nt = "http://www.w3.org/ns/formats/N-Triples";
 
 
 
 (:~
  : A function, which when called will serialize the given Graph and return the 
  : resulting serialization.
- : @param 
- : @return New Graph.
+ : @param $toParse The document to parse.
+ : @param $callBack The ParserCallback to execute once the parse has completed, 
+ : the ParserCallback will be passed a single argument which is the propulated 
+ : Graph.
+ : @param $base An optional base to be used by the parser when resolving 
+ : relative IRI references.
+ : @param $filter An optional TripleFilter to test each Triple against before 
+ : adding to the output Graph, only those triples successfully passing the test 
+ : will be added to the output graph.
+ : @param $graph An optional Graph to add the parsed triples to, if no Graph is 
+ : provided then a new, empty, Graph will be used.
+ : @return Graph.
  :)
-declare function ntdp:parse() 
+declare function ntdp:parse($toParse as xs:string, $callBack as item(), 
+		$base as xs:string?, $filter as item()?, $graph as element(graph)?) 
 	as element(graph)
 {
-	(:xdmp:xslt-invoke('xslt/graph-to-rdf-xml.xsl', document {$contextGraph})/*:)
+	xdmp:xslt-invoke('xslt/ntriples-to-graph.xsl', document {<nt:RDF>{$toParse}</nt:RDF>})/*
 };
 
