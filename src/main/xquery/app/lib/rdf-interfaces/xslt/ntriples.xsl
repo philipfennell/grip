@@ -195,7 +195,7 @@
 		<xsl:variable name="head" as="xs:string?" select="substring($in, 1, 1)"/>
 		<xsl:variable name="tail" as="xs:string?" select="substring($in, 2)"/>
 		<xsl:variable name="multiplier" as="xs:integer" select="nt:power(16,  string-length($tail))"/>
-		<xsl:variable name="decimalValue" as="xs:integer" 
+		<xsl:variable name="decimalValue" as="xs:integer?" 
 				select="index-of(('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'), $head) - 1"/>
 		
 		<xsl:value-of select="
