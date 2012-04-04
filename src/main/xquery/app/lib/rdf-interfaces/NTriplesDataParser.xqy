@@ -27,6 +27,9 @@ module namespace ntdp = "http://www.w3.org/TR/rdf-interfaces/NTriplesDataParser"
 import module namespace rdvenv = "http://www.w3.org/TR/rdf-interfaces/RDFEnvironment"
 	at "/lib/rdf-interfaces/RDFEnvironment.xqy";
 
+import module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"
+	at "/lib/rdf-interfaces/Graph.xqy";
+
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 declare namespace nt = "http://www.w3.org/ns/formats/N-Triples";
@@ -53,10 +56,16 @@ declare function ntdp:parse($toParse as xs:string, $callBack as item(),
 		$base as xs:string?, $filter as item()?, $graph as element(graph)?) 
 	as element(graph)
 {
-	let $tempGraph as element(graph) := 
+	let $params := map:map()
+	let $_put := map:put($params, 'GRAPH_URI', $base)
+	let $parsedGraph as element(graph) := 
 			xdmp:xslt-invoke('xslt/ntriples-to-graph.xsl', 
-					document {<nt:RDF>{$toParse}</nt:RDF>})/graph
+					document {<nt:RDF>{$toParse}</nt:RDF>}, 
+							$params)/graph
 	return
-		rdvenv:create-graph(<rdf-environment/>, $tempGraph/triple)
+		if (exists($graph)) then 
+			graph:add-all($graph, $parsedGraph)
+		else
+			rdvenv:create-graph(<rdf-environment/>, $parsedGraph/triple)
 };
 
