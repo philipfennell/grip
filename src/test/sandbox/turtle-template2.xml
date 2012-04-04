@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ttl:RDF xmlns:ttl="http://www.w3.org/ns/formats/Turtle"><![CDATA[
-<http://example.org/book/book1> <http://purl.org/dc/elements/1.1/title> "Harry Potter and the Philosopher's Stone"@en-gb.
+@prefix xs: <http://www.w3.org/2001/XMLSchema#> .
+<http://example.org/book/book5> <http://purl.org/dc/elements/1.1/date> "2003-06-21"^^xs:date.
 ]]></ttl:RDF>
