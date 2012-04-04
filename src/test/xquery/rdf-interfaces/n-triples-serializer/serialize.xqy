@@ -3,8 +3,8 @@ xquery version "1.0-ml" encoding "utf-8";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
-import module namespace ntriples = "http://www.w3.org/TR/rdf-interfaces/NTriplesSerializer"
-	at "/lib/rdf-interfaces/NTriplesSerializer.xqy";
+import module namespace ntriples = "http://www.w3.org/TR/rdf-interfaces/NTriplesDataSerializer"
+	at "/lib/rdf-interfaces/NTriplesDataSerializer.xqy";
 
 let $graph as element(graph) := 
 <graph xmlns="http://www.w3.org/TR/rdf-interfaces"

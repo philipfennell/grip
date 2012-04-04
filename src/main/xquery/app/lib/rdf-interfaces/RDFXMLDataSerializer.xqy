@@ -22,7 +22,7 @@ xquery version "1.0-ml" encoding "utf-8";
  : @version 0.1
  :)
 
-module namespace rdfxml = "http://www.w3.org/TR/rdf-interfaces/RDFXMLSerializer";
+module namespace rxds = "http://www.w3.org/TR/rdf-interfaces/RDFXMLDataSerializer";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
@@ -37,7 +37,7 @@ declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
  : @param $contextGraph
  : @return N-Triples serialization as a string.
  :)
-declare function rdfxml:serialize($contextGraph as element(graph)) 
+declare function rxds:serialize($contextGraph as element(graph)) 
 	as element(rdf:RDF)
 {
 	xdmp:xslt-invoke('xslt/graph-to-rdf-xml.xsl', document {$contextGraph})/*

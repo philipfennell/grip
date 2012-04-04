@@ -3,8 +3,8 @@ xquery version "1.0-ml" encoding "utf-8";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
-import module namespace trix = "http://www.w3.org/TR/rdf-interfaces/TriXSerializer"
-	at "/lib/rdf-interfaces/TriXSerializer.xqy";
+import module namespace trix = "http://www.w3.org/TR/rdf-interfaces/TriXDataSerializer"
+	at "/lib/rdf-interfaces/TriXDataSerializer.xqy";
 
 let $graph as element(graph) := 
 <graph xmlns="http://www.w3.org/TR/rdf-interfaces"

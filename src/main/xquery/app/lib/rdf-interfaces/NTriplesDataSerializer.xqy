@@ -22,7 +22,7 @@ xquery version "1.0-ml" encoding "utf-8";
  : @version 0.1
  :)
 
-module namespace ntriples = "http://www.w3.org/TR/rdf-interfaces/NTriplesSerializer";
+module namespace ntds = "http://www.w3.org/TR/rdf-interfaces/NTriplesDataSerializer";
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
@@ -36,7 +36,7 @@ declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
  : @param $contextGraph
  : @return N-Triples serialization as a string.
  :)
-declare function ntriples:serialize($contextGraph as element(graph)) 
+declare function ntds:serialize($contextGraph as element(graph)) 
 	as xs:string
 {
 	xdmp:xslt-invoke('xslt/graph-to-ntriples.xsl', document {$contextGraph})
