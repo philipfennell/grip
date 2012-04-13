@@ -34,10 +34,12 @@ import module namespace impl = "http://www.w3.org/TR/rdf-interfaces/Implementati
 	at "/lib/rdf-interfaces/Implementation.xqy";
 
 
-let $graph as element() := 
-<graph>
-	<uri>http://localhost:8005/test?default=</uri>
-</graph>
+let $triple as element() := 
+<triple>
+	<uri>http://example.org/book/book3</uri>
+	<uri>http://purl.org/dc/elements/1.1/title</uri>
+	<plainLiteral>Harry Potter and the Prisoner Of Azkaban</plainLiteral>
+</triple>
 return
-	impl:get-triples($graph)/*[3]/text() eq 'Harry Potter and the ha''penny chews'
+	impl:add-triple('/test?default', $triple) instance of empty-sequence()
 

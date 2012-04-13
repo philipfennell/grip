@@ -38,28 +38,30 @@ declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
 declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
+declare variable $PERMISSIONS as xs:string* := ();
+
+declare variable $DEFAULT_GRAPH_COLLECTION as xs:string* := "http://www.w3.org/TR/rdf-interfaces/Graph";
+
 
 
 
 (:~
- : Insert the passed triple into the database for the context Graph.
- : @param $contextGraph
+ : Insert the passed triple into the database for the context graph URI.
+ : @param $graphURI The context graph's URI.
  : @param $triple The Triple to add. Graphs must not contain duplicate triples.
  : @return the context Graph.
  :)
-declare function impl:add-triple($contextGraph as element(graph), 
-		$triple as element(triple)) 
-	as element(graph)
+declare function impl:add-triple($graphURI as xs:string, $triple as element(triple)) 
+	as empty-sequence()
 {
 	let $subject as xs:string := rdfnode:to-string(triple:get-subject($triple))
 	let $predicate as xs:string := rdfnode:to-string(triple:get-predicate($triple))
 	let $object as item()* := rdfnode:to-string(triple:get-object($triple))
-	let $permissions as xs:string* := ()
-	let $collections as xs:string* := (impl:get-graph-uri($contextGraph))
-	let $add := 
+	let $collections as xs:string* := ($graphURI)
+	return
 		xdmp:document-insert(
 			impl:uri-for-quad($subject, $predicate, $object, 
-					impl:get-graph-uri($contextGraph)),
+					$graphURI),
 			element {QName('', 't')} {
 				( element {QName('', 's')} {
 					( typeswitch ($triple/*[1])
@@ -84,13 +86,11 @@ declare function impl:add-triple($contextGraph as element(graph),
 							return $object
 						default 
 							return ( $triple/*[3]/@datatype, $object ) ) )},
-				element {QName('', 'c')} {impl:get-graph-uri($contextGraph)} )
-	    	},
-	    	$permissions,
+				element {QName('', 'c')} {$graphURI} )
+	    	} ,
+	    	$PERMISSIONS,
 	    	$collections
 	    )
-	return
-		$contextGraph
 };
 
 

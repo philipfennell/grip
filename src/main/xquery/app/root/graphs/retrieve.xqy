@@ -13,12 +13,11 @@ import module namespace gsp="http://www.w3.org/TR/sparql11-http-rdf-update/"
 import module namespace resource = "http://www.marklogic.com/grip/graphs" at 
 		"/root/graphs/resource.xqy";
 
-
-if ($resource:default) then 
-	gsp:get-graph($resource:REQUEST_URI)
-else if (string-length($resource:graph) gt 0) then 
-	gsp:get-graph($resource:graph)
-else 
-	gsp:get-service-description($resource:REQUEST_URI)
+let $graphURI := gsp:select-graph-uri($resource:REQUEST_URI, $resource:default, $resource:graph)
+return
+	if (exists($graphURI)) then 
+		gsp:retrieve-graph($graphURI)
+	else 
+		gsp:retrieve-service-description($resource:REQUEST_URI)
 	
 

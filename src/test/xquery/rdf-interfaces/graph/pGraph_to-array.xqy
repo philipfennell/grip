@@ -8,6 +8,6 @@ declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
 import module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"
 	at "/lib/rdf-interfaces/Graph.xqy";
 
-let $graph as element() := doc('http://localhost:8005/graphs?default=')/*
+let $graph as element() := doc('http://localhost:8005/graphs?default')/*
 return
 	graph:to-array($graph) instance of element(rdfi:triple)+

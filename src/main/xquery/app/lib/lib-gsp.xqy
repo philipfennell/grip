@@ -18,12 +18,22 @@ xquery version "1.0-ml" encoding "utf-8";
  : Function library for implementing the W3C's Graph Store Protocol.
  : @see http://www.w3.org/TR/sparql11-http-rdf-update/
  : @author	Philip A. R. Fennell
- : @version 0.1
+ : @version 0.2
  :)
 
 module namespace gsp = "http://www.w3.org/TR/sparql11-http-rdf-update/"; 
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
+declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
+
+import module namespace rdfenv = "http://www.w3.org/TR/rdf-interfaces/RDFEnvironment"
+	at "/lib/rdf-interfaces/RDFEnvironment.xqy";
+
+import module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"
+	at "/lib/rdf-interfaces/Graph.xqy";
+
+import module namespace txds = "http://www.w3.org/TR/rdf-interfaces/TriXDataSerializer"
+	at "/lib/rdf-interfaces/TriXDataSerializer.xqy";
 
 import module namespace sem = "http://marklogic.com/semantic"
 	at "/lib/semantic.xqy";
@@ -35,20 +45,26 @@ declare namespace nt 	= "http://www.w3.org/ns/formats/N-Triples";
 declare namespace rdf 	= "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 declare namespace ttl 	= "http://www.w3.org/ns/formats/Turtle";
 
+declare variable $DEFAULT_PERMISSIONS as xs:string* := ();
+declare variable $DEFAULT_GRAPH_COLLECTION as xs:string := 
+		"http://www.w3.org/TR/rdf-interfaces/Graph";
+
+
 
 (:~
  : From the passed arguments, decide if the default graph was requested, if not 
  : use the passed graph URI, if neither of them then use the request URI.
  : If both default and graphURI are passed then throw an exception because you 
  : can't use both together. 
+ : @param $requestURI the original request URI.
  : @param $default requested the default graph.
  : @param $graphURI the named graph.
- : @param $requestURI the original request URI.
  : @return the requested graph URI.
  : @throws err:GSP001 The default and graph parameters cannot be used together.
  :)
-declare function gsp:select-graph-uri($default as xs:boolean, $graphURI as xs:string, $requestURI as xs:string) 
-		as xs:string 
+declare function gsp:select-graph-uri($requestURI as xs:string, 
+		$default as xs:boolean, $graphURI as xs:string) 
+	as xs:string? 
 {
 	if ($default and string-length($graphURI) gt 0) then
 		error(
@@ -56,11 +72,11 @@ declare function gsp:select-graph-uri($default as xs:boolean, $graphURI as xs:st
 			'The default and graph parameters cannot be used together.'
 		)
 	else if (xs:boolean($default)) then 
-		'#default' 
-	else if (not($default) and string-length($graphURI) eq 0) then 
-			$requestURI
+		$requestURI
+	else if (not($default) and string-length($graphURI) gt 0) then 
+			$graphURI
 	else
-		$graphURI
+		()
 }; 
 
 
@@ -75,7 +91,7 @@ declare function gsp:select-graph-uri($default as xs:boolean, $graphURI as xs:st
  :)
 declare function gsp:parse-graph($graphURI as xs:string, $graphContent as item()?, 
 		$mediaType as xs:string)
-				as element(trix:trix)
+	as element(trix:trix)
 {
 	(: 
 	 : If it's a text based graph representation, take it as is, else if it's
@@ -112,7 +128,7 @@ declare function gsp:parse-graph($graphURI as xs:string, $graphContent as item()
  : @return element(namespaces)
  :)
 declare function gsp:get-graph-namespace($graphDoc as element(graph)) 
-		as element(gsp:namespaces)
+	as element(gsp:namespaces)
 {
 	<gsp:namespaces>{
 		for $ns in $graphDoc/namespace::* return
@@ -127,19 +143,15 @@ declare function gsp:get-graph-namespace($graphDoc as element(graph))
  : @return a TriX graph is any triples are found.
  : @throws err:RES001 Graph Not Found.
  :)
-declare function gsp:get-graph($graphURI as xs:string) 
-		as element(trix:trix)
+declare function gsp:retrieve-graph($graphURI as xs:string) 
+	as element(graph)
 {
 	let $info := xdmp:log(concat('[XQuery][GRIP] Retrieving Graph: ', $graphURI), 'info')
-	let $debug := xdmp:log('[XQuery][GRIP] Namespace from the graph document:', 'debug')
-	let $debug := xdmp:log(gsp:get-graph-namespace(doc($graphURI)/*), 'debug')
+	let $graph as element(graph)? := doc($graphURI)/graph
 	return
-		if (doc-available($graphURI)) then
-			trix:tuples-to-trix(
-				<graph uri="{$graphURI}">{
-					gsp:tuples-for-context($graphURI)
-				}</graph>,
-				gsp:get-graph-namespace(doc($graphURI)/*))
+		if (exists($graph)) then 
+			rdfenv:create-graph($rdfenv:DEFAULT_ENVIRONMENT,
+				graph:to-array($graph))
 		else
 			gsp:graph-not-found($graphURI)
 };
@@ -188,7 +200,7 @@ declare function gsp:add-graph-doc($graphContent as element(trix:graph))
  : @return empty-sequence()
  :)
 declare function gsp:merge-graph-docs($graphContent as element(trix:graph)) 
-		as empty-sequence() 
+	as empty-sequence() 
 {
 	let $graphURI as xs:string := string($graphContent/trix:uri)
 	let $graphDoc as element(graph)? := 
@@ -215,7 +227,7 @@ declare function gsp:merge-graph-docs($graphContent as element(trix:graph))
  : @param $triple
  :)
 declare function gsp:tuple-insert($triple as element(trix:triple), $graphURI as xs:string)
-		as empty-sequence()
+	as empty-sequence()
 {
 	let $subject as xs:string := trix:subject-from-triple($triple)
 	let $predicate as xs:string := trix:predicate-from-triple($triple)
@@ -257,7 +269,7 @@ declare function gsp:tuple-insert($triple as element(trix:triple), $graphURI as 
  : @return xs:string
  :)
 declare function gsp:string($items as item()*) 
-		as xs:string 
+	as xs:string 
 {
 	xdmp:quote(<item>{$items}</item>)
 }; 
@@ -270,7 +282,7 @@ declare function gsp:string($items as item()*)
  : @return xs:string 
  :)
 declare function gsp:generate-blank-node-id($id as xs:string, $graphURI as xs:string) 
-		as xs:string 
+	as xs:string 
 {
 	concat('_:', 'A', string(xdmp:hash64(concat($id, $graphURI))))
 }; 
@@ -282,7 +294,7 @@ declare function gsp:generate-blank-node-id($id as xs:string, $graphURI as xs:st
  : @return empty-sequence()
  :)
 declare function gsp:delete-graph($graphURI as xs:string) 
-		as empty-sequence()
+	as empty-sequence()
 {
 	let $info := xdmp:log(concat('[XQuery][GRIP] Deleting Graph: ', $graphURI), 'info')
 	return
@@ -296,22 +308,45 @@ declare function gsp:delete-graph($graphURI as xs:string)
 (:~
  : When POSTed to the service URI, attempt to create a new graph, if the graph
  : URI already exists then this is an error.
- : @param $trix the TriX graph to be inserted.
+ : @param $graphURI the Graph's URI.
+ : @param $graph the Graph to be inserted.
  : @return empty-sequence()
  : @throws 
  :)
-declare function gsp:create-graph($trix as element(trix:trix))
+declare function gsp:create-graph($graphURI as xs:string, $graph as element(graph))
 	as xs:anyURI
 {
-	let $graphURI as xs:string := string($trix/trix:graph/trix:uri)
 	let $info := xdmp:log(concat('[XQuery][GRIP] Creating New Graph: ', $graphURI), 'info')
 	return
 		if (doc-available($graphURI)) then 
-			error(xs:QName('err:REQ004'), 'Graph already exists.', $graphURI)
+			gsp:graph-already-exists($graphURI)
 		else
-			( gsp:insert-graph($trix/trix:graph), 
-			gsp:add-graph-doc($trix/trix:graph),
-			xs:anyURI($graphURI) )
+			let $defaultAction as element(action) := 
+				rdfenv:create-action($rdfenv:DEFAULT_ENVIRONMENT,
+					<filter><![CDATA[
+						declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
+						declare variable $rdfi:triple as element() external;
+						
+						true()
+					]]></filter>,
+					<callback>
+						import module namespace impl = "http://www.w3.org/TR/rdf-interfaces/Implementation"
+							at "/lib/rdf-interfaces/Implementation.xqy";	
+						declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
+						declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
+						declare variable $rdfi:triple as element() external;
+						declare variable $rdfi:graph as element() external;
+						
+						impl:add-triple('{$graphURI}', $rdfi:triple)
+					</callback>
+				)
+			let $actionedGraph as element(graph) := 
+				graph:add-action($graph, $defaultAction, true())
+			let $create := xdmp:document-insert($graphURI, $actionedGraph, 
+					($DEFAULT_PERMISSIONS),	($DEFAULT_GRAPH_COLLECTION)
+			)
+			return
+				xs:anyURI($graphURI)
 };
 
 
@@ -393,8 +428,8 @@ declare function gsp:merge-graph($trix as element(trix:trix))
  : @param $requestURI the URI of the original request to the service.
  : @return element(trix:trix)
  :)
-declare function gsp:get-service-description($requestURI as xs:string) 
-		as element(trix:trix)
+declare function gsp:retrieve-service-description($requestURI as xs:string) 
+	as element(trix:trix)
 {
 let $serviceURI as xs:string := $requestURI
 let $defaultGraphURI as xs:string := concat($serviceURI, '?default=')
@@ -465,7 +500,7 @@ return
  : @return element(t*)
  :)
 declare function gsp:tuples-for-context($c as xs:string)
-		as element(t)*
+	as element(t)*
 {
 	sem:tuples-for-query(gsp:cq($c))
 };
@@ -477,7 +512,7 @@ declare function gsp:tuples-for-context($c as xs:string)
  : @return cts:query
  :)
 declare function gsp:cq($c as xs:string+)
-		as cts:query
+	as cts:query
 {
 	gsp:rq($sem:QN-C, $c)
 };
@@ -506,7 +541,7 @@ declare function gsp:rq($qn as xs:QName+, $v as xs:string+)
  : @return xs:string
  :)
 declare function gsp:create-new-uri($baseURI as xs:string, $slug as xs:string) 
-		as xs:string
+	as xs:string
 {
 	concat($baseURI, if (ends-with($baseURI, '/')) then '' else '/', translate(normalize-space($slug), ' ', '-'))
 }; 
@@ -518,7 +553,7 @@ declare function gsp:create-new-uri($baseURI as xs:string, $slug as xs:string)
  : @return xs:boolean.
  :)
 declare function gsp:graph-exists($graphURI as xs:string) 
-		as xs:boolean 
+	as xs:boolean 
 {
 	if (doc-available($graphURI)) then 
 			true()
@@ -535,6 +570,17 @@ declare function gsp:graph-exists($graphURI as xs:string)
 declare function gsp:graph-not-found($graphURI as xs:string) 
 {
 	error(xs:QName('err:RES001'), 'Graph Not Found', $graphURI)
+}; 
+
+
+(:~
+ : Throws an error because the graph URI already exist.
+ : @param $graphURI the graph URI to be tested for.
+ : @throws err:REQ004 - 'Graph already exists'.
+ :)
+declare function gsp:graph-already-exists($graphURI as xs:string) 
+{
+	error(xs:QName('err:REQ004'), 'Graph already exists.', $graphURI)
 }; 
 
 

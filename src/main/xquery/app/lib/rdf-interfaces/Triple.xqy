@@ -27,6 +27,7 @@ xquery version "1.0-ml" encoding "utf-8";
 module namespace triple = "http://www.w3.org/TR/rdf-interfaces/Triple"; 
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
+declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
 
 declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
@@ -39,7 +40,7 @@ declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
  : @param $triple
  : @return subject of type RDFNode
  :)
-declare function triple:get-subject($triple as element(rdfi:triple)) 
+declare function triple:get-subject($triple as element(triple)) 
 	as element() 
 {
 	$triple/*[1]
@@ -51,7 +52,7 @@ declare function triple:get-subject($triple as element(rdfi:triple))
  : @param $triple
  : @return predicate of type RDFNode
  :)
-declare function triple:get-predicate($triple as element(rdfi:triple)) 
+declare function triple:get-predicate($triple as element(triple)) 
 	as element() 
 {
 	$triple/*[2]
@@ -63,7 +64,7 @@ declare function triple:get-predicate($triple as element(rdfi:triple))
  : @param $triple
  : @return object of type RDFNode
  :)
-declare function triple:get-object($triple as element(rdfi:triple)) 
+declare function triple:get-object($triple as element(triple)) 
 	as element() 
 {
 	$triple/*[3]
@@ -75,7 +76,7 @@ declare function triple:get-object($triple as element(rdfi:triple))
  : @param $triple
  : @return xs:string.
  :)
-declare function triple:to-string($triple as element(rdfi:triple)) 
+declare function triple:to-string($triple as element(triple)) 
 	as xs:string
 {
 	xdmp:xslt-invoke('xslt/graph-to-ntriples.xsl', 
@@ -88,8 +89,8 @@ declare function triple:to-string($triple as element(rdfi:triple))
  : @param 
  : @return xs:boolean
  :)
-declare function triple:equals($triple as element(rdfi:triple), 
-		$otherTriple as element(rdfi:triple)) 
+declare function triple:equals($triple as element(triple), 
+		$otherTriple as element(triple)) 
 	as xs:boolean 
 {
 	(: 

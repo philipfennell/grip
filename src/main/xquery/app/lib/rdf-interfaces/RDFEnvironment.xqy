@@ -104,7 +104,6 @@ declare function rdfenv:create-graph(
 	as element(graph) 
 {
 	<graph>{
-		<actions/>,
 		$triples
 	}</graph>
 };
@@ -140,6 +139,25 @@ declare function rdfenv:create-triple(
 	as element(rdfi:triple)? 
 {
 	<triple>{$subject, $predicate, $object}</triple>
+};
+
+
+(:~
+ : Creates a TripleAction given a TripleFilter test and a TripleCallback action.
+ : @param $contextRDFEnvironment
+ : @param $test The TripleFilter to test the Triple against.
+ : @param $action The action to run should the Triple being tried pass the test.
+ : @return a new TripleAction.
+ :)
+declare function rdfenv:create-action(
+		$contextRDFEnvironment as element(rdf-environment), 
+				$test as element(filter), $action as element(callback)) 
+	as element(action)? 
+{
+	<action>{
+		$test,
+		$action
+	}</action>
 };
 
 
@@ -316,7 +334,7 @@ declare function rdfenv:create-term-map(
  :)
 declare function rdfenv:create-profile(
 		$contextRDFEnvironment as element(rdf-environment), $empty as xs:boolean) 
-	as element(rdfi:profile)
+	as element(profile)
 {
 	<profile>{
 		if ($empty) then 
@@ -335,7 +353,7 @@ declare function rdfenv:create-profile(
  :)
 declare function rdfenv:create-profile(
 		$contextRDFEnvironment as element(rdf-environment)) 
-	as element(rdfi:profile)
+	as element(profile)
 {
 	rdfenv:create-profile($contextRDFEnvironment, false())
 };

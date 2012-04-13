@@ -37,8 +37,8 @@ declare namespace nt = "http://www.w3.org/ns/formats/N-Triples";
 
 
 (:~
- : A function, which when called will serialize the given Graph and return the 
- : resulting serialization.
+ : A function, which when called will parse the given Graph document and return 
+ : the resulting graph.
  : @param $toParse The document to parse.
  : @param $callBack The ParserCallback to execute once the parse has completed, 
  : the ParserCallback will be passed a single argument which is the propulated 
@@ -66,6 +66,6 @@ declare function ntdp:parse($toParse as xs:string, $callBack as item(),
 		if (exists($graph)) then 
 			graph:add-all($graph, $parsedGraph)
 		else
-			rdvenv:create-graph(<rdf-environment/>, $parsedGraph/triple)
+			$parsedGraph
 };
 

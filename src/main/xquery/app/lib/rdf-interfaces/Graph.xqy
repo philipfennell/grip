@@ -29,6 +29,9 @@ import module namespace impl = "http://www.w3.org/TR/rdf-interfaces/Implementati
 import module namespace common = "http://www.w3.org/TR/rdf-interfaces/Common"
 	at "/lib/rdf-interfaces/Common.xqy";
 
+import module namespace action = "http://www.w3.org/TR/rdf-interfaces/TripleAction"
+	at "/lib/rdf-interfaces/TripleAction.xqy";
+
 import module namespace triple = "http://www.w3.org/TR/rdf-interfaces/Triple"
 	at "/lib/rdf-interfaces/Triple.xqy";
 
@@ -50,9 +53,9 @@ declare namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
  : @return 
  :)
 declare function graph:get-actions($contextGraph as element(graph)) 
-	as item()*
+	as element(action)*
 {
-	error(xs:QName('NOT_IMPLEMENTED'), 'The function ''graph:get-actions'' is not implemented.')
+	$contextGraph/action
 };
 
 
@@ -66,10 +69,20 @@ declare function graph:get-actions($contextGraph as element(graph))
  : @return the graph instance it was called on.
  :)
 declare function graph:add-action($contextGraph as element(graph), 
-		$action as item(), $run as xs:boolean) 
+		$action as element(action), $run as xs:boolean) 
 	as element(graph)
 {
-	error(xs:QName('NOT_IMPLEMENTED'), 'The function ''graph:add-actions'' is not implemented.')
+	element {xs:QName(name($contextGraph))} {
+		( $contextGraph/@*,
+		$contextGraph/action,
+		$action,
+		if ($run) then 
+			for $triple in graph:to-array($contextGraph)
+			return
+				action:run($action, $triple, $contextGraph)
+		else
+			$contextGraph/triple)
+	}
 };
 
 
@@ -104,8 +117,11 @@ declare function graph:add($contextGraph as element(graph),
 	else
 		element {xs:QName(name($contextGraph))} {
 			( $contextGraph/@*,
-			$triple,
-			$contextGraph/triple)
+			$contextGraph/action,
+			( for $action in graph:get-actions($contextGraph)
+			return
+				action:run($action, $triple, $contextGraph) ),
+			$contextGraph/triple )
 		}
 };
 
