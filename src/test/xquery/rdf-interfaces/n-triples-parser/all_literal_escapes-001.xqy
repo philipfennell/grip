@@ -16,4 +16,4 @@ let $doc as element(nt:RDF) :=
 <http://example.org/resource11> <http://example.org/property> "return\r" .
 <http://example.org/resource12> <http://example.org/property> "tab:\t" .]]></nt:RDF>
 return
-	ntdp:parse(string($doc), '', (), (), ())
+	ntdp:parse(string($doc), (), (), (), ())

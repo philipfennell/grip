@@ -15,4 +15,4 @@ let $doc as element(nt:RDF) :=
 _:anon <http://example.org/property> <http://example.org/resource2> .
 <http://example.org/resource2> <http://example.org/property> _:anon .]]></nt:RDF>
 return
-	ntdp:parse(string($doc), '', (), (), ())
+	ntdp:parse(string($doc), (), (), (), ())

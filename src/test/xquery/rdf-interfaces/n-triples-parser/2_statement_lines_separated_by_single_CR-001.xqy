@@ -12,4 +12,4 @@ let $doc as element(nt:RDF) :=
 <nt:RDF xmlns:nt="http://www.w3.org/ns/formats/N-Triples"><![CDATA[<http://example.org/resource5> <http://example.org/property> <http://example.org/resource2> .
 <http://example.org/resource6> <http://example.org/property> <http://example.org/resource2> .]]></nt:RDF>
 return
-	ntdp:parse(string($doc), '', (), (), ())
+	ntdp:parse(string($doc), (), (), (), ())

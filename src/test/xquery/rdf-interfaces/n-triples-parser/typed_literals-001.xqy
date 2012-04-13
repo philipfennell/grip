@@ -11,4 +11,4 @@ import module namespace ntdp = "http://www.w3.org/TR/rdf-interfaces/NTriplesData
 let $doc as element(nt:RDF) := 
 <nt:RDF xmlns:nt="http://www.w3.org/ns/formats/N-Triples"><![CDATA[<http://example.org/resource32> <http://example.org/property> "abc"^^<http://example.org/datatype1> .]]></nt:RDF>
 return
-	ntdp:parse(string($doc), '', (), (), ())
+	ntdp:parse(string($doc), (), (), (), ())

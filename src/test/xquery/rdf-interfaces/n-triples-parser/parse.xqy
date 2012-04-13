@@ -17,4 +17,4 @@ let $doc as element(nt:RDF) :=
 _:A0 <http://www.w3.org/2001/vcard-rdf/3.0#FN> "J.K. Rowling" .
 ]]></nt:RDF>
 return
-	ntdp:parse(string($doc), '', (), (), ())
+	ntdp:parse(string($doc), (), (), (), ())
