@@ -32,7 +32,12 @@ import module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"
 
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
+
 declare namespace nt = "http://www.w3.org/ns/formats/N-Triples";
+declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
+
+declare variable $MIME_TYPE as xs:string := 'text/plain';
+
 
 
 
@@ -52,8 +57,8 @@ declare namespace nt = "http://www.w3.org/ns/formats/N-Triples";
  : provided then a new, empty, Graph will be used.
  : @return Graph.
  :)
-declare function ntdp:parse($toParse as xs:string, $callBack as item(), 
-		$base as xs:string?, $filter as item()?, $graph as element(graph)?) 
+declare function ntdp:parse($toParse as xs:string, $callback as element(callback)?, 
+		$base as xs:string?, $filter as element(filter)?, $graph as element(graph)?) 
 	as element(graph)
 {
 	let $params := map:map()
@@ -62,10 +67,23 @@ declare function ntdp:parse($toParse as xs:string, $callBack as item(),
 			xdmp:xslt-invoke('xslt/ntriples-to-graph.xsl', 
 					document {<nt:RDF>{$toParse}</nt:RDF>}, 
 							$params)/graph
+	let $postProcess as element(callback) := 
+		if (exists($callback)) then
+			$callback
+		else
+			<callback>
+				declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
+				declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
+				declare variable $rdfi:graph as element() external;
+				
+				$rdfi:graph
+			</callback>
+	let $postProcessedGraph as element(graph) := 
+			xdmp:eval(string($postProcess), (xs:QName('rdfi:graph'), $parsedGraph))
 	return
 		if (exists($graph)) then 
-			graph:add-all($graph, $parsedGraph)
+			graph:add-all($graph, $postProcessedGraph)
 		else
-			$parsedGraph
+			$postProcessedGraph
 };
 

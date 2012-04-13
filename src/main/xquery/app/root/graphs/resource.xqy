@@ -21,14 +21,14 @@ declare variable $resource:QUERY as xs:string? external;
 (:~ Default graph? :)
 declare variable $resource:DEFAULT as xs:string? external;
 
-(:~ Request Slug header - a suggested name/suffix for the new graph URI. :)
-declare variable $resource:SLUG as xs:string? external;
-
 (:~ Explicit graph URI. :)
 declare variable $resource:GRAPH as xs:string? external;
 
 (:~ Request payload. :)
 declare variable $resource:CONTENT as item()? external;
+
+(:~ Request Slug header - a suggested name/suffix for the new graph URI. :)
+declare variable $resource:SLUG as xs:string? external;
 
 (:~ Request payload media-type. :)
 declare variable $resource:MEDIA_TYPE as xs:string? external;
@@ -46,3 +46,4 @@ declare variable $resource:default as xs:boolean? :=
 
 declare variable $resource:graph as xs:string? := 
 		try {xs:string($resource:GRAPH)} catch ($error) {''};
+

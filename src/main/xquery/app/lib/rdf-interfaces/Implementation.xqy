@@ -168,7 +168,7 @@ declare function impl:is-persistent($contextNode as element())
 declare function impl:get-graph-uri($contextGraph as element(graph)) 
 	as xs:string
 {
-	string($contextGraph/uri)
+	string(($contextGraph/uri, base-uri($contextGraph))[1])
 };
 
 
@@ -251,5 +251,21 @@ declare function impl:map-remove($contextMap as item(), $key as xs:string)
 	let $matchingEntry as element(entry)? := $contextMap/entry[@xml:id eq $key]
 	return
 		xdmp:node-delete($matchingEntry)
+};
+
+
+(:~
+ : Inserts a <uri> element as the first chiold of the graph.
+ : @param $graph The context graph.
+ : @param $uri The URI to be inserted.
+ : @return the updated graph.
+ :)
+declare function impl:graph-add-uri($graph as element(graph), $uri as xs:string) 
+	as element(graph)
+{
+	element {xs:QName(name($graph))} {
+		<uri>{$uri}</uri>,
+		$graph/*
+	}
 };
 

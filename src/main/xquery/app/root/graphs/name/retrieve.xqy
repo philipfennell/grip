@@ -13,4 +13,4 @@ import module namespace resource = "http://www.marklogic.com/grip/graphs/name"
 		at "/root/graphs/name/resource.xqy"; 
 
 
-gsp:get-graph($resource:REQUEST_URI)
+gsp:retrieve-graph($resource:REQUEST_PATH)

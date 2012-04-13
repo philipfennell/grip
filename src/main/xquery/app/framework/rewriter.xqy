@@ -34,7 +34,8 @@ import module namespace core="http://www.marklogic.com/rig/core" at
     	core:handle-request(xdmp:get-request-protocol(), 
     			xdmp:get-request-header('Host'), 
     					xdmp:get-request-path(),
-			    				(for $paramName in xdmp:get-request-field-names()
-								return concat($paramName, '=', 
+			    				( for $paramName in xdmp:get-request-field-names()
+			    				return concat($paramName, 
+										if (string-length(xdmp:get-request-field($paramName)) gt 0) then '=' else '', 
 										encode-for-uri(xdmp:get-request-field($paramName)))),
-												'/framework/handler.xqy'))
+												'/framework/handler.xqy') )

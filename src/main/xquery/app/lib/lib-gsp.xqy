@@ -31,6 +31,9 @@ import module namespace rdfenv = "http://www.w3.org/TR/rdf-interfaces/RDFEnviron
 
 import module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"
 	at "/lib/rdf-interfaces/Graph.xqy";
+	
+import module namespace ntdp = "http://www.w3.org/TR/rdf-interfaces/NTriplesDataParser"
+	at "/lib/rdf-interfaces/NTriplesDataParser.xqy";
 
 import module namespace txds = "http://www.w3.org/TR/rdf-interfaces/TriXDataSerializer"
 	at "/lib/rdf-interfaces/TriXDataSerializer.xqy";
@@ -81,9 +84,8 @@ declare function gsp:select-graph-uri($requestURI as xs:string,
 
 
 (:~
- : Currently an incredibly simplistic parsing process. Deserialises the passed
- : graph which is assumed to be RDF/XML.
- : @param $graphURI the graph URI.
+ : Calls the RDF Interfces parser appropriate for the content type.
+ : @param $graphURI the Graph's URI.
  : @param $graphContent the graph to be inserted.
  : @param $mediaType graph serialisation media-type.
  : @return element(graph)
@@ -91,32 +93,23 @@ declare function gsp:select-graph-uri($requestURI as xs:string,
  :)
 declare function gsp:parse-graph($graphURI as xs:string, $graphContent as item()?, 
 		$mediaType as xs:string)
-	as element(trix:trix)
+	as element(graph)
 {
-	(: 
-	 : If it's a text based graph representation, take it as is, else if it's
-	 : XML then parse it as XML, otherwise it's not supported.
-	 :)
-	let $source as element() := 
-		if (starts-with($mediaType, 'text/')) then 
-			<nt:RDF>{$graphContent}</nt:RDF>
-		else if (ends-with($mediaType, '+xml')) then 
-			xdmp:unquote($graphContent)/*
+	let $addGraphURI as element(callback) := 
+		<callback>
+			import module namespace impl = "http://www.w3.org/TR/rdf-interfaces/Implementation"
+				at "/lib/rdf-interfaces/Implementation.xqy";	
+			declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
+			declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
+			declare variable $rdfi:graph as element() external;
+			
+			impl:graph-add-uri($rdfi:graph, '{$graphURI}')
+		</callback>
+	return
+		if ($mediaType eq $ntdp:MIME_TYPE) then 
+			ntdp:parse($graphContent, $addGraphURI, (), (), ())
 		else
 			error(xs:QName('err:REQ005'), concat('Unsupported Media Type: ', $mediaType))
-	let $info := xdmp:log(concat('[XQuery][GRIP] Parsing Graph: ', $graphURI, ' as ', $mediaType), 'info')
-	return
-		typeswitch ($source) 
-			case element(trix:trix) 
-				return trix:trix-set-graph-uri($source, $graphURI)
-			case element(nt:RDF) 
-				return trix:ntriples-to-trix($source, $graphURI)
-			(: case element(ttl:RDF) 
-				return trix:turtle-to-trix($source, $graphURI) :)
-			case element() 
-				return trix:rdf-xml-to-trix($source, $graphURI)
-			default 
-				return error(xs:QName('err:REQ005'), concat('Unsupported Media Type: ', name($source)))
 };
 
 
@@ -162,7 +155,7 @@ declare function gsp:retrieve-graph($graphURI as xs:string)
  : @param $graphContent the graph to be inserted.
  : @return empty-sequence()
  :)
-declare function gsp:insert-graph($graphContent as element(trix:graph))
+declare function gsp:insert-graph($graphContent as element(graph))
 	as empty-sequence()
 {
 	for $triple in $graphContent/trix:triple 
@@ -179,7 +172,7 @@ declare function gsp:insert-graph($graphContent as element(trix:graph))
  : @param $graphContent the graph to be inserted.
  : @return empty-sequence()
  :)
-declare function gsp:add-graph-doc($graphContent as element(trix:graph)) 
+declare function gsp:add-graph-doc($graphContent as element(graph)) 
 	as empty-sequence() 
 {
 	let $graphURI as xs:string := string($graphContent/trix:uri)
@@ -199,7 +192,7 @@ declare function gsp:add-graph-doc($graphContent as element(trix:graph))
  : @param $graphContent the graph to be inserted.
  : @return empty-sequence()
  :)
-declare function gsp:merge-graph-docs($graphContent as element(trix:graph)) 
+declare function gsp:merge-graph-docs($graphContent as element(graph)) 
 	as empty-sequence() 
 {
 	let $graphURI as xs:string := string($graphContent/trix:uri)
@@ -308,14 +301,14 @@ declare function gsp:delete-graph($graphURI as xs:string)
 (:~
  : When POSTed to the service URI, attempt to create a new graph, if the graph
  : URI already exists then this is an error.
- : @param $graphURI the Graph's URI.
  : @param $graph the Graph to be inserted.
  : @return empty-sequence()
  : @throws 
  :)
-declare function gsp:create-graph($graphURI as xs:string, $graph as element(graph))
+declare function gsp:create-graph($graph as element(graph))
 	as xs:anyURI
 {
+	let $graphURI as xs:string := string($graph/uri)
 	let $info := xdmp:log(concat('[XQuery][GRIP] Creating New Graph: ', $graphURI), 'info')
 	return
 		if (doc-available($graphURI)) then 
@@ -361,7 +354,7 @@ declare function gsp:create-graph($graphURI as xs:string, $graph as element(grap
 declare function gsp:add-graph($trix as element(trix:trix))
 	as xs:anyURI?
 {
-	let $graphURI as xs:string := string($trix/trix:graph/trix:uri)
+	let $graphURI as xs:string := string($trix/graph/trix:uri)
 	let $info := xdmp:log(concat('[XQuery][GRIP] Adding Graph: ', $graphURI), 'info')
 	let $result as xs:anyURI? := 
 		(: 
@@ -373,7 +366,7 @@ declare function gsp:add-graph($trix as element(trix:trix))
 			let $existingTuples as element(t)* := gsp:tuples-for-context($graphURI)
 			(: Find all existing tuples that match the incoming graph triples. :)
 			let $tuplesToBeReplaced as element(t)* := 
-				for $triple in $trix/trix:graph/trix:triple
+				for $triple in $trix/graph/triple
 				let $subject as xs:string := trix:subject-from-triple($triple)
 				let $predicate as xs:string := trix:predicate-from-triple($triple)
 				let $object as item()* := trix:object-from-triple($triple)
@@ -392,8 +385,8 @@ declare function gsp:add-graph($trix as element(trix:trix))
 		else
 			xs:anyURI($graphURI)
 	return
-		( gsp:insert-graph($trix/trix:graph), 
-		gsp:add-graph-doc($trix/trix:graph), 
+		( gsp:insert-graph($trix/graph), 
+		gsp:add-graph-doc($trix/graph), 
 		$result )
 };
 
@@ -403,21 +396,21 @@ declare function gsp:add-graph($trix as element(trix:trix))
  : @param $graph the graph to be merged.
  : @return empty-sequence()
  :)
-declare function gsp:merge-graph($trix as element(trix:trix))
+declare function gsp:merge-graph($graph as element(graph))
 	as xs:anyURI?
 {
-	let $graphURI as xs:string := string($trix/trix:graph/trix:uri)
+	let $graphURI as xs:string := string($graph/uri)
 	let $info := xdmp:log(concat('[XQuery][GRIP] Merging Graph: ', $graphURI), 'info')
 	let $debug := xdmp:log('[XQuery][GRIP] Graph Content: ', 'fine')
-	let $debug := xdmp:log($trix, 'fine')
+	let $debug := xdmp:log($graph, 'fine')
 	return
 		(: 
 		 : If the incoming graph already exists, add the triples and return
 		 : nothing. Otherwise, add the new graph and return its new graph URI. 
 		 :)
-		( gsp:insert-graph($trix/trix:graph), 
-		gsp:merge-graph-docs($trix/trix:graph),
-		if (doc-available($graphURI)) then () else xs:anyURI($graphURI) )
+		(:( gsp:insert-graph($graph), 
+		gsp:merge-graph-docs($graph),:)
+		if (doc-available($graphURI)) then () else xs:anyURI($graphURI) (: ) :)
 };
 
 
@@ -581,16 +574,5 @@ declare function gsp:graph-not-found($graphURI as xs:string)
 declare function gsp:graph-already-exists($graphURI as xs:string) 
 {
 	error(xs:QName('err:REQ004'), 'Graph already exists.', $graphURI)
-}; 
-
-
-(:~
- : Transform TriX to RDF/XML.
- : @param $trix the graph to be inserted.
- : @return element(rdf:RDF)
- :)
-declare function gsp:trix-to-rdf-xml($trix as element(trix:trix))
-	as element(rdf:RDF)
-{
-	xdmp:xslt-invoke('resources/xslt/application-rdf-xml/trix-to-rdf-xml.xsl', $trix, ())/*
 };
+
