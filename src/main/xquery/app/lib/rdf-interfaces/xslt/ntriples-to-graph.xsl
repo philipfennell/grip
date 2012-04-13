@@ -51,7 +51,6 @@
 	<!--  -->
 	<xsl:template match="nt:RDF">
 		<graph>
-			<uri><xsl:value-of select="$GRAPH_URI"/></uri>
 			<xsl:for-each select="tokenize(text(), '&#10;')">
 				<xsl:call-template name="rdfi:triple"/>
 			</xsl:for-each>
