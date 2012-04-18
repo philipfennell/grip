@@ -7,4 +7,4 @@ import module namespace gsp="http://www.w3.org/TR/sparql11-http-rdf-update/" at
 
 (: Tests the retrieval of the default graph. :)
 
-gsp:retrieve-graph('http://localhost:8005/graphs?default')
+gsp:retrieve-graph('/test?default')

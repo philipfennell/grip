@@ -14,9 +14,8 @@ import module namespace resource = "http://www.marklogic.com/grip/graphs"
 		at "/root/graphs/resource.xqy";
 
 
-if ($resource:default) then 
-	gsp:add-graph(gsp:parse-graph($resource:REQUEST_URI, $resource:CONTENT, $resource:MEDIA_TYPE))
-else if (string-length($resource:graph) gt 0) then 
-	gsp:add-graph(gsp:parse-graph($resource:graph, $resource:CONTENT, $resource:MEDIA_TYPE))
-else 
-	gsp:graph-not-found($resource:REQUEST_URI)
+let $graphURI := gsp:select-graph-uri($resource:REQUEST_PATH, $resource:default, 
+		$resource:graph)
+return
+	gsp:update-graph(gsp:parse-graph($graphURI, $resource:CONTENT, 
+				$resource:MEDIA_TYPE))

@@ -31,6 +31,12 @@ import module namespace rdfenv = "http://www.w3.org/TR/rdf-interfaces/RDFEnviron
 
 import module namespace graph = "http://www.w3.org/TR/rdf-interfaces/Graph"
 	at "/lib/rdf-interfaces/Graph.xqy";
+
+import module namespace triple = "http://www.w3.org/TR/rdf-interfaces/Triple"
+	at "/lib/rdf-interfaces/Triple.xqy";
+
+import module namespace rdfnode = "http://www.w3.org/TR/rdf-interfaces/RDFNode"
+	at "/lib/rdf-interfaces/RDFNode.xqy";
 	
 import module namespace ntdp = "http://www.w3.org/TR/rdf-interfaces/NTriplesDataParser"
 	at "/lib/rdf-interfaces/NTriplesDataParser.xqy";
@@ -75,12 +81,24 @@ declare function gsp:select-graph-uri($requestURI as xs:string,
 			'The default and graph parameters cannot be used together.'
 		)
 	else if (xs:boolean($default)) then 
-		$requestURI
+		concat($requestURI, '?default')
 	else if (not($default) and string-length($graphURI) gt 0) then 
 			$graphURI
 	else
 		()
 }; 
+
+
+(:~
+ : Returns the context Graph's URI.
+ : @param $graph the context Graph.
+ : @return xs:anyURI
+ :)
+declare function gsp:get-graph-uri($graph as element(graph)) 
+	as xs:anyURI
+{
+	xs:anyURI(string($graph/uri))
+};
 
 
 (:~
@@ -114,19 +132,75 @@ declare function gsp:parse-graph($graphURI as xs:string, $graphContent as item()
 
 
 (:~
- : TODO - Make this dynamic.
- : Retrieves a set of all the namespaces and their prefixes that are used in the
- : context graph.
- : @param $graphDoc the context graph
- : @return element(namespaces)
+ : Attempt to create a new graph.
+ : @param $graph the Graph to be inserted.
+ : @return The new Graph's URI.
  :)
-declare function gsp:get-graph-namespace($graphDoc as element(graph)) 
-	as element(gsp:namespaces)
+declare function gsp:create-graph($graph as element(graph))
+	as xs:anyURI
 {
-	<gsp:namespaces>{
-		for $ns in $graphDoc/namespace::* return
-			<gsp:namespace prefix="{name($ns)}" uri="{$ns}"/>
-	}</gsp:namespaces>
+	gsp:add-graph($graph, false())
+};
+
+
+(:~
+ : Replace an existing graph.
+ : @param $graph the Graph to be inserted.
+ : @return an empty sequence.
+ :)
+declare function gsp:replace-graph($graph as element(graph))
+	as empty-sequence()
+{
+	gsp:add-graph($graph, true())
+};
+
+
+(:~
+ : Attempt to create a new graph, if the graph
+ : URI already exists then this is an error.
+ : @param $graph the Graph to be inserted.
+ : @return The new graph's URI
+ :)
+declare private function gsp:add-graph($graph as element(graph), $replace as xs:boolean)
+	as xs:anyURI?
+{
+	let $graphURI as xs:string := string(gsp:get-graph-uri($graph))
+	let $info := xdmp:log(concat('[XQuery][GRIP] ', 
+			(if ($replace) then 'Replacing' else 'Creating'), ' New Graph: ', 
+					$graphURI), 'info')
+	return
+		if (doc-available($graphURI) and not($replace)) then 
+			gsp:graph-already-exists($graphURI)
+		else
+			let $defaultAction as element(action) := 
+				rdfenv:create-action($rdfenv:DEFAULT_ENVIRONMENT,
+					<filter>
+						declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
+						declare variable $rdfi:triple as element() external;
+						
+						true()
+					</filter>,
+					<callback>
+						import module namespace impl = "http://www.w3.org/TR/rdf-interfaces/Implementation"
+							at "/lib/rdf-interfaces/Implementation.xqy";	
+						declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
+						declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
+						declare variable $rdfi:triple as element() external;
+						declare variable $rdfi:graph as element() external;
+						
+						impl:add-triple('{$graphURI}', $rdfi:triple)
+					</callback>
+				)
+			let $actionedGraph as element(graph) := 
+				graph:add-action($graph, $defaultAction, true())
+			let $create := xdmp:document-insert($graphURI, $actionedGraph, 
+					($DEFAULT_PERMISSIONS),	($DEFAULT_GRAPH_COLLECTION)
+			)
+			return
+				if ($replace) then 
+					()
+				else
+					xs:anyURI($graphURI)
 };
 
 
@@ -151,134 +225,26 @@ declare function gsp:retrieve-graph($graphURI as xs:string)
 
 
 (:~
- : Inserts the passed graph into the database with the given graph URI.
- : @param $graphContent the graph to be inserted.
- : @return empty-sequence()
+ : Create new or replace an existing Graph with the passed graph.
+ : @param $graph
+ : @return 
  :)
-declare function gsp:insert-graph($graphContent as element(graph))
-	as empty-sequence()
+declare function gsp:update-graph($graph as element(graph)) 
+	as xs:anyURI?
 {
-	for $triple in $graphContent/trix:triple 
+	let $graphURI as xs:string := string(gsp:get-graph-uri($graph))
+	let $info := xdmp:log(concat('[XQuery][GRIP] Updating Graph: ', $graphURI), 'info')
+	let $existingGraph as element(graph)? := doc($graphURI)/graph
 	return
-		gsp:tuple-insert($triple, string($graphContent/trix:uri)) 
-};
-
-
-(:~
- : Inserts the graph document, a record of the graph URI and the namespaces 
- : it uses along with their prefixes. This enables more effective graph 
- : round-tripping by allowing original namespace prefixed to be returned when 
- : the graph is retrieved.
- : @param $graphContent the graph to be inserted.
- : @return empty-sequence()
- :)
-declare function gsp:add-graph-doc($graphContent as element(graph)) 
-	as empty-sequence() 
-{
-	let $graphURI as xs:string := string($graphContent/trix:uri)
-	let $graphDoc as element(graph) := 
-		element graph {
-			( attribute uri {$graphURI},
-			$graphContent/namespace::* )
-		}
-	return
-		xdmp:document-insert($graphURI, $graphDoc)
-};
-
-
-(:~
- : If the graph document exists then add the new namespaces, otherewise create 
- : a new graph document.
- : @param $graphContent the graph to be inserted.
- : @return empty-sequence()
- :)
-declare function gsp:merge-graph-docs($graphContent as element(graph)) 
-	as empty-sequence() 
-{
-	let $graphURI as xs:string := string($graphContent/trix:uri)
-	let $graphDoc as element(graph)? := 
-		if (doc-available($graphURI)) then doc($graphURI)/graph else ()
-	return
-		if (exists($graphDoc)) then 
-			xdmp:document-insert(
-				$graphURI,
-				element graph {
-					( $graphDoc/namespace::*,
-					$graphContent/namespace::*,
-					$graphDoc/@* )
-				}
-			)
+		if (exists($existingGraph)) then 
+			( ( for $triple in graph:to-array($existingGraph)
+			let $remove := graph:remove($existingGraph, $triple)
+			return
+				() ),
+			gsp:replace-graph($graph) )
 		else
-			gsp:add-graph-doc($graphContent)
-}; 
-
-
-(:~
- : Takes a TriX triple and inserts it into MarkLogic in the ml-tuples format.
- : In reality it's an extended version of ml-tuples because the original didn't
- : allow for xml:lang and datatype annotations.
- : @param $triple
- :)
-declare function gsp:tuple-insert($triple as element(trix:triple), $graphURI as xs:string)
-	as empty-sequence()
-{
-	let $subject as xs:string := trix:subject-from-triple($triple)
-	let $predicate as xs:string := trix:predicate-from-triple($triple)
-	let $object as item()* := trix:object-from-triple($triple)
-	return
-		xdmp:document-insert(
-			sem:uri-for-tuple($subject, $predicate, gsp:string($object), $graphURI),
-			element t {
-				( element s {
-				( typeswitch ($triple/*[1])
-					case $sub as element(trix:id) 
-						return $subject
-					default 
-						return $subject ) },
-				element p {$predicate},
-				element o {
-				(: Add the language annotation if present. :)
-				( $triple/*[3]/@xml:lang,
-				(: 
-				 : When the subject is a URI reference mark it as such with 
-				 : xs:anyURI, otherwise copy the datatype, if any.
-				 :)
-				( typeswitch ($triple/*[3]) 
-					case element(trix:uri) 
-						return ( attribute datatype {'http://www.w3.org/2001/XMLSchema#anyURI'}, $object )
-					case element(trix:id) 
-						return $object
-					default 
-						return ( $triple/*[3]/@datatype, $object ) ) )},
-				element c {$graphURI} )
-	    	} )
+			gsp:create-graph($graph)
 };
-
-
-(:~
- : Takes a possible sequence of nodes (element and text()) and serialises them
- : to a string.
- : @param $items items to be serialised as a string.
- : @return xs:string
- :)
-declare function gsp:string($items as item()*) 
-	as xs:string 
-{
-	xdmp:quote(<item>{$items}</item>)
-}; 
-
-
-(:~
- : Generates a new blank node id that's tied to the graph URI.
- : @param $id the original blank node id.
- : @param $graphURI
- : @return xs:string 
- :)
-declare function gsp:generate-blank-node-id($id as xs:string, $graphURI as xs:string) 
-	as xs:string 
-{
-	concat('_:', 'A', string(xdmp:hash64(concat($id, $graphURI))))
-}; 
 
 
 (:~
@@ -290,105 +256,30 @@ declare function gsp:delete-graph($graphURI as xs:string)
 	as empty-sequence()
 {
 	let $info := xdmp:log(concat('[XQuery][GRIP] Deleting Graph: ', $graphURI), 'info')
-	return
-		( xdmp:document-delete($graphURI),
-		for $t in gsp:tuples-for-context($graphURI)
-		return
-			xdmp:document-delete(base-uri($t)) )
-};
-
-
-(:~
- : When POSTed to the service URI, attempt to create a new graph, if the graph
- : URI already exists then this is an error.
- : @param $graph the Graph to be inserted.
- : @return empty-sequence()
- : @throws 
- :)
-declare function gsp:create-graph($graph as element(graph))
-	as xs:anyURI
-{
-	let $graphURI as xs:string := string($graph/uri)
-	let $info := xdmp:log(concat('[XQuery][GRIP] Creating New Graph: ', $graphURI), 'info')
-	return
-		if (doc-available($graphURI)) then 
-			gsp:graph-already-exists($graphURI)
-		else
-			let $defaultAction as element(action) := 
-				rdfenv:create-action($rdfenv:DEFAULT_ENVIRONMENT,
-					<filter><![CDATA[
-						declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
-						declare variable $rdfi:triple as element() external;
-						
-						true()
-					]]></filter>,
-					<callback>
-						import module namespace impl = "http://www.w3.org/TR/rdf-interfaces/Implementation"
-							at "/lib/rdf-interfaces/Implementation.xqy";	
-						declare namespace rdfi = "http://www.w3.org/TR/rdf-interfaces";
-						declare default element namespace "http://www.w3.org/TR/rdf-interfaces";
-						declare variable $rdfi:triple as element() external;
-						declare variable $rdfi:graph as element() external;
-						
-						impl:add-triple('{$graphURI}', $rdfi:triple)
-					</callback>
-				)
-			let $actionedGraph as element(graph) := 
-				graph:add-action($graph, $defaultAction, true())
-			let $create := xdmp:document-insert($graphURI, $actionedGraph, 
-					($DEFAULT_PERMISSIONS),	($DEFAULT_GRAPH_COLLECTION)
-			)
+	let $existingGraph as element(graph)? := doc($graphURI)/graph
+	let $delete := 
+		if (exists($existingGraph)) then 
+			( xdmp:document-delete($graphURI),
+			for $triple in graph:to-array($existingGraph)
 			return
-				xs:anyURI($graphURI)
-};
-
-
-(:~
- : Inserts the passed graph into the database replacing one if it already exists.
- : To get around conflicting updates this function finds those tuples that 
- : already exist and eliminates those that won't be replaced by the incoming 
- : graph and inserts the new graph as a whole.
- : @param $trix the TriX graph to be inserted.
- : @return empty-sequence()
- :)
-declare function gsp:add-graph($trix as element(trix:trix))
-	as xs:anyURI?
-{
-	let $graphURI as xs:string := string($trix/graph/trix:uri)
-	let $info := xdmp:log(concat('[XQuery][GRIP] Adding Graph: ', $graphURI), 'info')
-	let $result as xs:anyURI? := 
-		(: 
-		 : If the incoming graph already exists, replace the original and return
-		 : nothing. Otherwise, insert the new graph and return its new graph URI. 
-		 :)
-		if (doc-available($graphURI)) then 
-			(: The tuples that belong to the context graph URI. :)
-			let $existingTuples as element(t)* := gsp:tuples-for-context($graphURI)
-			(: Find all existing tuples that match the incoming graph triples. :)
-			let $tuplesToBeReplaced as element(t)* := 
-				for $triple in $trix/graph/triple
-				let $subject as xs:string := trix:subject-from-triple($triple)
-				let $predicate as xs:string := trix:predicate-from-triple($triple)
-				let $object as item()* := trix:object-from-triple($triple)
-				let $tupleURI as xs:string := 
-						sem:uri-for-tuple($subject, $predicate, gsp:string($object), $graphURI)
-				where doc-available($tupleURI)
-				return
-					doc($tupleURI)/*
-			(: By exclusion, identify those tuples that exist but are not in the incoming graph. :)
-			let $tuplesToBeDeleted as element(t)* := $existingTuples except $tuplesToBeReplaced
-			return
-				( (: Remove any remainder tuples that belong to the context graph but weren't replaced. :)
-				for $tupleToDelete in $tuplesToBeDeleted
-				return
-					xdmp:document-delete(base-uri($tupleToDelete)) )
+				graph:remove($existingGraph, $triple) )
 		else
-			xs:anyURI($graphURI)
+			gsp:graph-not-found($graphURI)
 	return
-		( gsp:insert-graph($trix/graph), 
-		gsp:add-graph-doc($trix/graph), 
-		$result )
+		()
 };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 (:~
@@ -460,7 +351,7 @@ let $serviceDescription as element(rdf:RDF) :=
 		(: Default Graph details. :)
 		( if (doc-available($defaultGraphURI)) then 
 			<rdf:Description rdf:nodeID="DG1">
-				<void:triples rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">{count(gsp:tuples-for-context($defaultGraphURI))}</void:triples>
+				<void:triples rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">{graph:get-length(doc($defaultGraphURI)/graph)}</void:triples>
 				<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#Graph"/>
 			</rdf:Description>
 		else 
@@ -478,52 +369,13 @@ let $serviceDescription as element(rdf:RDF) :=
 			</rdf:Description>,
 			
 			<rdf:Description rdf:nodeID="G{$n}">
-				<void:triples rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">{count(gsp:tuples-for-context($graphURI))}</void:triples>
+				<void:triples rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">{graph:get-length(doc($graphURI))}</void:triples>
 				<rdf:type rdf:resource="http://www.w3.org/ns/sparql-service-description#Graph"/>
 			</rdf:Description> )
 	)}</rdf:RDF>
 return
 	trix:rdf-xml-to-trix($serviceDescription, '')
 }; 
-
-
-(:~
- : Return all tuples for the given context (all triples for the given graph uri)
- : @param $c the context (graph URI)
- : @return element(t*)
- :)
-declare function gsp:tuples-for-context($c as xs:string)
-	as element(t)*
-{
-	sem:tuples-for-query(gsp:cq($c))
-};
-
-
-(:~
- : 
- : @param $c context (graph URI)
- : @return cts:query
- :)
-declare function gsp:cq($c as xs:string+)
-	as cts:query
-{
-	gsp:rq($sem:QN-C, $c)
-};
-
-
-(:~
- : RangeQuery - returns a cts:element-range-query with the equal operator 
- : between $qn and $v
- : @param $qn QName
- : @param $v query value
- : @return cts:query
- :)
-declare function gsp:rq($qn as xs:QName+, $v as xs:string+)
-	as cts:query
-{
-	cts:element-range-query($qn, '=', $v, 
-  			('collation=http://marklogic.com/collation/codepoint'))
-};
 
 
 (:~

@@ -13,9 +13,10 @@ import module namespace gsp="http://www.w3.org/TR/sparql11-http-rdf-update/"
 import module namespace resource = "http://www.marklogic.com/grip/graphs" 
 		at "/root/graphs/resource.xqy"; 
 
-if ($resource:default) then 
-	gsp:delete-graph($resource:REQUEST_URI)
-else if (string-length($resource:graph) gt 0) then 
-	gsp:delete-graph($resource:graph)
-else 
-	gsp:graph-not-found($resource:REQUEST_URI)
+let $graphURI := gsp:select-graph-uri($resource:REQUEST_PATH, $resource:default, $resource:graph)
+return
+	if (exists($graphURI)) then 
+		gsp:delete-graph($graphURI)
+	else 
+		gsp:graph-not-found($resource:REQUEST_PATH)
+		

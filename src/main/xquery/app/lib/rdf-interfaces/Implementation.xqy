@@ -60,11 +60,10 @@ declare function impl:add-triple($graphURI as xs:string, $triple as element(trip
 	let $collections as xs:string* := ($graphURI)
 	return
 		xdmp:document-insert(
-			impl:uri-for-quad($subject, $predicate, $object, 
-					$graphURI),
+			impl:uri-for-triple($triple, $graphURI),
 			element {QName('', 't')} {
 				( element {QName('', 's')} {
-					( typeswitch ($triple/*[1])
+					( typeswitch (triple:get-subject($triple))
 						case $sub as element(id) 
 							return $subject
 						default 
@@ -72,12 +71,12 @@ declare function impl:add-triple($graphURI as xs:string, $triple as element(trip
 				element {QName('', 'p')} {$predicate},
 				element {QName('', 'o')} {
 					(: Add the language annotation if present. :)
-					( $triple/*[3]/@xml:lang,
+					( triple:get-object($triple)/@xml:lang,
 					(: 
 					 : When the subject is a URI reference mark it as such with 
 					 : xs:anyURI, otherwise copy the datatype, if any.
 					 :)
-					( typeswitch ($triple/*[3]) 
+					( typeswitch (triple:get-object($triple)) 
 						case element(uri) 
 							return ( attribute datatype 
 									{'http://www.w3.org/2001/XMLSchema#anyURI'}, 
@@ -85,7 +84,7 @@ declare function impl:add-triple($graphURI as xs:string, $triple as element(trip
 						case element(id) 
 							return $object
 						default 
-							return ( $triple/*[3]/@datatype, $object ) ) )},
+							return ( triple:get-object($triple)/@datatype, $object ) ) )},
 				element {QName('', 'c')} {$graphURI} )
 	    	} ,
 	    	$PERMISSIONS,
@@ -108,7 +107,12 @@ declare function impl:get-triples($contextGraph as element(graph))
 			element {xs:QName(name($contextGraph))} {
 				$contextGraph/@*,
 				$contextGraph/uri,
-				collection(impl:get-graph-uri($contextGraph))/*
+				for $t in collection(impl:get-graph-uri($contextGraph))/*
+				return
+					element {QName('', 't')} {
+						attribute xml:base {base-uri($t)},
+						$t/*
+					}
 			}
 		}
 	)//triple
@@ -125,11 +129,7 @@ declare function impl:remove-triple($contextGraph as element(graph),
 		$triple as element(triple)) 
 	as element(graph)
 {
-	let $subject as xs:string := rdfnode:to-string(triple:get-subject($triple))
-	let $predicate as xs:string := rdfnode:to-string(triple:get-predicate($triple))
-	let $object as item()* := rdfnode:to-string(triple:get-object($triple))
-	let $remove := xdmp:document-delete(impl:uri-for-quad($subject, $predicate, 
-			$object, impl:get-graph-uri($contextGraph)))
+	let $remove := xdmp:document-delete(string($triple/@xml:base))
 	return
 		$contextGraph
 };
@@ -187,6 +187,21 @@ declare function impl:uri-for-quad($subject as xs:string,
   xdmp:integer-to-hex(
     xdmp:hash64(
       string-join(($subject, $predicate, $object, $context), '|') ) )
+};
+
+
+(:~
+ : Build a deterministic uri for . 
+ : @param $triple The context Triple.
+ : @param $context
+ : @return a URI string.
+ :)
+declare function impl:uri-for-triple($triple, $context as xs:string?)
+	as xs:string
+{
+  xdmp:integer-to-hex(
+    xdmp:hash64(
+      string-join((triple:to-string($triple), $context, string(current-dateTime())), '|') ) )
 };
 
 

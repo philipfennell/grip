@@ -13,4 +13,10 @@ import module namespace resource = "http://www.marklogic.com/grip/graphs/name"
 		at "/root/graphs/name/resource.xqy"; 
 
 
-()
+(: The HEAD (metainfo) action should not return any content. :)
+let $graphURI := gsp:select-graph-uri($resource:REQUEST_PATH, $resource:default, 
+		$resource:graph)
+let $graph as element(graph) : = gsp:retrieve-graph($graphURI)
+return
+	()
+

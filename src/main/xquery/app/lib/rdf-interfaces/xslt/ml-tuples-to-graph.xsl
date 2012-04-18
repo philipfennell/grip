@@ -67,7 +67,7 @@
 	
 	<!-- Creates the predicate/object pair. -->
 	<xsl:template match="t" mode="rdfi" priority="3">
-		<triple>
+		<triple xml:base="{base-uri(.)}">
 			<xsl:choose>
 				<xsl:when test="matches(s, '_:\w+')">
 					<id><xsl:value-of select="substring-after(s, '_:')"/></id>

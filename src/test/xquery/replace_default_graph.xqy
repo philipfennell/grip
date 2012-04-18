@@ -10,11 +10,12 @@ import module namespace gsp="http://www.w3.org/TR/sparql11-http-rdf-update/" at
 
 let $graph as element(graph) := 
 <graph>
+	<uri>/test?default</uri>
 	<triple>
-		<uri>http://example.org/book/book3</uri>
+		<uri>http://example.org/book/book1</uri>
 		<uri>http://purl.org/dc/elements/1.1/title</uri>
-		<plainLiteral>Harry Potter and the Prisoner Of Azkaban</plainLiteral>
+		<plainLiteral xml:lang="en-GB">Harry Potter and the Philosopher's Stone</plainLiteral>
 	</triple>
 </graph>
 return
-	gsp:create-graph('/test?deafult', $graph) eq '/test?deafult'
+	gsp:update-graph($graph)

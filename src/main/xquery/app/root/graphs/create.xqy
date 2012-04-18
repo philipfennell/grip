@@ -17,7 +17,8 @@ import module namespace resource = "http://www.marklogic.com/grip/graphs"
 		at "/root/graphs/resource.xqy";
 
 
-let $graphURI := gsp:select-graph-uri($resource:REQUEST_PATH, $resource:default, $resource:graph)
+let $graphURI := gsp:select-graph-uri($resource:REQUEST_PATH, $resource:default, 
+		$resource:graph)
 return
 	(: Merge the graph data. :)
 	if (exists($graphURI)) then 
@@ -29,6 +30,6 @@ return
 		gsp:create-graph(
 			gsp:parse-graph(
 				gsp:create-new-uri($resource:REQUEST_PATH, $resource:SLUG), 
-				$resource:CONTENT, $resource:MEDIA_TYPE
+						$resource:CONTENT, $resource:MEDIA_TYPE
 			)
 		)
