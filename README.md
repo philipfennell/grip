@@ -19,3 +19,5 @@ Note: I have had a rather good idea...
 > _I'm going to re-write the under-lying library that interacts with the triples, as stored in MarkLogic, by creating an XQuery language binding to the [RDF Interfaces 1.0](http://www.w3.org/TR/rdf-interfaces/). That'll have two positive effects. One it will create a 'standard' library for interacting with RDF triples stored in MarkLogic and two, it provide a standard API upon which to build the SPARQL 1.1 Graph Store Protocol implementation._
 
 More to come so: _watch this space..._ (and/or the wiki)
+
+Nope, nothing more for the foreseable future I'm afraid :-(
